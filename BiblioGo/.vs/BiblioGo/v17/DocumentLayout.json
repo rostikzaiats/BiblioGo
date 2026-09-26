@@ -1,0 +1,333 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\Migrations\\20260926212852_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BiblioGo.Infrastructure\\Migrations\\20260926212852_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.domain\\entities\\bookcopy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|solutionrelative:bibliogo.domain\\entities\\bookcopy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.domain\\entities\\loan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|solutionrelative:bibliogo.domain\\entities\\loan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.domain\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|solutionrelative:bibliogo.domain\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.domain\\entities\\book.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|solutionrelative:bibliogo.domain\\entities\\book.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.infrastructure\\bibliogo.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|solutionrelative:bibliogo.infrastructure\\bibliogo.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.infrastructure\\appsettings.local.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|solutionrelative:bibliogo.infrastructure\\appsettings.local.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.infrastructure\\persistence\\designtimedbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|solutionrelative:bibliogo.infrastructure\\persistence\\designtimedbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0FA36D17-9569-863E-8512-607BB45EB688}|BiblioGo.Wpf\\BiblioGo.Wpf.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.wpf\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0FA36D17-9569-863E-8512-607BB45EB688}|BiblioGo.Wpf\\BiblioGo.Wpf.csproj|solutionrelative:bibliogo.wpf\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0FA36D17-9569-863E-8512-607BB45EB688}|BiblioGo.Wpf\\BiblioGo.Wpf.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.wpf\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0FA36D17-9569-863E-8512-607BB45EB688}|BiblioGo.Wpf\\BiblioGo.Wpf.csproj|solutionrelative:bibliogo.wpf\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|solutionrelative:bibliogo.infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.infrastructure\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{BC21F7D3-90C1-410C-B892-3DCB07A9302B}|BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj|solutionrelative:bibliogo.infrastructure\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1559EAC-853C-4287-AB7E-3E16D55616FC}|BiblioGo.Application\\BiblioGo.Application.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.application\\interfaces\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1559EAC-853C-4287-AB7E-3E16D55616FC}|BiblioGo.Application\\BiblioGo.Application.csproj|solutionrelative:bibliogo.application\\interfaces\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}|Solution Items{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}|C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\Directory.Build.props||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}|Solution Items{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}|solutionrelative:Directory.Build.props||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|c:\\users\\rosti\\onedrive\\desktop\\bibliogo\\bibliogo\\bibliogo.domain\\bibliogo.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{CC775B99-FCA5-462C-B79D-283FEEDFDA59}|BiblioGo.Domain\\BiblioGo.Domain.csproj|solutionrelative:bibliogo.domain\\bibliogo.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\MainWindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BibilioGo.Wpf\\MainWindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\App.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BibilioGo.Wpf\\App.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\MainWindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BibilioGo.Wpf\\MainWindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\App.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BibilioGo.Wpf\\App.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "20260926212852_InitialCreate.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\Migrations\\20260926212852_InitialCreate.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Infrastructure\\Migrations\\20260926212852_InitialCreate.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\Migrations\\20260926212852_InitialCreate.cs",
+              "RelativeToolTip": "BiblioGo.Infrastructure\\Migrations\\20260926212852_InitialCreate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T21:28:53.116Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BookCopy.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\BookCopy.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Domain\\Entities\\BookCopy.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\BookCopy.cs",
+              "RelativeToolTip": "BiblioGo.Domain\\Entities\\BookCopy.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAAAAwAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T21:26:49.944Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Book.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\Book.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Domain\\Entities\\Book.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\Book.cs",
+              "RelativeToolTip": "BiblioGo.Domain\\Entities\\Book.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T21:25:28.799Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Loan.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\Loan.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Domain\\Entities\\Loan.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\Loan.cs",
+              "RelativeToolTip": "BiblioGo.Domain\\Entities\\Loan.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T21:24:35.553Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Wpf\\App.xaml.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Wpf\\App.xaml.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Wpf\\App.xaml.cs",
+              "RelativeToolTip": "BiblioGo.Wpf\\App.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T20:57:17.531Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AssemblyInfo.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Wpf\\AssemblyInfo.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Wpf\\AssemblyInfo.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Wpf\\AssemblyInfo.cs",
+              "RelativeToolTip": "BiblioGo.Wpf\\AssemblyInfo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T20:57:06.806Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "DesignTimeDbContextFactory.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\Persistence\\DesignTimeDbContextFactory.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Infrastructure\\Persistence\\DesignTimeDbContextFactory.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\Persistence\\DesignTimeDbContextFactory.cs",
+              "RelativeToolTip": "BiblioGo.Infrastructure\\Persistence\\DesignTimeDbContextFactory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T20:43:06.955Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "BibilioGo.Wpf\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\MainWindow.xaml",
+              "RelativeToolTip": "BibilioGo.Wpf\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-09-26T20:18:13.999Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\App.xaml",
+              "RelativeDocumentMoniker": "BibilioGo.Wpf\\App.xaml",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\App.xaml",
+              "RelativeToolTip": "BibilioGo.Wpf\\App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-09-26T20:13:29.801Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BiblioGo.Infrastructure.csproj",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj",
+              "RelativeToolTip": "BiblioGo.Infrastructure\\BiblioGo.Infrastructure.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-09-26T19:59:10.552Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "BibilioGo.Wpf\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\MainWindow.xaml.cs",
+              "RelativeToolTip": "BibilioGo.Wpf\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T20:18:17.217Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\User.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Domain\\Entities\\User.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\Entities\\User.cs",
+              "RelativeToolTip": "BiblioGo.Domain\\Entities\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T19:09:23.696Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "appsettings.Local.json",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\appsettings.Local.json",
+              "RelativeDocumentMoniker": "BiblioGo.Infrastructure\\appsettings.Local.json",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\appsettings.Local.json",
+              "RelativeToolTip": "BiblioGo.Infrastructure\\appsettings.Local.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-09-26T20:38:47.446Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "RelativeToolTip": "BiblioGo.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T20:34:36.857Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\App.xaml.cs",
+              "RelativeDocumentMoniker": "BibilioGo.Wpf\\App.xaml.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BibilioGo.Wpf\\App.xaml.cs",
+              "RelativeToolTip": "BibilioGo.Wpf\\App.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T20:15:13.324Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\appsettings.json",
+              "RelativeDocumentMoniker": "BiblioGo.Infrastructure\\appsettings.json",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Infrastructure\\appsettings.json",
+              "RelativeToolTip": "BiblioGo.Infrastructure\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-09-26T20:38:28.558Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "BiblioGo.Domain.csproj",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\BiblioGo.Domain.csproj",
+              "RelativeDocumentMoniker": "BiblioGo.Domain\\BiblioGo.Domain.csproj",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\BiblioGo.Domain.csproj",
+              "RelativeToolTip": "BiblioGo.Domain\\BiblioGo.Domain.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-09-26T19:59:06.99Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Directory.Build.props",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\Directory.Build.props",
+              "RelativeDocumentMoniker": "Directory.Build.props",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\Directory.Build.props",
+              "RelativeToolTip": "Directory.Build.props",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-09-26T19:54:51.415Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Application\\Interfaces\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "BiblioGo.Application\\Interfaces\\IUserRepository.cs",
+              "ToolTip": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Application\\Interfaces\\IUserRepository.cs",
+              "RelativeToolTip": "BiblioGo.Application\\Interfaces\\IUserRepository.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAhwBAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-26T19:09:22.411Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

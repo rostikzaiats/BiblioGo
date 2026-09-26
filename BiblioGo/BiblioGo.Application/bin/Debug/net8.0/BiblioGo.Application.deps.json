@@ -1,0 +1,48 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "BiblioGo.Application/1.0.0": {
+        "dependencies": {
+          "BiblioGo.Domain": "1.0.0",
+          "Roslynator.Analyzers": "4.12.9"
+        },
+        "runtime": {
+          "BiblioGo.Application.dll": {}
+        }
+      },
+      "Roslynator.Analyzers/4.12.9": {},
+      "BiblioGo.Domain/1.0.0": {
+        "runtime": {
+          "BiblioGo.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BiblioGo.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Roslynator.Analyzers/4.12.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-X6lDpN/D5wuinq37KIx+l3GSUe9No+8bCjGBTI5sEEtxapLztkHg6gzNVhMXpXw8P+/5gFYxTXJ5Pf8O4iNz/w==",
+      "path": "roslynator.analyzers/4.12.9",
+      "hashPath": "roslynator.analyzers.4.12.9.nupkg.sha512"
+    },
+    "BiblioGo.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

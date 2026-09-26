@@ -1,0 +1,12 @@
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\bin\Debug\net8.0\BiblioGo.Domain.deps.json
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\bin\Debug\net8.0\BiblioGo.Domain.dll
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\bin\Debug\net8.0\BiblioGo.Domain.pdb
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\BiblioGo.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\BiblioGo.Domain.AssemblyInfoInputs.cache
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\BiblioGo.Domain.AssemblyInfo.cs
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\BiblioGo.Domain.csproj.CoreCompileInputs.cache
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\BiblioGo.Domain.sourcelink.json
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\BiblioGo.Domain.dll
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\refint\BiblioGo.Domain.dll
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\BiblioGo.Domain.pdb
+C:\Users\rosti\OneDrive\Desktop\BiblioGO\BiblioGo\BiblioGo.Domain\obj\Debug\net8.0\ref\BiblioGo.Domain.dll
