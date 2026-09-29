@@ -1,1 +1,6 @@
 ﻿/BiblioGo/.vs/BiblioGo/FileContentIndex
+bin/
+obj/
+.vs/
+appsettings.Local.json
+*.user
