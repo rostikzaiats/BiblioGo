@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BiblioGo.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+963ea8a81888e5349d082f115e9e6cdfc24b8736")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+36928d39ab07409c37965621fcabd68bc03f6d19")]
 [assembly: System.Reflection.AssemblyProductAttribute("BiblioGo.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BiblioGo.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
