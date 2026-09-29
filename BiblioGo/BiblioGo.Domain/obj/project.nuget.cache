@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "U5Ng1ZcfAaU=",
+  "dgSpecHash": "9TKIfRcPuXU=",
   "success": true,
-  "projectFilePath": "C:\\Users\\rosti\\OneDrive\\Desktop\\BiblioGO\\BiblioGo\\BiblioGo.Domain\\BiblioGo.Domain.csproj",
+  "projectFilePath": "C:\\Users\\Олеся\\Source\\Repos\\BiblioGo\\BiblioGo\\BiblioGo.Domain\\BiblioGo.Domain.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\rosti\\.nuget\\packages\\roslynator.analyzers\\4.12.9\\roslynator.analyzers.4.12.9.nupkg.sha512"
+    "C:\\Users\\Олеся\\.nuget\\packages\\roslynator.analyzers\\4.12.9\\roslynator.analyzers.4.12.9.nupkg.sha512"
   ],
   "logs": []
 }

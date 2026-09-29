@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BiblioGo.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb6203922c8a335ff7a7e9cb04a29f5a97a67e53")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+963ea8a81888e5349d082f115e9e6cdfc24b8736")]
 [assembly: System.Reflection.AssemblyProductAttribute("BiblioGo.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BiblioGo.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
