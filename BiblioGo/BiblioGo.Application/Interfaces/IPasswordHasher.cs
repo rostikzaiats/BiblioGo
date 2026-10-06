@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace BiblioGo.Application.Interfaces
 {
-    public class IPasswordHasher
+    public interface IPasswordHasher
     {
+        string Hash(string password);
+        bool Verify(string password, string passwordHash);
     }
 }

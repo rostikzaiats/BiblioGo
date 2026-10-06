@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using BiblioGo.Domain.Entities;
 
 namespace BiblioGo.Infrastructure.Persistence
@@ -20,7 +15,5 @@ namespace BiblioGo.Infrastructure.Persistence
         public DbSet<BookCopy> BookCopies => Set<BookCopy>();
         public DbSet<Loan> Loans => Set<Loan>();
         public DbSet<Library> Libraries => Set<Library>();
-
-        // ще 4 DbSet — сам допиши для Book, BookCopy, Loan, Library
     }
 }

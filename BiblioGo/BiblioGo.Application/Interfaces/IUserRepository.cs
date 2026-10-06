@@ -14,6 +14,5 @@ namespace BiblioGo.Application.Interfaces
          User? FindById(int id);
          bool AddUser(User user);
          bool UpdateUser(User user);
-
     }
 }

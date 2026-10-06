@@ -1,25 +1,27 @@
-﻿using Serilog;
-using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using Serilog;
 
 namespace BiblioGo.Wpf
 {
-
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : System.Windows.Application
     {
         protected override void OnStartup(StartupEventArgs e)
         {
             Log.Logger = new LoggerConfiguration()
+                .Enrich.WithProperty("Application", "BiblioGo")
                 .WriteTo.Seq("http://localhost:5341")
                 .WriteTo.Console()
                 .CreateLogger();
-            Log.Information("BiblioGo started at {Time}", DateTime.Now);
+
+            Log.Information("BiblioGo started on {MachineName}", Environment.MachineName);
             base.OnStartup(e);
         }
-    }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Log.Information("BiblioGo stopped");
+            Log.CloseAndFlush();
+            base.OnExit(e);
+        }
+    }
 }
