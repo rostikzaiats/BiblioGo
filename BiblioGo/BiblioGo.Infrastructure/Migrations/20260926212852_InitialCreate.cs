@@ -57,10 +57,7 @@ namespace BiblioGo.Infrastructure.Migrations
                     Phone = table.Column<string>(type: "text", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
+                constraints: table =>{table.PrimaryKey("PK_Users", x => x.Id);});
 
             migrationBuilder.CreateTable(
                 name: "BookCopies",
