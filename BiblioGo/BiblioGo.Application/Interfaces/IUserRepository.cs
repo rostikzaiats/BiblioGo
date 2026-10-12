@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace BiblioGo.Application.Interfaces
 {
-    // TODO: Result class to return Success\Exception
+   
     public interface IUserRepository
     {
-         User? FindByEmail(string email);
-         User? FindById(int id);
-         bool AddUser(User user);
-         bool UpdateUser(User user);
+        Task<User?> FindByEmailAsync(string email);
+        Task<User?> FindByIdAsync(int id);
+        Task<User> AddAsync(User user);
+        Task UpdateAsync(User user);
     }
 }
