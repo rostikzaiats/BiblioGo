@@ -21,4 +21,3 @@ namespace BiblioGo.Application.Books.Queries
         }
     }
 }
-
