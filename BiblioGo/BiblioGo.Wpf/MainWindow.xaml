@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BiblioGo.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
-    </Grid>
+        Title="BiblioGo" Height="450" Width="800">
+    <StackPanel Margin="20">
+        <Button x:Name="BookSearchButton" Content="Пошук книги за назвою" HorizontalAlignment="Left"
+                Padding="15,5" Click="BookSearchButton_Click"/>
+    </StackPanel>
 </Window>

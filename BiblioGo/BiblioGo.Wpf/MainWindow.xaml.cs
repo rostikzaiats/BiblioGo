@@ -1,13 +1,6 @@
-﻿using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using BiblioGo.Wpf.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BiblioGo.Wpf
 {
@@ -16,9 +9,19 @@ namespace BiblioGo.Wpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly IServiceProvider _serviceProvider;
+
+        public MainWindow(IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             InitializeComponent();
+        }
+
+        private void BookSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            var bookSearchWindow = _serviceProvider.GetRequiredService<BookSearchWindow>();
+            bookSearchWindow.Owner = this;
+            bookSearchWindow.Show();
         }
     }
 }
