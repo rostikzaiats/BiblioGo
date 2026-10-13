@@ -27,9 +27,20 @@ namespace BiblioGo.Infrastructure.Repositories
                 .FirstOrDefaultAsync(copy => copy.Id == bookCopyId, cancellationToken);
         }
 
-        public Task<BookCopy?> FindAvailableCopyAsync(int bookId, int libraryId)
+        // Use case 1: вільний примірник книги у філії. Примірник лишається Available до підтвердження видачі,
+        // тому виключаємо ті, на які вже подано заявку Requested, щоб двом читачам не дістався один примірник
+        public async Task<BookCopy?> FindAvailableCopyAsync(int bookId, int libraryId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.BookCopies
+                .AsNoTracking()
+                .Where(copy => copy.BookId == bookId
+                    && copy.LibraryId == libraryId
+                    && copy.Status == BookCopyStatus.Available
+                    && !context.Loans.Any(loan => loan.BookCopyId == copy.Id && loan.Status == LoanStatus.Requested))
+                .OrderBy(copy => copy.InventoryNumber)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         public Task<bool> IsAvailableAsync(int bookCopyId)

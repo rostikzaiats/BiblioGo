@@ -11,7 +11,8 @@ namespace BiblioGo.Application.Interfaces
         Task<BookCopy?> GetByIdAsync(int bookCopyId, CancellationToken cancellationToken = default);
 
         // UC 1: знайти вільний примірник книги у конкретній філії
-        Task<BookCopy?> FindAvailableCopyAsync(int bookId, int libraryId);
+        // (статус Available і без іншої незакритої заявки Requested на цей примірник)
+        Task<BookCopy?> FindAvailableCopyAsync(int bookId, int libraryId, CancellationToken cancellationToken = default);
 
         // UC 3: чи вільний примірник (статус Available)
         Task<bool> IsAvailableAsync(int bookCopyId);
