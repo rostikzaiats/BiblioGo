@@ -8,6 +8,8 @@
         Title="BiblioGo" Height="450" Width="800">
     <StackPanel Margin="20">
         <Button x:Name="BookSearchButton" Content="Пошук книги за назвою" HorizontalAlignment="Left"
-                Padding="15,5" Click="BookSearchButton_Click"/>
+            Padding="15,5" Click="BookSearchButton_Click"/>
+        <Button x:Name="RegistrationButton" Content="Реєстрація" HorizontalAlignment="Left"
+            Margin="0,10,0,0" Padding="15,5" Click="RegistrationButton_Click"/>
     </StackPanel>
 </Window>

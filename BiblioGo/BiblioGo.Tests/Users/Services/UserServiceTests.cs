@@ -23,7 +23,7 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task Handle_ValidCommand_ReturnsNewUserId()
+        public async Task RegisterAsync_ValidCommand_ReturnsNewUserId()
         {
             // Arrange
             var command = CreateValidCommand();
@@ -46,7 +46,7 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task Handle_ValidCommand_SavesHashedPasswordNotRaw()
+        public async Task RegisterAsync_ValidCommand_SavesHashedPasswordNotRaw()
         {
             // Arrange
             var command = CreateValidCommand();
@@ -64,7 +64,7 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task Handle_EmailWithSpacesAndUppercase_StoresNormalizedEmail()
+        public async Task RegisterAsync_EmailWithSpacesAndUppercase_StoresNormalizedEmail()
         {
             // Arrange
             var command = CreateValidCommand();
@@ -89,7 +89,7 @@ namespace BiblioGo.Tests.Users.Services
         [InlineData("a@")]
         [InlineData("@b.com")]
         [InlineData("Ivan <ivan@example.com>")]
-        public async Task Handle_InvalidEmail_ThrowsInputValidationException(string invalidEmail)
+        public async Task RegisterAsync_InvalidEmail_ThrowsInputValidationException(string invalidEmail)
         {
             // Arrange
             var command = CreateValidCommand();
@@ -109,7 +109,7 @@ namespace BiblioGo.Tests.Users.Services
         [InlineData("1234567")]
         [InlineData("onlyletters")]
         [InlineData("123456789")]
-        public async Task Handle_WeakPassword_ThrowsInputValidationException(string weakPassword)
+        public async Task RegisterAsync_WeakPassword_ThrowsInputValidationException(string weakPassword)
         {
             // Arrange
             var command = CreateValidCommand();
@@ -125,7 +125,7 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task Handle_EmailAlreadyExists_ThrowsBusinessRuleException()
+        public async Task RegisterAsync_EmailAlreadyExists_ThrowsBusinessRuleException()
         {
             // Arrange
             var command = CreateValidCommand();
@@ -143,7 +143,7 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task Handle_NullCommand_ThrowsArgumentNullException()
+        public async Task RegisterAsync_NullCommand_ThrowsArgumentNullException()
         {
             // Act
             var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(null!));
