@@ -10,6 +10,7 @@ namespace BiblioGo.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddTransient<BookCatalogService>();
+            services.AddTransient<BookCopyService>();
             services.AddTransient<UserService>();
             return services;
         }
