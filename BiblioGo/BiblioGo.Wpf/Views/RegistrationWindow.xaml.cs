@@ -1,22 +1,21 @@
 ﻿using System.Windows;
 using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Users.Commands;
-using BiblioGo.Application.Users.Handlers;
+using BiblioGo.Application.Users.Services;
 using BiblioGo.Infrastructure.Persistence;
 using BiblioGo.Infrastructure.Repositories;
-using BiblioGo.Infrastructure.Security;
-using Microsoft.Extensions.Logging;
-using Serilog;
 
-namespace BiblioGo.Wpf
+namespace BiblioGo.Wpf.Views
 {
     public partial class RegistrationWindow : Window
     {
-        public RegistrationWindow()
+        private readonly UserService _userService;
+
+        public RegistrationWindow(UserService userService)
         {
+            _userService = userService;
             InitializeComponent();
         }
-
         private async void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
             RegisterButton.IsEnabled = false;
@@ -33,13 +32,8 @@ namespace BiblioGo.Wpf
                     Phone = PhoneInput.Text
                 };
 
-                using var db = new ApplicationDbContext(App.DbOptions);
-                var repo = new UserRepository(db);
-                var hasher = new BcryptPasswordHasher();
-                var logger = App.AppLoggerFactory.CreateLogger<RegisterUserHandler>();
-
-                var handler = new RegisterUserHandler(repo, hasher, logger);
-                var id = await handler.Handle(command);
+                var id = await _userService.RegisterAsync(command);
+    
 
                 PasswordInput.Clear();
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
@@ -49,10 +43,10 @@ namespace BiblioGo.Wpf
             {
                 StatusText.Text = ex.Message;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Log.Error(ex, "Unexpected error during user registration");
-                StatusText.Text = "Сталася неочікувана помилка. Деталі є в логах.";
+                // Подробиці помилки вже залоговані сервісо
+                StatusText.Text = "Не вдалося виконати реєстрацію. Спробуйте пізніше.";
             }
             finally
             {

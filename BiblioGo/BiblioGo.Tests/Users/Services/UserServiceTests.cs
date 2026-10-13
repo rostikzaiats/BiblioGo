@@ -1,25 +1,25 @@
 ﻿using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Application.Users.Commands;
-using BiblioGo.Application.Users.Handlers;
+using BiblioGo.Application.Users.Services;
 using BiblioGo.Domain.Entities;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace BiblioGo.Tests.Users
+namespace BiblioGo.Tests.Users.Services
 {
-    public class RegisterUserHandlerTests
+    public class UserServiceTests
     {
         private readonly Mock<IUserRepository> _userRepository = new();
         private readonly Mock<IPasswordHasher> _passwordHasher = new();
-        private readonly RegisterUserHandler _sut;
+        private readonly UserService _sut;
 
-        public RegisterUserHandlerTests()
+        public UserServiceTests()
         {
-            _sut = new RegisterUserHandler(
-                _userRepository.Object,
+            _sut = new UserService(
+                 _userRepository.Object,
                 _passwordHasher.Object,
-                NullLogger<RegisterUserHandler>.Instance);
+                NullLogger<UserService>.Instance);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace BiblioGo.Tests.Users
                 });
 
             // Act
-            var result = await _sut.Handle(command);
+            var result = await _sut.RegisterAsync(command);
 
             // Assert
             Assert.Equal(42, result);
@@ -55,7 +55,7 @@ namespace BiblioGo.Tests.Users
             _passwordHasher.Setup(h => h.Hash("Password123")).Returns("SECRET_HASH_123");
 
             // Act
-            await _sut.Handle(command);
+            await _sut.RegisterAsync(command);
 
             // Assert
             _userRepository.Verify(
@@ -74,7 +74,7 @@ namespace BiblioGo.Tests.Users
             _passwordHasher.Setup(h => h.Hash(It.IsAny<string>())).Returns("hash");
 
             // Act
-            await _sut.Handle(command);
+            await _sut.RegisterAsync(command);
 
             // Assert
             _userRepository.Verify(
@@ -96,7 +96,7 @@ namespace BiblioGo.Tests.Users
             command.Email = invalidEmail;
 
             // Act
-            var exception = await Record.ExceptionAsync(() => _sut.Handle(command));
+            var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(command));
 
             // Assert
             Assert.IsType<InputValidationException>(exception);
@@ -116,7 +116,7 @@ namespace BiblioGo.Tests.Users
             command.Password = weakPassword;
 
             // Act
-            var exception = await Record.ExceptionAsync(() => _sut.Handle(command));
+            var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(command));
 
             // Assert
             Assert.IsType<InputValidationException>(exception);
@@ -134,7 +134,7 @@ namespace BiblioGo.Tests.Users
                 .ReturnsAsync(new User { Id = 1, Email = "test@example.com" });
 
             // Act
-            var exception = await Record.ExceptionAsync(() => _sut.Handle(command));
+            var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(command));
 
             // Assert
             Assert.IsType<BusinessRuleException>(exception);
@@ -146,7 +146,7 @@ namespace BiblioGo.Tests.Users
         public async Task Handle_NullCommand_ThrowsArgumentNullException()
         {
             // Act
-            var exception = await Record.ExceptionAsync(() => _sut.Handle(null!));
+            var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(null!));
 
             // Assert
             Assert.IsType<ArgumentNullException>(exception);

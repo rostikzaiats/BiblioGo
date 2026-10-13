@@ -1,6 +1,7 @@
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Infrastructure.Persistence;
 using BiblioGo.Infrastructure.Repositories;
+using BiblioGo.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +18,8 @@ namespace BiblioGo.Infrastructure
 
             services.AddDbContextFactory<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
             services.AddTransient<IBookRepository, BookRepository>();
-
+            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
             return services;
         }
     }

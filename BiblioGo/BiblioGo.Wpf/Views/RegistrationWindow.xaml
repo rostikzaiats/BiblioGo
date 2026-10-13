@@ -1,4 +1,4 @@
-﻿<Window x:Class="BiblioGo.Wpf.RegistrationWindow"
+﻿<Window x:Class="BiblioGo.Wpf.Views.RegistrationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Реєстрація у BiblioGo" Height="480" Width="350" WindowStartupLocation="CenterScreen">
