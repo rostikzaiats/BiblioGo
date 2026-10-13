@@ -1,3 +1,4 @@
+using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
@@ -16,6 +17,16 @@ namespace BiblioGo.Infrastructure.Repositories
             _contextFactory = contextFactory;
         }
 
+        // UC 1, 3, 4, 6: отримати примірник за ідентифікатором
+        public async Task<BookCopy?> GetByIdAsync(int bookCopyId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.BookCopies
+                .AsNoTracking()
+                .FirstOrDefaultAsync(copy => copy.Id == bookCopyId, cancellationToken);
+        }
+
         // Use case 1: вільний примірник книги у філії. Примірник лишається Available до підтвердження видачі,
         // тому виключаємо ті, на які вже подано заявку Requested, щоб двом читачам не дістався один примірник
         public async Task<BookCopy?> FindAvailableCopyAsync(int bookId, int libraryId, CancellationToken cancellationToken = default)
@@ -32,11 +43,6 @@ namespace BiblioGo.Infrastructure.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task<BookCopy?> GetByIdAsync(int bookCopyId)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<bool> IsAvailableAsync(int bookCopyId)
         {
             throw new NotImplementedException();
@@ -47,9 +53,19 @@ namespace BiblioGo.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task SetStatusAsync(int bookCopyId, BookCopyStatus status)
+        // UC 6: змінити статус примірника (один UPDATE без попереднього читання запису)
+        public async Task SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var updatedRows = await context.BookCopies
+                .Where(copy => copy.Id == bookCopyId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(copy => copy.Status, status), cancellationToken);
+
+            if (updatedRows == 0)
+            {
+                throw new NotFoundException($"Примірник {bookCopyId} не знайдено.");
+            }
         }
     }
 }

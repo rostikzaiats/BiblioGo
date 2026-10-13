@@ -7,8 +7,8 @@ namespace BiblioGo.Application.Interfaces
 {
     public interface IBookCopyRepository
     {
-        // UC 1, 3, 4: отримати примірник за ідентифікатором
-        Task<BookCopy?> GetByIdAsync(int bookCopyId);
+        // UC 1, 3, 4, 6: отримати примірник за ідентифікатором
+        Task<BookCopy?> GetByIdAsync(int bookCopyId, CancellationToken cancellationToken = default);
 
         // UC 1: знайти вільний примірник книги у конкретній філії
         // (статус Available і без іншої незакритої заявки Requested на цей примірник)
@@ -20,7 +20,7 @@ namespace BiblioGo.Application.Interfaces
         // UC 6: зберегти зміни примірника (статус)
         Task UpdateAsync(BookCopy bookCopy);
 
-        // UC 6: змінити статус примірника
-        Task SetStatusAsync(int bookCopyId, BookCopyStatus status);
+        // UC 6: змінити статус примірника (NotFoundException, якщо примірника не існує)
+        Task SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default);
     }
 }
