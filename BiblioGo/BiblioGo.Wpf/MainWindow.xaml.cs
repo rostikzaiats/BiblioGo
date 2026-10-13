@@ -15,6 +15,7 @@ namespace BiblioGo.Wpf
         {
             _serviceProvider = serviceProvider;
             InitializeComponent();
+
         }
 
         private void BookSearchButton_Click(object sender, RoutedEventArgs e)
@@ -22,6 +23,13 @@ namespace BiblioGo.Wpf
             var bookSearchWindow = _serviceProvider.GetRequiredService<BookSearchWindow>();
             bookSearchWindow.Owner = this;
             bookSearchWindow.Show();
+        }
+
+        private void RegistrationButton_Click(object sender, RoutedEventArgs e)
+        {
+            var registrationWindow = _serviceProvider.GetRequiredService<RegistrationWindow>();
+            registrationWindow.Owner = this;
+            registrationWindow.Show();
         }
     }
 }

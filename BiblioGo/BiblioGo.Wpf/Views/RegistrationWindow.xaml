@@ -1,0 +1,25 @@
+﻿<Window x:Class="BiblioGo.Wpf.Views.RegistrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Реєстрація у BiblioGo" Height="480" Width="350" WindowStartupLocation="CenterScreen">
+    <StackPanel Margin="20">
+        <TextBlock Text="Email:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="EmailInput" Margin="0,0,0,10" Height="25"/>
+
+        <TextBlock Text="Пароль:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <PasswordBox x:Name="PasswordInput" Margin="0,0,0,10" Height="25"/>
+
+        <TextBlock Text="Ім'я:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="FirstNameInput" Margin="0,0,0,10" Height="25"/>
+
+        <TextBlock Text="Прізвище:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="LastNameInput" Margin="0,0,0,10" Height="25"/>
+
+        <TextBlock Text="Телефон:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="PhoneInput" Margin="0,0,0,20" Height="25"/>
+
+        <Button x:Name="RegisterButton" Content="Зареєструватись" Click="RegisterButton_Click" Height="35" FontWeight="Bold"/>
+
+        <TextBlock x:Name="StatusText" Margin="0,15,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
+    </StackPanel>
+</Window>

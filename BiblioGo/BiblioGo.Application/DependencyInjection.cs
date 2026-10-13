@@ -1,4 +1,5 @@
 using BiblioGo.Application.Books.Services;
+using BiblioGo.Application.Users.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BiblioGo.Application
@@ -9,7 +10,7 @@ namespace BiblioGo.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddTransient<BookCatalogService>();
-
+            services.AddTransient<UserService>();
             return services;
         }
     }
