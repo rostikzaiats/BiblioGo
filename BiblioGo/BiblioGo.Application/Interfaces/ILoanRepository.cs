@@ -9,7 +9,7 @@ namespace BiblioGo.Application.Interfaces
     public interface ILoanRepository
     {
         // UC 1 (Читач): зберегти нову заявку зі статусом Requested
-        Task<Loan> AddAsync(Loan loan);
+        Task<Loan> AddAsync(Loan loan, CancellationToken cancellationToken = default);
 
         // UC 2 (Читач): позики користувача з опційним фільтром за статусом
         Task<IEnumerable<Loan>> GetByUserIdAsync(int userId, LoanStatus? status);
@@ -23,7 +23,7 @@ namespace BiblioGo.Application.Interfaces
         // UC 7 (Бібліотекар): журнал позик філії з фільтром, пагінацією
         Task<IEnumerable<Loan>> GetJournalAsync(int libraryId, LoanStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageNumber, int pageSize);
 
-        // Допоміжне: чи має користувач активну заявку/позику на цю книгу
-        Task<bool> HasActiveLoanForBookAsync(int userId, int bookId);
+        // UC 1: чи має користувач активну (Requested або Issued) заявку/позику на цю книгу
+        Task<bool> HasActiveLoanForBookAsync(int userId, int bookId, CancellationToken cancellationToken = default);
     }
 }
