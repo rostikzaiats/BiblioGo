@@ -38,5 +38,12 @@ namespace BiblioGo.Wpf
             writeOffWindow.Owner = this;
             writeOffWindow.Show();
         }
+
+        private void CreateLoanRequestButton_Click(object sender, RoutedEventArgs e)
+        {
+            var loanRequestWindow = _serviceProvider.GetRequiredService<LoanRequestWindow>();
+            loanRequestWindow.Owner = this;
+            loanRequestWindow.Show();
+        }
     }
 }
