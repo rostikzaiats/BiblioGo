@@ -31,5 +31,12 @@ namespace BiblioGo.Wpf
             registrationWindow.Owner = this;
             registrationWindow.Show();
         }
+
+        private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var writeOffWindow = _serviceProvider.GetRequiredService<BookCopyWriteOffWindow>();
+            writeOffWindow.Owner = this;
+            writeOffWindow.Show();
+        }
     }
 }
