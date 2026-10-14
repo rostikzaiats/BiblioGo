@@ -11,5 +11,7 @@
             Padding="15,5" Click="BookSearchButton_Click"/>
         <Button x:Name="RegistrationButton" Content="Реєстрація" HorizontalAlignment="Left"
             Margin="0,10,0,0" Padding="15,5" Click="RegistrationButton_Click"/>
+        <Button x:Name="WriteOffBookCopyButton" Content="Списати примірник" HorizontalAlignment="Left"
+            Margin="0,10,0,0" Padding="15,5" Click="WriteOffBookCopyButton_Click"/>
     </StackPanel>
 </Window>
