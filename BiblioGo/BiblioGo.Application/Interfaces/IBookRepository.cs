@@ -12,8 +12,8 @@ namespace BiblioGo.Application.Interfaces
         // Use case 2: пошук за назвою (входження підрядка без урахування регістру)
         Task<IReadOnlyList<Book>> SearchByTitleAsync(string title, CancellationToken cancellationToken = default);
 
-        // Use case 3: пошук за автором
-        Task<IEnumerable<Book>> SearchByAuthorAsync(string author);
+        // Use case 3: пошук за автором (входження підрядка без урахування регістру)
+        Task<IReadOnlyList<Book>> SearchByAuthorAsync(string author, CancellationToken cancellationToken = default);
 
         // Use case 8: перегляд інформації про конкретну книгу
         Task<Book?> GetByIdAsync(int id);
