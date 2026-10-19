@@ -17,6 +17,10 @@ namespace BiblioGo.Application.Interfaces
         // UC 3: чи вільний примірник (статус Available)
         Task<bool> IsAvailableAsync(int bookCopyId);
 
+        // UC 4: додати quantity нових примірників (статус Available) книги у філію з новими унікальними
+        // інвентарними номерами (NotFoundException, якщо книги або філії не існує)
+        Task<IReadOnlyList<BookCopy>> AddCopiesAsync(int bookId, int libraryId, int quantity, CancellationToken cancellationToken = default);
+
         // UC 6: зберегти зміни примірника (статус)
         Task UpdateAsync(BookCopy bookCopy);
 

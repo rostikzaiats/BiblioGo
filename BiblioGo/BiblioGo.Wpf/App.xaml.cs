@@ -55,6 +55,7 @@ namespace BiblioGo.Wpf
             services.AddTransient<BookSearchWindow>();
             services.AddTransient<RegistrationWindow>();
             services.AddTransient<BookCopyWriteOffWindow>();
+            services.AddTransient<AddBookCopiesWindow>();
             services.AddTransient<LoanRequestWindow>();
             return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
         }

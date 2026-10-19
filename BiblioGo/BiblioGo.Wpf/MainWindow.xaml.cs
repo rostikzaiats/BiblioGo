@@ -39,6 +39,13 @@ namespace BiblioGo.Wpf
             writeOffWindow.Show();
         }
 
+        private void AddBookCopiesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var addBookCopiesWindow = _serviceProvider.GetRequiredService<AddBookCopiesWindow>();
+            addBookCopiesWindow.Owner = this;
+            addBookCopiesWindow.Show();
+        }
+
         private void CreateLoanRequestButton_Click(object sender, RoutedEventArgs e)
         {
             var loanRequestWindow = _serviceProvider.GetRequiredService<LoanRequestWindow>();
