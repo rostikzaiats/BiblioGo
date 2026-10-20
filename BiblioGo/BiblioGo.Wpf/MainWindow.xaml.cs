@@ -38,13 +38,13 @@ namespace BiblioGo.Wpf
             registrationWindow.Show();
         }
 
-<<<<<<< HEAD
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
             loginWindow.Owner = this;
             loginWindow.Show();
-=======
+        }
+
         private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)
         {
             var writeOffWindow = _serviceProvider.GetRequiredService<BookCopyWriteOffWindow>();
@@ -71,7 +71,6 @@ namespace BiblioGo.Wpf
             var userLoansWindow = _serviceProvider.GetRequiredService<UserLoansWindow>();
             userLoansWindow.Owner = this;
             userLoansWindow.Show();
->>>>>>> origin/main
         }
     }
 }
