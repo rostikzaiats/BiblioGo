@@ -15,6 +15,9 @@ namespace BiblioGo.Tests.Books.Services
     public class BookCopyServiceTests
     {
         private const int ExistingCopyId = 7;
+        private const int ExistingBookId = 2;
+        private const int ExistingLibraryId = 3;
+        private const int CopiesQuantity = 3;
 
         [Fact]
         public async Task WriteOffAsync_AvailableCopy_SetsWrittenOffStatus()
@@ -309,6 +312,210 @@ namespace BiblioGo.Tests.Books.Services
                 Times.Once);
         }
 
+        [Fact]
+        public async Task AddCopiesAsync_ValidCommand_ReturnsCreatedCopies()
+        {
+            // Arrange
+            var createdCopies = CreateCopies(CopiesQuantity);
+            var stubRepository = CreateRepositoryAdding(createdCopies);
+            var service = CreateService(stubRepository.Object);
+
+            // Act
+            var result = await service.AddCopiesAsync(CreateAddCommand());
+
+            // Assert
+            Assert.Same(createdCopies, result);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_ValidCommand_PassesCommandDataToRepository()
+        {
+            // Arrange
+            var mockRepository = CreateRepositoryAdding(CreateCopies(CopiesQuantity));
+            var service = CreateService(mockRepository.Object);
+
+            // Act
+            await service.AddCopiesAsync(CreateAddCommand());
+
+            // Assert
+            mockRepository.Verify(
+                repository => repository.AddCopiesAsync(ExistingBookId, ExistingLibraryId, CopiesQuantity, It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(100)]
+        public async Task AddCopiesAsync_QuantityWithinLimits_DoesNotThrow(int quantity)
+        {
+            // Arrange
+            var stubRepository = CreateRepositoryAdding(CreateCopies(quantity));
+            var service = CreateService(stubRepository.Object);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => service.AddCopiesAsync(CreateAddCommand(quantity: quantity)));
+
+            // Assert
+            Assert.Null(exception);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_NullCommand_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var service = CreateService(Mock.Of<IBookCopyRepository>());
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => service.AddCopiesAsync(null!));
+
+            // Assert
+            Assert.IsType<ArgumentNullException>(exception);
+        }
+
+        [Theory]
+        [InlineData(0, ExistingLibraryId, CopiesQuantity)]
+        [InlineData(-1, ExistingLibraryId, CopiesQuantity)]
+        [InlineData(ExistingBookId, 0, CopiesQuantity)]
+        [InlineData(ExistingBookId, -1, CopiesQuantity)]
+        [InlineData(ExistingBookId, ExistingLibraryId, 0)]
+        [InlineData(ExistingBookId, ExistingLibraryId, -1)]
+        [InlineData(ExistingBookId, ExistingLibraryId, 101)]
+        public async Task AddCopiesAsync_InvalidCommand_ThrowsInputValidationException(int bookId, int libraryId, int quantity)
+        {
+            // Arrange
+            var service = CreateService(Mock.Of<IBookCopyRepository>());
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => service.AddCopiesAsync(CreateAddCommand(bookId, libraryId, quantity)));
+
+            // Assert
+            Assert.IsType<InputValidationException>(exception);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_InvalidCommand_DoesNotCallRepository()
+        {
+            // Arrange
+            var mockRepository = new Mock<IBookCopyRepository>();
+            var service = CreateService(mockRepository.Object);
+
+            // Act
+            await Record.ExceptionAsync(() => service.AddCopiesAsync(CreateAddCommand(quantity: 0)));
+
+            // Assert
+            mockRepository.Verify(
+                repository => repository.AddCopiesAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_ValidCommand_LogsInformationWithCount()
+        {
+            // Arrange
+            var logger = new FakeLogger<BookCopyService>();
+            var stubRepository = CreateRepositoryAdding(CreateCopies(CopiesQuantity));
+            var service = CreateService(stubRepository.Object, logger);
+
+            // Act
+            await service.AddCopiesAsync(CreateAddCommand());
+
+            // Assert
+            Assert.Equal(LogLevel.Information, logger.LatestRecord.Level);
+            Assert.Equal("3", logger.LatestRecord.GetStructuredStateValue("Count"));
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_InvalidCommand_LogsWarning()
+        {
+            // Arrange
+            var logger = new FakeLogger<BookCopyService>();
+            var service = CreateService(Mock.Of<IBookCopyRepository>(), logger);
+
+            // Act
+            await Record.ExceptionAsync(() => service.AddCopiesAsync(CreateAddCommand(quantity: 0)));
+
+            // Assert
+            Assert.Equal(LogLevel.Warning, logger.LatestRecord.Level);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_BookOrLibraryNotFound_RethrowsAndLogsWarningNotError()
+        {
+            // Arrange
+            var notFoundException = new NotFoundException("Книгу 2 не знайдено.");
+            var logger = new FakeLogger<BookCopyService>();
+            var stubRepository = new Mock<IBookCopyRepository>();
+            stubRepository
+                .Setup(r => r.AddCopiesAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(notFoundException);
+            var service = CreateService(stubRepository.Object, logger);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => service.AddCopiesAsync(CreateAddCommand()));
+
+            // Assert
+            Assert.Same(notFoundException, exception);
+            Assert.Equal(LogLevel.Warning, logger.LatestRecord.Level);
+            Assert.DoesNotContain(logger.Collector.GetSnapshot(), record => record.Level == LogLevel.Error);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_RepositoryFails_RethrowsAndLogsErrorWithException()
+        {
+            // Arrange
+            var repositoryException = new InvalidOperationException("Database is unavailable.");
+            var logger = new FakeLogger<BookCopyService>();
+            var stubRepository = new Mock<IBookCopyRepository>();
+            stubRepository
+                .Setup(r => r.AddCopiesAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(repositoryException);
+            var service = CreateService(stubRepository.Object, logger);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => service.AddCopiesAsync(CreateAddCommand()));
+
+            // Assert
+            Assert.Same(repositoryException, exception);
+            Assert.Equal(LogLevel.Error, logger.LatestRecord.Level);
+            Assert.Same(repositoryException, logger.LatestRecord.Exception);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_OperationCanceled_DoesNotLogError()
+        {
+            // Arrange
+            var logger = new FakeLogger<BookCopyService>();
+            var stubRepository = new Mock<IBookCopyRepository>();
+            stubRepository
+                .Setup(r => r.AddCopiesAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new OperationCanceledException());
+            var service = CreateService(stubRepository.Object, logger);
+
+            // Act
+            await Record.ExceptionAsync(() => service.AddCopiesAsync(CreateAddCommand()));
+
+            // Assert
+            Assert.DoesNotContain(logger.Collector.GetSnapshot(), record => record.Level == LogLevel.Error);
+        }
+
+        [Fact]
+        public async Task AddCopiesAsync_CancellationTokenProvided_PassesItToRepository()
+        {
+            // Arrange
+            using var cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token;
+            var mockRepository = CreateRepositoryAdding(CreateCopies(CopiesQuantity));
+            var service = CreateService(mockRepository.Object);
+
+            // Act
+            await service.AddCopiesAsync(CreateAddCommand(), token);
+
+            // Assert
+            mockRepository.Verify(
+                repository => repository.AddCopiesAsync(ExistingBookId, ExistingLibraryId, CopiesQuantity, token),
+                Times.Once);
+        }
+
         private static void VerifyStatusNeverChanged(Mock<IBookCopyRepository> mockRepository)
         {
             mockRepository.Verify(
@@ -329,6 +536,38 @@ namespace BiblioGo.Tests.Books.Services
                 .ReturnsAsync(bookCopy);
 
             return repository;
+        }
+
+        private static Mock<IBookCopyRepository> CreateRepositoryAdding(IReadOnlyList<BookCopy> copies)
+        {
+            var repository = new Mock<IBookCopyRepository>();
+            repository
+                .Setup(r => r.AddCopiesAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(copies);
+
+            return repository;
+        }
+
+        private static AddBookCopiesCommand CreateAddCommand(
+            int bookId = ExistingBookId,
+            int libraryId = ExistingLibraryId,
+            int quantity = CopiesQuantity)
+        {
+            return new AddBookCopiesCommand { BookId = bookId, LibraryId = libraryId, Quantity = quantity };
+        }
+
+        private static IReadOnlyList<BookCopy> CreateCopies(int quantity)
+        {
+            return Enumerable.Range(1, quantity)
+                .Select(number => new BookCopy
+                {
+                    Id = number,
+                    BookId = ExistingBookId,
+                    LibraryId = ExistingLibraryId,
+                    InventoryNumber = 1000 + number,
+                    Status = BookCopyStatus.Available
+                })
+                .ToList();
         }
 
         private static WriteOffBookCopyCommand CreateCommand(int bookCopyId = ExistingCopyId)

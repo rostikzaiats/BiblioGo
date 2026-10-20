@@ -34,9 +34,19 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<IEnumerable<Book>> SearchByAuthorAsync(string author)
+        // Use case 3: пошук за автором (PostgreSQL ILIKE — без урахування регістру)
+        public async Task<IReadOnlyList<Book>> SearchByAuthorAsync(string author, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var pattern = $"%{EscapeLikePattern(author)}%";
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Books
+                .AsNoTracking()
+                .Where(book => EF.Functions.ILike(book.Author, pattern))
+                .OrderBy(book => book.Author)
+                .ThenBy(book => book.Title)
+                .ToListAsync(cancellationToken);
         }
 
         public Task<Book?> GetByIdAsync(int id)
@@ -49,7 +59,7 @@ namespace BiblioGo.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        // Екранування спецсимволів LIKE, щоб '%' та '_' у назві шукались як звичайні символи
+        // Екранування спецсимволів LIKE, щоб '%' та '_' у назві чи імені автора шукались як звичайні символи
         private static string EscapeLikePattern(string value)
         {
             return value

@@ -1,0 +1,26 @@
+<Window x:Class="BiblioGo.Wpf.Views.BookSearchByAuthorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Пошук книги за автором" Height="450" Width="700"
+        WindowStartupLocation="CenterOwner"
+        FocusManager.FocusedElement="{Binding ElementName=AuthorTextBox}">
+    <DockPanel Margin="10">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <TextBlock Text="Автор:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox x:Name="AuthorTextBox" Width="300" VerticalContentAlignment="Center"/>
+            <Button x:Name="SearchButton" Content="Знайти" Margin="10,0,0,0" Padding="15,3"
+                    IsDefault="True" Click="SearchButton_Click"/>
+        </StackPanel>
+
+        <TextBlock x:Name="StatusTextBlock" DockPanel.Dock="Bottom" Margin="0,10,0,0" TextWrapping="Wrap"/>
+
+        <DataGrid x:Name="BooksDataGrid" Margin="0,10,0,0" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Автор" Binding="{Binding Author}" Width="*"/>
+                <DataGridTextColumn Header="Назва" Binding="{Binding Title}" Width="2*"/>
+                <DataGridTextColumn Header="Жанр" Binding="{Binding Genre}" Width="*"/>
+                <DataGridTextColumn Header="Рік" Binding="{Binding Year}" Width="Auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>

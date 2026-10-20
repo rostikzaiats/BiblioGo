@@ -1,3 +1,4 @@
+using System.Data;
 using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
@@ -41,6 +42,43 @@ namespace BiblioGo.Infrastructure.Repositories
                     && !context.Loans.Any(loan => loan.BookCopyId == copy.Id && loan.Status == LoanStatus.Requested))
                 .OrderBy(copy => copy.InventoryNumber)
                 .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        // Use case 4: додати примірники з новими інвентарними номерами (наступні після найбільшого наявного).
+        // Serializable-транзакція не дає двом одночасним додаванням отримати однакові номери
+        public async Task<IReadOnlyList<BookCopy>> AddCopiesAsync(int bookId, int libraryId, int quantity, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+            await using var transaction = await context.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+
+            if (!await context.Books.AnyAsync(book => book.Id == bookId, cancellationToken))
+            {
+                throw new NotFoundException($"Книгу {bookId} не знайдено.");
+            }
+
+            if (!await context.Libraries.AnyAsync(library => library.Id == libraryId, cancellationToken))
+            {
+                throw new NotFoundException($"Філію {libraryId} не знайдено.");
+            }
+
+            var lastInventoryNumber = await context.BookCopies
+                .MaxAsync(copy => (int?)copy.InventoryNumber, cancellationToken) ?? 0;
+
+            var copies = Enumerable.Range(1, quantity)
+                .Select(offset => new BookCopy
+                {
+                    BookId = bookId,
+                    LibraryId = libraryId,
+                    InventoryNumber = lastInventoryNumber + offset,
+                    Status = BookCopyStatus.Available
+                })
+                .ToList();
+
+            context.BookCopies.AddRange(copies);
+            await context.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return copies;
         }
 
         public Task<bool> IsAvailableAsync(int bookCopyId)

@@ -1,6 +1,8 @@
 using BiblioGo.Application.Books.Commands;
+using BiblioGo.Application.Books.Validators;
 using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Interfaces;
+using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +18,48 @@ namespace BiblioGo.Application.Books.Services
         {
             _bookCopyRepository = bookCopyRepository;
             _logger = logger;
+        }
+
+        // Use case 4: додати фізичні примірники книги (повертає створені примірники з інвентарними номерами)
+        public async Task<IReadOnlyList<BookCopy>> AddCopiesAsync(AddBookCopiesCommand command, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+
+            var error = AddBookCopiesValidator.Validate(command);
+            if (error is not null)
+            {
+                _logger.LogWarning("Adding book copies rejected: {Reason}", error);
+                throw new InputValidationException(error);
+            }
+
+            _logger.LogInformation(
+                "Adding {Quantity} copies of book {BookId} to library {LibraryId}",
+                command.Quantity, command.BookId, command.LibraryId);
+
+            try
+            {
+                var copies = await _bookCopyRepository.AddCopiesAsync(
+                    command.BookId, command.LibraryId, command.Quantity, cancellationToken);
+
+                _logger.LogInformation(
+                    "Added {Count} copies of book {BookId} to library {LibraryId}",
+                    copies.Count, command.BookId, command.LibraryId);
+                return copies;
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(
+                    "Adding book copies rejected: {Reason} (book {BookId}, library {LibraryId})",
+                    ex.Message, command.BookId, command.LibraryId);
+                throw;
+            }
+            catch (Exception ex) when (ex is not BiblioGoException and not OperationCanceledException)
+            {
+                _logger.LogError(
+                    ex, "Failed to add copies of book {BookId} to library {LibraryId}",
+                    command.BookId, command.LibraryId);
+                throw;
+            }
         }
 
         // Use case 6: списати примірник (виданий або вже списаний примірник списати не можна)

@@ -9,8 +9,8 @@ namespace BiblioGo.Application.Interfaces
         // UC 1 (Читач): зберегти нову заявку зі статусом Requested
         Task<Loan> AddAsync(Loan loan, CancellationToken cancellationToken = default);
 
-        // UC 2 (Читач): позики користувача з опційним фільтром за статусом
-        Task<IEnumerable<Loan>> GetByUserIdAsync(int userId, LoanStatus? status);
+        // UC 2 (Читач): позики користувача (з книгою та філією) з опційним фільтром за статусом, нові першими
+        Task<IReadOnlyList<Loan>> GetByUserIdAsync(int userId, LoanStatus? status, CancellationToken cancellationToken = default);
 
         // UC 4, 5: отримати позику за ідентифікатором
         Task<Loan?> GetByIdAsync(int loanId);
