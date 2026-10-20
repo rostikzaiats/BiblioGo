@@ -3,6 +3,7 @@ using BiblioGo.Application.Interfaces;
 using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
 using BiblioGo.Domain.Entities;
+using BiblioGo.Domain.Enums;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -170,5 +171,143 @@ namespace BiblioGo.Tests.Users.Services
             _userRepository
                 .Setup(r => r.AddAsync(It.IsAny<User>()))
                 .Returns((User user) => Task.FromResult(user));
+        // ---------- Login (Use case 2) ----------
+
+        [Fact]
+        public async Task LoginAsync_ValidCredentials_ReturnsUserDtoWithAllFields()
+        {
+            // Arrange
+            var user = CreateStoredUser();
+            _userRepository.Setup(r => r.FindByEmailAsync("reader@mail.com")).ReturnsAsync(user);
+            _passwordHasher.Setup(h => h.Verify("Password123", "stored_hash")).Returns(true);
+
+            // Act
+            var result = await _sut.LoginAsync(CreateLoginCommand());
+
+            // Assert
+            Assert.Equal(7, result.UserId);
+            Assert.Equal("reader@mail.com", result.Email);
+            Assert.Equal("Іван", result.FirstName);
+            Assert.Equal("Петренко", result.LastName);
+            Assert.Equal(UserRole.Reader, result.Role);
+        }
+
+        [Fact]
+        public async Task LoginAsync_EmailWithSpacesAndUpperCase_SearchesByNormalizedEmail()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByEmailAsync("reader@mail.com")).ReturnsAsync(CreateStoredUser());
+            _passwordHasher.Setup(h => h.Verify("Password123", "stored_hash")).Returns(true);
+            var command = CreateLoginCommand(email: "  Reader@Mail.COM  ");
+
+            // Act
+            await _sut.LoginAsync(command);
+
+            // Assert
+            _userRepository.Verify(r => r.FindByEmailAsync("reader@mail.com"), Times.Once());
+        }
+
+        [Fact]
+        public async Task LoginAsync_UnknownEmail_ThrowsBusinessRuleExceptionAndSkipsPasswordCheck()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<BusinessRuleException>(() => _sut.LoginAsync(CreateLoginCommand()));
+            _passwordHasher.Verify(h => h.Verify(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task LoginAsync_WrongPassword_ThrowsBusinessRuleException()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByEmailAsync("reader@mail.com")).ReturnsAsync(CreateStoredUser());
+            _passwordHasher.Setup(h => h.Verify(It.IsAny<string>(), "stored_hash")).Returns(false);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<BusinessRuleException>(() => _sut.LoginAsync(CreateLoginCommand()));
+        }
+
+        [Fact]
+        public async Task LoginAsync_UnknownEmailAndWrongPassword_ReturnSameErrorMessage()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByEmailAsync("unknown@mail.com")).ReturnsAsync((User?)null);
+            _userRepository.Setup(r => r.FindByEmailAsync("reader@mail.com")).ReturnsAsync(CreateStoredUser());
+            _passwordHasher.Setup(h => h.Verify(It.IsAny<string>(), "stored_hash")).Returns(false);
+
+            // Act
+            var unknownEmailError = await Assert.ThrowsAsync<BusinessRuleException>(
+                () => _sut.LoginAsync(CreateLoginCommand(email: "unknown@mail.com")));
+            var wrongPasswordError = await Assert.ThrowsAsync<BusinessRuleException>(
+                () => _sut.LoginAsync(CreateLoginCommand()));
+
+            // Assert
+            Assert.Equal(unknownEmailError.Message, wrongPasswordError.Message);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task LoginAsync_EmptyEmail_ThrowsInputValidationExceptionAndSkipsRepository(string email)
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<InputValidationException>(
+                () => _sut.LoginAsync(CreateLoginCommand(email: email)));
+            _userRepository.Verify(r => r.FindByEmailAsync(It.IsAny<string>()), Times.Never());
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task LoginAsync_EmptyPassword_ThrowsInputValidationExceptionAndSkipsRepository(string password)
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<InputValidationException>(
+                () => _sut.LoginAsync(CreateLoginCommand(password: password)));
+            _userRepository.Verify(r => r.FindByEmailAsync(It.IsAny<string>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task LoginAsync_NullCommand_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.LoginAsync(null!));
+        }
+
+        [Fact]
+        public async Task LoginAsync_RepositoryFails_RethrowsOriginalException()
+        {
+            // Arrange
+            _userRepository
+                .Setup(r => r.FindByEmailAsync(It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("DB is down"));
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.LoginAsync(CreateLoginCommand()));
+            Assert.Equal("DB is down", ex.Message);
+        }
+
+        private static LoginUserCommand CreateLoginCommand(
+            string email = "reader@mail.com",
+            string password = "Password123")
+        {
+            return new LoginUserCommand { Email = email, Password = password };
+        }
+
+        private static User CreateStoredUser()
+        {
+            return new User
+            {
+                Id = 7,
+                Email = "reader@mail.com",
+                PasswordHash = "stored_hash",
+                FirstName = "Іван",
+                LastName = "Петренко",
+                Phone = "+380501234567",
+                Role = UserRole.Reader
+            };
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using BiblioGo.Application.Interfaces;
+﻿using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Application.Books.Queries
 {

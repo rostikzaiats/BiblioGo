@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BiblioGo.Infrastructure.Repositories
 {
-
     public class UserRepository(IDbContextFactory<ApplicationDbContext> contextFactory) : IUserRepository
     {
         public async Task<User?> FindByEmailAsync(string email)
