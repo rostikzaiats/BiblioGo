@@ -19,5 +19,7 @@
             Margin="0,10,0,0" Padding="15,5" Click="AddBookCopiesButton_Click"/>
         <Button x:Name="CreateLoanRequestButton" Content="Оформити заявку на отримання книги" HorizontalAlignment="Left"
             Margin="0,10,0,0" Padding="15,5" Click="CreateLoanRequestButton_Click"/>
+        <Button x:Name="UserLoansButton" Content="Переглянути власні позики та терміни" HorizontalAlignment="Left"
+            Margin="0,10,0,0" Padding="15,5" Click="UserLoansButton_Click"/>
     </StackPanel>
 </Window>

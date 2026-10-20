@@ -41,9 +41,26 @@ namespace BiblioGo.Infrastructure.Repositories
                     cancellationToken);
         }
 
-        public Task<IEnumerable<Loan>> GetByUserIdAsync(int userId, LoanStatus? status)
+        // Use case 2: позики користувача разом із книгою та філією примірника, нові першими
+        public async Task<IReadOnlyList<Loan>> GetByUserIdAsync(int userId, LoanStatus? status, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var query = context.Loans
+                .AsNoTracking()
+                .Include(loan => loan.BookCopy).ThenInclude(copy => copy.Book)
+                .Include(loan => loan.BookCopy).ThenInclude(copy => copy.Library)
+                .Where(loan => loan.UserId == userId);
+
+            if (status.HasValue)
+            {
+                query = query.Where(loan => loan.Status == status.Value);
+            }
+
+            return await query
+                .OrderByDescending(loan => loan.IssueDate)
+                .ThenByDescending(loan => loan.Id)
+                .ToListAsync(cancellationToken);
         }
 
         public Task<Loan?> GetByIdAsync(int loanId)

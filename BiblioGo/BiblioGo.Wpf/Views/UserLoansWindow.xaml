@@ -1,0 +1,37 @@
+<Window x:Class="BiblioGo.Wpf.Views.UserLoansWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Переглянути власні позики та терміни" Height="450" Width="960"
+        WindowStartupLocation="CenterOwner"
+        FocusManager.FocusedElement="{Binding ElementName=UserIdTextBox}">
+    <DockPanel Margin="10">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <TextBlock Text="Ідентифікатор читача:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox x:Name="UserIdTextBox" Width="80" VerticalContentAlignment="Center"/>
+            <TextBlock Text="Статус:" VerticalAlignment="Center" Margin="15,0,10,0"/>
+            <ComboBox x:Name="StatusComboBox" Width="170" SelectedIndex="0" VerticalContentAlignment="Center">
+                <ComboBoxItem Content="Усі"/>
+                <ComboBoxItem Content="Очікує підтвердження"/>
+                <ComboBoxItem Content="Видано"/>
+                <ComboBoxItem Content="Повернено"/>
+            </ComboBox>
+            <Button x:Name="ShowLoansButton" Content="Переглянути власні позики та терміни" Margin="15,0,0,0" Padding="15,3"
+                    IsDefault="True" Click="ShowLoansButton_Click"/>
+        </StackPanel>
+
+        <TextBlock x:Name="StatusTextBlock" DockPanel.Dock="Bottom" Margin="0,10,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
+
+        <DataGrid x:Name="LoansDataGrid" Margin="0,10,0,0" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Книга" Binding="{Binding BookTitle}" Width="2*"/>
+                <DataGridTextColumn Header="Автор" Binding="{Binding BookAuthor}" Width="*"/>
+                <DataGridTextColumn Header="Філія" Binding="{Binding LibraryName}" Width="*"/>
+                <DataGridTextColumn Header="Інв. №" Binding="{Binding InventoryNumber}" Width="Auto"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="Auto"/>
+                <DataGridTextColumn Header="Дата видачі" Binding="{Binding IssueDate}" Width="Auto"/>
+                <DataGridTextColumn Header="Повернути до" Binding="{Binding DueDate}" Width="Auto"/>
+                <DataGridTextColumn Header="Повернено" Binding="{Binding ReturnDate}" Width="Auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>
