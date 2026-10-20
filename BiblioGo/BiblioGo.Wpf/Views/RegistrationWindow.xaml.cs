@@ -2,8 +2,6 @@
 using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
-using BiblioGo.Infrastructure.Persistence;
-using BiblioGo.Infrastructure.Repositories;
 
 namespace BiblioGo.Wpf.Views
 {
@@ -33,8 +31,6 @@ namespace BiblioGo.Wpf.Views
                 };
 
                 var id = await _userService.RegisterAsync(command);
-    
-
                 PasswordInput.Clear();
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = $"Готово! Користувача створено, id: {id}";

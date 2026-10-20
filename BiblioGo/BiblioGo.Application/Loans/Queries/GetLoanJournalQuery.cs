@@ -1,4 +1,3 @@
-using System;
 using BiblioGo.Domain.Enums;
 
 namespace BiblioGo.Application.Loans.Queries

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Application.Loans.Queries

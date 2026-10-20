@@ -1,4 +1,3 @@
-using System;
 
 namespace BiblioGo.Application.Loans.Commands
 {
