@@ -1,10 +1,7 @@
 using BiblioGo.Application.Books.Services;
-using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Logging.Testing;
 using Moq;
 
 namespace BiblioGo.Tests.Books.Services
@@ -17,7 +14,7 @@ namespace BiblioGo.Tests.Books.Services
         private const char AuthorCharacter = 'а';
 
         [Fact]
-        public async Task SearchByAuthorAsync_ExistingAuthor_ReturnsBooksFromRepository()
+        public async Task SearchByAuthorAsync_ExistingAuthor_ReturnsSuccessWithBooksFromRepository()
         {
             // Arrange
             IReadOnlyList<Book> expectedBooks = [CreateBook(1, "Кобзар"), CreateBook(2, "Гайдамаки")];
@@ -25,24 +22,26 @@ namespace BiblioGo.Tests.Books.Services
             var service = CreateService(stubRepository.Object);
 
             // Act
-            var books = await service.SearchByAuthorAsync(ValidAuthor);
+            var result = await service.SearchByAuthorAsync(ValidAuthor);
 
             // Assert
-            Assert.Equal(expectedBooks, books);
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expectedBooks, result.Value);
         }
 
         [Fact]
-        public async Task SearchByAuthorAsync_NoMatchingBooks_ReturnsEmptyList()
+        public async Task SearchByAuthorAsync_NoMatchingBooks_ReturnsSuccessWithEmptyList()
         {
             // Arrange
             var stubRepository = CreateRepositoryReturning([]);
             var service = CreateService(stubRepository.Object);
 
             // Act
-            var books = await service.SearchByAuthorAsync(ValidAuthor);
+            var result = await service.SearchByAuthorAsync(ValidAuthor);
 
             // Assert
-            Assert.Empty(books);
+            Assert.True(result.IsSuccess);
+            Assert.Empty(result.Value);
         }
 
         [Theory]
@@ -67,7 +66,7 @@ namespace BiblioGo.Tests.Books.Services
         [Theory]
         [InlineData(BookCatalogService.MinSearchAuthorLength)]
         [InlineData(BookCatalogService.MaxSearchAuthorLength)]
-        public async Task SearchByAuthorAsync_AuthorLengthOnBoundary_SearchesInRepository(int authorLength)
+        public async Task SearchByAuthorAsync_AuthorLengthOnBoundary_ReturnsSuccess(int authorLength)
         {
             // Arrange
             var author = new string(AuthorCharacter, authorLength);
@@ -75,9 +74,10 @@ namespace BiblioGo.Tests.Books.Services
             var service = CreateService(mockRepository.Object);
 
             // Act
-            await service.SearchByAuthorAsync(author);
+            var result = await service.SearchByAuthorAsync(author);
 
             // Assert
+            Assert.True(result.IsSuccess);
             mockRepository.Verify(
                 repository => repository.SearchByAuthorAsync(author, It.IsAny<CancellationToken>()),
                 Times.Once);
@@ -87,32 +87,52 @@ namespace BiblioGo.Tests.Books.Services
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        [InlineData(TooShortAuthor)]
-        [InlineData("  Ш  ")]
-        public async Task SearchByAuthorAsync_AuthorIsMissingOrTooShort_ThrowsInputValidationException(string? author)
+        public async Task SearchByAuthorAsync_AuthorIsMissing_ReturnsFailureWithEnterAuthorMessage(string? author)
         {
             // Arrange
             var service = CreateService(Mock.Of<IBookRepository>());
 
             // Act
-            var exception = await Record.ExceptionAsync(() => service.SearchByAuthorAsync(author));
+            var result = await service.SearchByAuthorAsync(author);
 
             // Assert
-            Assert.IsType<InputValidationException>(exception);
+            Assert.True(result.IsFailure);
+            Assert.Equal("Введіть ім'я або прізвище автора для пошуку.", result.Error);
+        }
+
+        [Theory]
+        [InlineData(TooShortAuthor)]
+        [InlineData("  Ш  ")]
+        public async Task SearchByAuthorAsync_AuthorTooShort_ReturnsFailureWithMinLengthMessage(string author)
+        {
+            // Arrange
+            var service = CreateService(Mock.Of<IBookRepository>());
+
+            // Act
+            var result = await service.SearchByAuthorAsync(author);
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.Equal(
+                $"Ім'я автора для пошуку має містити щонайменше {BookCatalogService.MinSearchAuthorLength} символи.",
+                result.Error);
         }
 
         [Fact]
-        public async Task SearchByAuthorAsync_AuthorLongerThanMaximum_ThrowsInputValidationException()
+        public async Task SearchByAuthorAsync_AuthorLongerThanMaximum_ReturnsFailureWithMaxLengthMessage()
         {
             // Arrange
             var tooLongAuthor = new string(AuthorCharacter, BookCatalogService.MaxSearchAuthorLength + 1);
             var service = CreateService(Mock.Of<IBookRepository>());
 
             // Act
-            var exception = await Record.ExceptionAsync(() => service.SearchByAuthorAsync(tooLongAuthor));
+            var result = await service.SearchByAuthorAsync(tooLongAuthor);
 
             // Assert
-            Assert.IsType<InputValidationException>(exception);
+            Assert.True(result.IsFailure);
+            Assert.Equal(
+                $"Ім'я автора для пошуку не може бути довшим за {BookCatalogService.MaxSearchAuthorLength} символів.",
+                result.Error);
         }
 
         [Fact]
@@ -123,41 +143,12 @@ namespace BiblioGo.Tests.Books.Services
             var service = CreateService(mockRepository.Object);
 
             // Act
-            await Record.ExceptionAsync(() => service.SearchByAuthorAsync(TooShortAuthor));
+            await service.SearchByAuthorAsync(TooShortAuthor);
 
             // Assert
             mockRepository.Verify(
                 repository => repository.SearchByAuthorAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
                 Times.Never);
-        }
-
-        [Fact]
-        public async Task SearchByAuthorAsync_InvalidAuthor_LogsWarning()
-        {
-            // Arrange
-            var logger = new FakeLogger<BookCatalogService>();
-            var service = CreateService(Mock.Of<IBookRepository>(), logger);
-
-            // Act
-            await Record.ExceptionAsync(() => service.SearchByAuthorAsync(TooShortAuthor));
-
-            // Assert
-            Assert.Equal(LogLevel.Warning, logger.LatestRecord.Level);
-        }
-
-        [Fact]
-        public async Task SearchByAuthorAsync_ValidAuthor_LogsFoundBooksCount()
-        {
-            // Arrange
-            var logger = new FakeLogger<BookCatalogService>();
-            var stubRepository = CreateRepositoryReturning([CreateBook(1, "Кобзар")]);
-            var service = CreateService(stubRepository.Object, logger);
-
-            // Act
-            await service.SearchByAuthorAsync(ValidAuthor);
-
-            // Assert
-            Assert.Equal("1", logger.LatestRecord.GetStructuredStateValue("BookCount"));
         }
 
         [Fact]
@@ -176,40 +167,40 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task SearchByAuthorAsync_RepositoryFails_LogsErrorWithException()
+        public async Task SearchByAuthorAsync_SearchCanceled_RethrowsOperationCanceledException()
         {
             // Arrange
-            var repositoryException = new InvalidOperationException("Database is unavailable.");
-            var logger = new FakeLogger<BookCatalogService>();
-            var stubRepository = CreateRepositoryThrowing(repositoryException);
-            var service = CreateService(stubRepository.Object, logger);
+            var canceledException = new OperationCanceledException();
+            var stubRepository = CreateRepositoryThrowing(canceledException);
+            var service = CreateService(stubRepository.Object);
 
             // Act
-            await Record.ExceptionAsync(() => service.SearchByAuthorAsync(ValidAuthor));
+            var exception = await Record.ExceptionAsync(() => service.SearchByAuthorAsync(ValidAuthor));
 
             // Assert
-            Assert.Equal(LogLevel.Error, logger.LatestRecord.Level);
-            Assert.Same(repositoryException, logger.LatestRecord.Exception);
+            Assert.Same(canceledException, exception);
         }
 
         [Fact]
-        public async Task SearchByAuthorAsync_SearchCanceled_DoesNotLogError()
+        public async Task SearchByAuthorAsync_CancellationToken_PassedToRepository()
         {
             // Arrange
-            var logger = new FakeLogger<BookCatalogService>();
-            var stubRepository = CreateRepositoryThrowing(new OperationCanceledException());
-            var service = CreateService(stubRepository.Object, logger);
+            using var cancellationTokenSource = new CancellationTokenSource();
+            var mockRepository = CreateRepositoryReturning([]);
+            var service = CreateService(mockRepository.Object);
 
             // Act
-            await Record.ExceptionAsync(() => service.SearchByAuthorAsync(ValidAuthor));
+            await service.SearchByAuthorAsync(ValidAuthor, cancellationTokenSource.Token);
 
             // Assert
-            Assert.DoesNotContain(logger.Collector.GetSnapshot(), record => record.Level == LogLevel.Error);
+            mockRepository.Verify(
+                repository => repository.SearchByAuthorAsync(ValidAuthor, cancellationTokenSource.Token),
+                Times.Once);
         }
 
-        private static BookCatalogService CreateService(IBookRepository repository, ILogger<BookCatalogService>? logger = null)
+        private static BookCatalogService CreateService(IBookRepository repository)
         {
-            return new BookCatalogService(repository, logger ?? NullLogger<BookCatalogService>.Instance);
+            return new BookCatalogService(repository, NullLogger<BookCatalogService>.Instance);
         }
 
         private static Mock<IBookRepository> CreateRepositoryReturning(IReadOnlyList<Book> books)

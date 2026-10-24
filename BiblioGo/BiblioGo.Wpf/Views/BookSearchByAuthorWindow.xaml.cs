@@ -1,6 +1,5 @@
 using System.Windows;
 using BiblioGo.Application.Books.Services;
-using BiblioGo.Application.Exceptions;
 
 namespace BiblioGo.Wpf.Views
 {
@@ -22,17 +21,21 @@ namespace BiblioGo.Wpf.Views
 
             try
             {
-                var books = await _bookCatalogService.SearchByAuthorAsync(AuthorTextBox.Text);
+                var result = await _bookCatalogService.SearchByAuthorAsync(AuthorTextBox.Text);
 
+                if (result.IsFailure)
+                {
+                    // Помилка валідації: показуємо її текст користувачу
+                    BooksDataGrid.ItemsSource = null;
+                    StatusTextBlock.Text = result.Error;
+                    return;
+                }
+
+                var books = result.Value;
                 BooksDataGrid.ItemsSource = books;
                 StatusTextBlock.Text = books.Count == 0
                     ? "Книг цього автора не знайдено."
                     : $"Знайдено книг: {books.Count}";
-            }
-            catch (InputValidationException ex)
-            {
-                BooksDataGrid.ItemsSource = null;
-                StatusTextBlock.Text = ex.Message;
             }
             catch (Exception)
             {
