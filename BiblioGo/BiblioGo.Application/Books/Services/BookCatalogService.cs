@@ -1,11 +1,12 @@
-using BiblioGo.Application.Exceptions;
+using BiblioGo.Application.Common;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace BiblioGo.Application.Books.Services
 {
-    // Сервіс підсистеми «Каталог та пошук книг»: валідація вхідних даних, логування, звернення до репозиторію
+    // Сервіс підсистеми «Каталог та пошук книг»: валідація вхідних даних, логування, звернення до репозиторію.
+    // Помилка валідації повертається як неуспішний Result, а не виняток
     public class BookCatalogService
     {
         public const int MinSearchTitleLength = 2;
@@ -23,7 +24,7 @@ namespace BiblioGo.Application.Books.Services
         }
 
         // Use case 2: знайти книгу за назвою
-        public async Task<IReadOnlyList<Book>> SearchByTitleAsync(string? title, CancellationToken cancellationToken = default)
+        public async Task<Result<IReadOnlyList<Book>>> SearchByTitleAsync(string? title, CancellationToken cancellationToken = default)
         {
             var searchTitle = title?.Trim() ?? string.Empty;
             var validationError = ValidateSearchTitle(searchTitle);
@@ -31,7 +32,7 @@ namespace BiblioGo.Application.Books.Services
             if (validationError is not null)
             {
                 _logger.LogWarning("Book search by title {Title} rejected: {ValidationError}", title, validationError);
-                throw new InputValidationException(validationError);
+                return Result.Failure<IReadOnlyList<Book>>(validationError);
             }
 
             _logger.LogInformation("Searching books by title {Title}", searchTitle);
@@ -42,7 +43,7 @@ namespace BiblioGo.Application.Books.Services
 
                 _logger.LogInformation("Found {BookCount} book(s) by title {Title}", books.Count, searchTitle);
 
-                return books;
+                return Result.Success(books);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -52,7 +53,7 @@ namespace BiblioGo.Application.Books.Services
         }
 
         // Use case 3: знайти книгу за автором
-        public async Task<IReadOnlyList<Book>> SearchByAuthorAsync(string? author, CancellationToken cancellationToken = default)
+        public async Task<Result<IReadOnlyList<Book>>> SearchByAuthorAsync(string? author, CancellationToken cancellationToken = default)
         {
             var searchAuthor = author?.Trim() ?? string.Empty;
             var validationError = ValidateSearchAuthor(searchAuthor);
@@ -60,7 +61,7 @@ namespace BiblioGo.Application.Books.Services
             if (validationError is not null)
             {
                 _logger.LogWarning("Book search by author {Author} rejected: {ValidationError}", author, validationError);
-                throw new InputValidationException(validationError);
+                return Result.Failure<IReadOnlyList<Book>>(validationError);
             }
 
             _logger.LogInformation("Searching books by author {Author}", searchAuthor);
@@ -71,7 +72,7 @@ namespace BiblioGo.Application.Books.Services
 
                 _logger.LogInformation("Found {BookCount} book(s) by author {Author}", books.Count, searchAuthor);
 
-                return books;
+                return Result.Success(books);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
