@@ -8,5 +8,8 @@
     <Compile Update="Views\RegistrationWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\UpdateUserProfileWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

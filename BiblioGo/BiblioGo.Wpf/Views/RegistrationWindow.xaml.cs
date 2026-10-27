@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
 
@@ -29,15 +28,16 @@ namespace BiblioGo.Wpf.Views
                     LastName = LastNameInput.Text,
                     Phone = PhoneInput.Text
                 };
-
-                var id = await _userService.RegisterAsync(command);
+                var result = await _userService.RegisterAsync(command);
+                if (result.IsFailure)
+                {
+                    // Помилка валідації: показуємо її текст користувачу
+                    StatusText.Text = result.Error;
+                    return;
+                }
                 PasswordInput.Clear();
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
-                StatusText.Text = $"Готово! Користувача створено, id: {id}";
-            }
-            catch (BiblioGoException ex)
-            {
-                StatusText.Text = ex.Message;
+                StatusText.Text = $"Готово! Користувача створено, id: {result.Value}";
             }
             catch (Exception)
             {
@@ -47,6 +47,18 @@ namespace BiblioGo.Wpf.Views
             finally
             {
                 RegisterButton.IsEnabled = true;
+            }
+        }
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            try {   DialogResult = false; } catch {}
+            Close();
+        }
+        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                DragMove();
             }
         }
     }

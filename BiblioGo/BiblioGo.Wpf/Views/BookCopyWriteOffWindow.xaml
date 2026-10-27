@@ -1,12 +1,19 @@
 <Window x:Class="BiblioGo.Wpf.Views.BookCopyWriteOffWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Списати примірник" Height="230" Width="420"
+        Title="Списати примірник" Height="320" Width="420"
         WindowStartupLocation="CenterOwner"
-        FocusManager.FocusedElement="{Binding ElementName=BookCopyIdTextBox}">
+        FocusManager.FocusedElement="{Binding ElementName=BookComboBox}"
+        Loaded="Window_Loaded">
     <StackPanel Margin="20">
-        <TextBlock Text="Ідентифікатор примірника:" FontWeight="Bold" Margin="0,0,0,5"/>
-        <TextBox x:Name="BookCopyIdTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+        <TextBlock Text="Книга:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <ComboBox x:Name="BookComboBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"
+                  DisplayMemberPath="Name" SelectedValuePath="Id"
+                  SelectionChanged="BookComboBox_SelectionChanged"/>
+
+        <TextBlock Text="Примірник:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <ComboBox x:Name="CopyComboBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"
+                  DisplayMemberPath="Name" SelectedValuePath="Id"/>
 
         <Button x:Name="WriteOffButton" Content="Списати примірник" Height="35" FontWeight="Bold"
                 Click="WriteOffButton_Click"/>

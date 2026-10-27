@@ -20,6 +20,18 @@ namespace BiblioGo.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
+        // Для випадайок: усі книги, відсортовані за назвою та автором
+        public async Task<IReadOnlyList<Book>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Books
+                .AsNoTracking()
+                .OrderBy(book => book.Title)
+                .ThenBy(book => book.Author)
+                .ToListAsync(cancellationToken);
+        }
+
         // Use case 2: пошук за назвою (PostgreSQL ILIKE — без урахування регістру)
         public async Task<IReadOnlyList<Book>> SearchByTitleAsync(string title, CancellationToken cancellationToken = default)
         {

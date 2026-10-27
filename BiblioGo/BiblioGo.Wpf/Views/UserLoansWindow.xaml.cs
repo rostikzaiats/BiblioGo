@@ -5,10 +5,11 @@ using BiblioGo.Application.Loans.Dtos;
 using BiblioGo.Application.Loans.Queries;
 using BiblioGo.Application.Loans.Services;
 using BiblioGo.Domain.Enums;
+using BiblioGo.Wpf.Session;
 
 namespace BiblioGo.Wpf.Views
 {
-    // Вікно юз кейсу «Переглянути власні позики та терміни»: кнопка викликає сервіс, сервіс — репозиторії
+    // Вікно юз кейсу «Переглянути власні позики та терміни»: читач береться з поточного входу
     public partial class UserLoansWindow : Window
     {
         // Відповідає порядку елементів у StatusComboBox: Усі, Очікує підтвердження, Видано, Повернено
@@ -21,22 +22,45 @@ namespace BiblioGo.Wpf.Views
         };
 
         private readonly LoanService _loanService;
+        private readonly CurrentUserSession _session;
 
-        public UserLoansWindow(LoanService loanService)
+        public UserLoansWindow(LoanService loanService, CurrentUserSession session)
         {
             _loanService = loanService;
+            _session = session;
             InitializeComponent();
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var user = _session.User;
+            if (user is null)
+            {
+                ReaderTextBlock.Text = "—";
+                ShowLoansButton.IsEnabled = false;
+                ShowError("Спочатку увійдіть у систему.");
+                return;
+            }
+
+            ReaderTextBlock.Text = $"{user.FirstName} {user.LastName}";
+            await LoadLoansAsync(user.UserId);
         }
 
         private async void ShowLoansButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!int.TryParse(UserIdTextBox.Text, out var userId))
+            var user = _session.User;
+            if (user is null)
             {
                 LoansDataGrid.ItemsSource = null;
-                ShowError("Введіть числовий ідентифікатор читача.");
+                ShowError("Спочатку увійдіть у систему.");
                 return;
             }
 
+            await LoadLoansAsync(user.UserId);
+        }
+
+        private async Task LoadLoansAsync(int userId)
+        {
             ShowLoansButton.IsEnabled = false;
             StatusTextBlock.Foreground = Brushes.Black;
             StatusTextBlock.Text = "Завантаження...";

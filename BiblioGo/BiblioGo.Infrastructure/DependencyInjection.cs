@@ -21,6 +21,7 @@ namespace BiblioGo.Infrastructure
             services.AddTransient<IBookCopyRepository, BookCopyRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ILoanRepository, LoanRepository>();
+            services.AddTransient<ILibraryRepository, LibraryRepository>();
             services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
             return services;
         }

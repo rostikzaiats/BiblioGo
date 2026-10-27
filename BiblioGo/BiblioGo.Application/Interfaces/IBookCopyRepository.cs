@@ -20,6 +20,9 @@ namespace BiblioGo.Application.Interfaces
         // інвентарними номерами (NotFoundException, якщо книги або філії не існує)
         Task<IReadOnlyList<BookCopy>> AddCopiesAsync(int bookId, int libraryId, int quantity, CancellationToken cancellationToken = default);
 
+        // Для випадайки списання: вільні (Available) примірники книги разом із філією, за інвентарним номером
+        Task<IReadOnlyList<BookCopy>> GetAvailableByBookAsync(int bookId, CancellationToken cancellationToken = default);
+
         // UC 6: зберегти зміни примірника (статус)
         Task UpdateAsync(BookCopy bookCopy);
 

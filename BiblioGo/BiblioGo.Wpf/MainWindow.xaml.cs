@@ -42,7 +42,13 @@ namespace BiblioGo.Wpf
         {
             var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
             loginWindow.Owner = this;
-            loginWindow.Show();
+            loginWindow.ShowDialog();
+        }
+        private void UpdateUserProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var updateUserProfileWindow = _serviceProvider.GetRequiredService<UpdateUserProfileWindow>();
+            updateUserProfileWindow.Owner = this;
+            updateUserProfileWindow.Show();
         }
 
         private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)
