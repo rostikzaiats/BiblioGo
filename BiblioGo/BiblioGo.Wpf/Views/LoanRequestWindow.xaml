@@ -3,16 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Оформити заявку на отримання книги" Height="380" Width="420"
         WindowStartupLocation="CenterOwner"
-        FocusManager.FocusedElement="{Binding ElementName=UserIdTextBox}">
+        FocusManager.FocusedElement="{Binding ElementName=BookComboBox}"
+        Loaded="Window_Loaded">
     <StackPanel Margin="20">
-        <TextBlock Text="Ідентифікатор читача:" FontWeight="Bold" Margin="0,0,0,5"/>
-        <TextBox x:Name="UserIdTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+        <TextBlock Text="Читач:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBlock x:Name="ReaderTextBlock" Margin="0,0,0,15" Height="25"/>
 
-        <TextBlock Text="Ідентифікатор книги:" FontWeight="Bold" Margin="0,0,0,5"/>
-        <TextBox x:Name="BookIdTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+        <TextBlock Text="Книга:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <ComboBox x:Name="BookComboBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"
+                  DisplayMemberPath="Name" SelectedValuePath="Id"/>
 
-        <TextBlock Text="Ідентифікатор філії:" FontWeight="Bold" Margin="0,0,0,5"/>
-        <TextBox x:Name="LibraryIdTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+        <TextBlock Text="Філія:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <ComboBox x:Name="LibraryComboBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"
+                  DisplayMemberPath="Name" SelectedValuePath="Id"/>
 
         <Button x:Name="CreateLoanRequestButton" Content="Оформити заявку на отримання книги" Height="35" FontWeight="Bold"
                 IsDefault="True" Click="CreateLoanRequestButton_Click"/>

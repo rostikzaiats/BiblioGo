@@ -21,7 +21,7 @@ namespace BiblioGo.Application.Users.Validators
                 ?? ValidatePhone(command.Phone);
         }
 
-        private static string? ValidateEmail(string email)
+        internal static string? ValidateEmail(string email)
         {
             var trimmed = email.Trim();
 
@@ -49,7 +49,7 @@ namespace BiblioGo.Application.Users.Validators
             return null;
         }
 
-        private static string? ValidateName(string name, string fieldName)
+        internal static string? ValidateName(string name, string fieldName)
         {
             var trimmed = name.Trim();
 
@@ -61,7 +61,7 @@ namespace BiblioGo.Application.Users.Validators
             return null;
         }
 
-        private static string? ValidatePhone(string phone)
+        internal static string? ValidatePhone(string phone)
         {
             var trimmed = phone.Trim();
 

@@ -3,11 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Переглянути власні позики та терміни" Height="450" Width="960"
         WindowStartupLocation="CenterOwner"
-        FocusManager.FocusedElement="{Binding ElementName=UserIdTextBox}">
+        FocusManager.FocusedElement="{Binding ElementName=StatusComboBox}"
+        Loaded="Window_Loaded">
     <DockPanel Margin="10">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <TextBlock Text="Ідентифікатор читача:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <TextBox x:Name="UserIdTextBox" Width="80" VerticalContentAlignment="Center"/>
+            <TextBlock Text="Читач:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBlock x:Name="ReaderTextBlock" VerticalAlignment="Center" FontWeight="Bold"/>
             <TextBlock Text="Статус:" VerticalAlignment="Center" Margin="15,0,10,0"/>
             <ComboBox x:Name="StatusComboBox" Width="170" SelectedIndex="0" VerticalContentAlignment="Center">
                 <ComboBoxItem Content="Усі"/>

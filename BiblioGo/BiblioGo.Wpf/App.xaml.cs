@@ -3,6 +3,7 @@ using System.Windows;
 using BiblioGo.Application;
 using BiblioGo.Infrastructure;
 using BiblioGo.Wpf.Views;
+using BiblioGo.Wpf.Session;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -25,8 +26,23 @@ namespace BiblioGo.Wpf
             Log.Information("BiblioGo started on {MachineName}", Environment.MachineName);
             base.OnStartup(e);
 
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
             _serviceProvider = ConfigureServices();
-            _serviceProvider.GetRequiredService<MainWindow>().Show();
+
+            var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
+            if (loginWindow.ShowDialog() == true)
+            {
+                var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                System.Windows.Application.Current.MainWindow = mainWindow;
+                ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+                mainWindow.Show();
+            }
+            else
+            {
+                Shutdown();
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -37,7 +53,6 @@ namespace BiblioGo.Wpf
             base.OnExit(e);
         }
 
-        // Композиційний корінь: реєстрація шарів Application, Infrastructure та вікон
         private static ServiceProvider ConfigureServices()
         {
             var configuration = new ConfigurationBuilder()
@@ -60,6 +75,9 @@ namespace BiblioGo.Wpf
             services.AddTransient<AddBookCopiesWindow>();
             services.AddTransient<LoanRequestWindow>();
             services.AddTransient<UserLoansWindow>();
+            services.AddSingleton<CurrentUserSession>();
+            services.AddTransient<UpdateUserProfileWindow>();
+
             return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
         }
     }

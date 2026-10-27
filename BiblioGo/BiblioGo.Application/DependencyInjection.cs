@@ -1,5 +1,6 @@
 using BiblioGo.Application.Books.Services;
 using BiblioGo.Application.Loans.Services;
+using BiblioGo.Application.Lookups.Services;
 using BiblioGo.Application.Users.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,7 @@ namespace BiblioGo.Application
             services.AddTransient<BookCopyService>();
             services.AddTransient<UserService>();
             services.AddTransient<LoanService>();
+            services.AddTransient<LookupService>();
             return services;
         }
     }

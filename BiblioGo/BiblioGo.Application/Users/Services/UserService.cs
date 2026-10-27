@@ -1,4 +1,4 @@
-﻿using BiblioGo.Application.Exceptions;
+﻿using BiblioGo.Application.Common;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Dtos;
@@ -24,7 +24,7 @@ namespace BiblioGo.Application.Users.Services
         }
 
         // Use case 1: зареєструватися в системі
-        public async Task<int> RegisterAsync(RegisterUserCommand command)
+        public async Task<Result<int>> RegisterAsync(RegisterUserCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
 
@@ -32,7 +32,7 @@ namespace BiblioGo.Application.Users.Services
             if (error is not null)
             {
                 _logger.LogWarning("Registration rejected: {Reason}", error);
-                throw new InputValidationException(error);
+                return Result.Failure<int>(error);
             }
 
             var email = command.Email.Trim().ToLowerInvariant();
@@ -42,7 +42,7 @@ namespace BiblioGo.Application.Users.Services
                 if (await _users.FindByEmailAsync(email) is not null)
                 {
                     _logger.LogWarning("Registration rejected: email already registered");
-                    throw new BusinessRuleException("Користувач з такою поштою вже існує");
+                    return Result.Failure<int>("Користувач з такою поштою вже зареєстрований");
                 }
 
                 var user = new User
@@ -57,24 +57,24 @@ namespace BiblioGo.Application.Users.Services
 
                 var saved = await _users.AddAsync(user);
                 _logger.LogInformation("User registered {UserId}", saved.Id);
-                return saved.Id;
+                return Result.Success(saved.Id);
             }
-            catch (Exception ex) when (ex is not BiblioGoException)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to register user");
-                throw;
+                return Result.Failure<int>("Не вдалося зареєструвати користувача. Спробуйте пізніше.");
             }
         }
 
         // Use case 2: увійти в систему
-        public async Task<UserDto> LoginAsync(LoginUserCommand command)
+        public async Task<Result<UserDto>> LoginAsync(LoginUserCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             var error = LoginUserValidator.Validate(command);
             if (error is not null)
             {
                 _logger.LogWarning("Login rejected: {Reason}", error);
-                throw new InputValidationException(error);
+                return Result.Failure<UserDto>(error);
             }
             var email = command.Email.Trim().ToLowerInvariant();
             try
@@ -83,19 +83,50 @@ namespace BiblioGo.Application.Users.Services
                 if (user is null || !_hasher.Verify(command.Password, user.PasswordHash))
                 {
                     _logger.LogWarning("Login rejected: invalid credentials");
-                    throw new BusinessRuleException("Невірна пошта або пароль");
+                    return Result.Failure<UserDto>("Невірна пошта або пароль");
                 }
                 _logger.LogInformation("User logged in {UserId}", user.Id);
-                return new UserDto { UserId = user.Id,
+                return Result.Success(new UserDto { UserId = user.Id,
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    Role = user.Role };
+                    Role = user.Role });
             }
-            catch (Exception ex) when (ex is not BiblioGoException)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to log in user");
-                throw;
+                return Result.Failure<UserDto>("Не вдалося виконати вхід. Спробуйте пізніше.");
+            }
+        }
+    // Use case 3: Оновити користувача
+    public async Task<Result> UpdateUserAsync(UpdateUserCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            var error = UpdateUserValidator.Validate(command);
+            if (error is not null)
+            {
+                _logger.LogWarning("Update user rejected: {Reason}", error);
+                return Result.Failure(error);
+            }
+            try
+            {
+                var user = await _users.FindByIdAsync(command.UserId);
+                if (user is null)
+                {
+                    _logger.LogWarning("Update user rejected: user not found");
+                    return Result.Failure("Користувача не знайдено");
+                }
+                user.FirstName = command.FirstName.Trim();
+                user.LastName = command.LastName.Trim();
+                user.Phone = command.Phone.Trim();
+                await _users.UpdateAsync(user);
+                _logger.LogInformation("User updated {UserId}", user.Id);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update user");
+                return Result.Failure("Не вдалося оновити користувача. Спробуйте пізніше.");
             }
         }
     }

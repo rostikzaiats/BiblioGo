@@ -1,0 +1,51 @@
+﻿<Window x:Class="BiblioGo.Wpf.Views.UpdateUserProfileWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Оновлення профілю" Height="430" Width="380"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True">
+
+    <Border Style="{StaticResource CardBorder}">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="18" ShadowDepth="0" Opacity="0.55"/>
+        </Border.Effect>
+        <Grid>
+            <Grid Style="{StaticResource TitleBarPanel}"
+                  MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Button x:Name="CloseButton"
+                        Content="✕"
+                        Style="{StaticResource CloseButton}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"
+                        Click="CloseButton_Click"/>
+            </Grid>
+
+            <StackPanel Margin="32,48,32,24">
+                <TextBlock Text="Мій профіль" Style="{StaticResource TitleText}"/>
+                <TextBlock Text="Оновіть свої особисті дані"
+                           Style="{StaticResource SubtitleText}"
+                           Margin="0,0,0,24"/>
+
+                <TextBlock Text="Ім'я" Style="{StaticResource LabelText}"/>
+                <TextBox x:Name="FirstNameInput" Style="{StaticResource InputBox}"/>
+
+                <TextBlock Text="Прізвище" Style="{StaticResource LabelText}"/>
+                <TextBox x:Name="LastNameInput" Style="{StaticResource InputBox}"/>
+
+                <TextBlock Text="Телефон" Style="{StaticResource LabelText}"/>
+                <TextBox x:Name="PhoneInput" Style="{StaticResource InputBox}" Margin="0,0,0,20"/>
+
+                <Button x:Name="UpdateButton"
+                        Content="Оновити профіль"
+                        Style="{StaticResource PrimaryButton}"
+                        Click="UpdateButton_Click"/>
+
+                <TextBlock x:Name="StatusText" Style="{StaticResource ErrorText}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

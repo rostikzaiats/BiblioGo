@@ -1,5 +1,4 @@
-﻿using BiblioGo.Application.Exceptions;
-using BiblioGo.Application.Interfaces;
+﻿using BiblioGo.Application.Interfaces;
 using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
 using BiblioGo.Domain.Entities;
@@ -24,7 +23,7 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task RegisterAsync_ValidCommand_ReturnsNewUserId()
+        public async Task RegisterAsync_ValidCommand_ReturnsSuccessWithNewUserId()
         {
             // Arrange
             var command = CreateValidCommand();
@@ -42,7 +41,8 @@ namespace BiblioGo.Tests.Users.Services
             var result = await _sut.RegisterAsync(command);
 
             // Assert
-            Assert.Equal(42, result);
+            Assert.True(result.IsSuccess);
+            Assert.Equal(42, result.Value);
             _userRepository.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once());
         }
 
@@ -90,17 +90,18 @@ namespace BiblioGo.Tests.Users.Services
         [InlineData("a@")]
         [InlineData("@b.com")]
         [InlineData("Ivan <ivan@example.com>")]
-        public async Task RegisterAsync_InvalidEmail_ThrowsInputValidationException(string invalidEmail)
+        public async Task RegisterAsync_InvalidEmail_ReturnsFailureAndDoesNotSave(string invalidEmail)
         {
             // Arrange
             var command = CreateValidCommand();
             command.Email = invalidEmail;
 
             // Act
-            var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(command));
+            var result = await _sut.RegisterAsync(command);
 
             // Assert
-            Assert.IsType<InputValidationException>(exception);
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
             _passwordHasher.Verify(h => h.Hash(It.IsAny<string>()), Times.Never());
             _userRepository.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never());
         }
@@ -110,23 +111,24 @@ namespace BiblioGo.Tests.Users.Services
         [InlineData("1234567")]
         [InlineData("onlyletters")]
         [InlineData("123456789")]
-        public async Task RegisterAsync_WeakPassword_ThrowsInputValidationException(string weakPassword)
+        public async Task RegisterAsync_WeakPassword_ReturnsFailureAndDoesNotSave(string weakPassword)
         {
             // Arrange
             var command = CreateValidCommand();
             command.Password = weakPassword;
 
             // Act
-            var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(command));
+            var result = await _sut.RegisterAsync(command);
 
             // Assert
-            Assert.IsType<InputValidationException>(exception);
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
             _passwordHasher.Verify(h => h.Hash(It.IsAny<string>()), Times.Never());
             _userRepository.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never());
         }
 
         [Fact]
-        public async Task RegisterAsync_EmailAlreadyExists_ThrowsBusinessRuleException()
+        public async Task RegisterAsync_EmailAlreadyExists_ReturnsFailureAndDoesNotSave()
         {
             // Arrange
             var command = CreateValidCommand();
@@ -135,10 +137,11 @@ namespace BiblioGo.Tests.Users.Services
                 .ReturnsAsync(new User { Id = 1, Email = "test@example.com" });
 
             // Act
-            var exception = await Record.ExceptionAsync(() => _sut.RegisterAsync(command));
+            var result = await _sut.RegisterAsync(command);
 
             // Assert
-            Assert.IsType<BusinessRuleException>(exception);
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
             _passwordHasher.Verify(h => h.Hash(It.IsAny<string>()), Times.Never());
             _userRepository.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never());
         }
@@ -151,6 +154,22 @@ namespace BiblioGo.Tests.Users.Services
 
             // Assert
             Assert.IsType<ArgumentNullException>(exception);
+        }
+
+        [Fact]
+        public async Task RegisterAsync_RepositoryFails_ReturnsFailure()
+        {
+            // Arrange
+            _userRepository
+                .Setup(r => r.FindByEmailAsync(It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("DB is down"));
+
+            // Act
+            var result = await _sut.RegisterAsync(CreateValidCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
         }
 
         private static RegisterUserCommand CreateValidCommand() => new()
@@ -171,10 +190,11 @@ namespace BiblioGo.Tests.Users.Services
             _userRepository
                 .Setup(r => r.AddAsync(It.IsAny<User>()))
                 .Returns((User user) => Task.FromResult(user));
+
         // ---------- Login (Use case 2) ----------
 
         [Fact]
-        public async Task LoginAsync_ValidCredentials_ReturnsUserDtoWithAllFields()
+        public async Task LoginAsync_ValidCredentials_ReturnsSuccessWithUserDtoWithAllFields()
         {
             // Arrange
             var user = CreateStoredUser();
@@ -185,11 +205,13 @@ namespace BiblioGo.Tests.Users.Services
             var result = await _sut.LoginAsync(CreateLoginCommand());
 
             // Assert
-            Assert.Equal(7, result.UserId);
-            Assert.Equal("reader@mail.com", result.Email);
-            Assert.Equal("Іван", result.FirstName);
-            Assert.Equal("Петренко", result.LastName);
-            Assert.Equal(UserRole.Reader, result.Role);
+            Assert.True(result.IsSuccess);
+            var dto = result.Value;
+            Assert.Equal(7, dto.UserId);
+            Assert.Equal("reader@mail.com", dto.Email);
+            Assert.Equal("Іван", dto.FirstName);
+            Assert.Equal("Петренко", dto.LastName);
+            Assert.Equal(UserRole.Reader, dto.Role);
         }
 
         [Fact]
@@ -208,25 +230,33 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task LoginAsync_UnknownEmail_ThrowsBusinessRuleExceptionAndSkipsPasswordCheck()
+        public async Task LoginAsync_UnknownEmail_ReturnsFailureAndSkipsPasswordCheck()
         {
             // Arrange
             _userRepository.Setup(r => r.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<BusinessRuleException>(() => _sut.LoginAsync(CreateLoginCommand()));
+            // Act
+            var result = await _sut.LoginAsync(CreateLoginCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
             _passwordHasher.Verify(h => h.Verify(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         }
 
         [Fact]
-        public async Task LoginAsync_WrongPassword_ThrowsBusinessRuleException()
+        public async Task LoginAsync_WrongPassword_ReturnsFailure()
         {
             // Arrange
             _userRepository.Setup(r => r.FindByEmailAsync("reader@mail.com")).ReturnsAsync(CreateStoredUser());
             _passwordHasher.Setup(h => h.Verify(It.IsAny<string>(), "stored_hash")).Returns(false);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<BusinessRuleException>(() => _sut.LoginAsync(CreateLoginCommand()));
+            // Act
+            var result = await _sut.LoginAsync(CreateLoginCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
         }
 
         [Fact]
@@ -238,34 +268,40 @@ namespace BiblioGo.Tests.Users.Services
             _passwordHasher.Setup(h => h.Verify(It.IsAny<string>(), "stored_hash")).Returns(false);
 
             // Act
-            var unknownEmailError = await Assert.ThrowsAsync<BusinessRuleException>(
-                () => _sut.LoginAsync(CreateLoginCommand(email: "unknown@mail.com")));
-            var wrongPasswordError = await Assert.ThrowsAsync<BusinessRuleException>(
-                () => _sut.LoginAsync(CreateLoginCommand()));
+            var unknownEmailResult = await _sut.LoginAsync(CreateLoginCommand(email: "unknown@mail.com"));
+            var wrongPasswordResult = await _sut.LoginAsync(CreateLoginCommand());
 
             // Assert
-            Assert.Equal(unknownEmailError.Message, wrongPasswordError.Message);
+            Assert.True(unknownEmailResult.IsFailure);
+            Assert.True(wrongPasswordResult.IsFailure);
+            Assert.Equal(unknownEmailResult.Error, wrongPasswordResult.Error);
         }
 
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
-        public async Task LoginAsync_EmptyEmail_ThrowsInputValidationExceptionAndSkipsRepository(string email)
+        public async Task LoginAsync_EmptyEmail_ReturnsFailureAndSkipsRepository(string email)
         {
-            // Act & Assert
-            await Assert.ThrowsAsync<InputValidationException>(
-                () => _sut.LoginAsync(CreateLoginCommand(email: email)));
+            // Act
+            var result = await _sut.LoginAsync(CreateLoginCommand(email: email));
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
             _userRepository.Verify(r => r.FindByEmailAsync(It.IsAny<string>()), Times.Never());
         }
 
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
-        public async Task LoginAsync_EmptyPassword_ThrowsInputValidationExceptionAndSkipsRepository(string password)
+        public async Task LoginAsync_EmptyPassword_ReturnsFailureAndSkipsRepository(string password)
         {
-            // Act & Assert
-            await Assert.ThrowsAsync<InputValidationException>(
-                () => _sut.LoginAsync(CreateLoginCommand(password: password)));
+            // Act
+            var result = await _sut.LoginAsync(CreateLoginCommand(password: password));
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
             _userRepository.Verify(r => r.FindByEmailAsync(It.IsAny<string>()), Times.Never());
         }
 
@@ -277,17 +313,175 @@ namespace BiblioGo.Tests.Users.Services
         }
 
         [Fact]
-        public async Task LoginAsync_RepositoryFails_RethrowsOriginalException()
+        public async Task LoginAsync_RepositoryFails_ReturnsFailure()
         {
             // Arrange
             _userRepository
                 .Setup(r => r.FindByEmailAsync(It.IsAny<string>()))
                 .ThrowsAsync(new InvalidOperationException("DB is down"));
 
-            // Act & Assert
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.LoginAsync(CreateLoginCommand()));
-            Assert.Equal("DB is down", ex.Message);
+            // Act
+            var result = await _sut.LoginAsync(CreateLoginCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
         }
+
+        // ---------- UpdateUser (Use case 3) ----------
+
+        [Fact]
+        public async Task UpdateUserAsync_ValidCommand_ReturnsSuccessAndSavesNewProfileData()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByIdAsync(7)).ReturnsAsync(CreateStoredUser());
+
+            // Act
+            var result = await _sut.UpdateUserAsync(CreateUpdateCommand());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            _userRepository.Verify(
+                r => r.UpdateAsync(It.Is<User>(u =>
+                    u.Id == 7
+                    && u.FirstName == "Олена"
+                    && u.LastName == "Коваль"
+                    && u.Phone == "+380931112233")),
+                Times.Once());
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ValidCommand_DoesNotChangeEmailPasswordHashAndRole()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByIdAsync(7)).ReturnsAsync(CreateStoredUser());
+
+            // Act
+            await _sut.UpdateUserAsync(CreateUpdateCommand());
+
+            // Assert
+            _userRepository.Verify(
+                r => r.UpdateAsync(It.Is<User>(u =>
+                    u.Email == "reader@mail.com"
+                    && u.PasswordHash == "stored_hash"
+                    && u.Role == UserRole.Reader)),
+                Times.Once());
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_FieldsWithSurroundingSpaces_SavesTrimmedValues()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByIdAsync(7)).ReturnsAsync(CreateStoredUser());
+            var command = CreateUpdateCommand();
+            command.FirstName = "  Олена  ";
+            command.LastName = "  Коваль ";
+            command.Phone = " +380931112233  ";
+
+            // Act
+            await _sut.UpdateUserAsync(command);
+
+            // Assert
+            _userRepository.Verify(
+                r => r.UpdateAsync(It.Is<User>(u =>
+                    u.FirstName == "Олена"
+                    && u.LastName == "Коваль"
+                    && u.Phone == "+380931112233")),
+                Times.Once());
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_UserNotFound_ReturnsFailureAndDoesNotSave()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByIdAsync(It.IsAny<int>())).ReturnsAsync((User?)null);
+
+            // Act
+            var result = await _sut.UpdateUserAsync(CreateUpdateCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            _userRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never());
+        }
+
+        [Theory]
+        [InlineData("", "Коваль", "+380931112233")]
+        [InlineData("   ", "Коваль", "+380931112233")]
+        [InlineData("О", "Коваль", "+380931112233")]
+        [InlineData("Олена", "", "+380931112233")]
+        [InlineData("Олена", "К", "+380931112233")]
+        [InlineData("Олена", "Коваль", "")]
+        [InlineData("Олена", "Коваль", "380931112233")]
+        [InlineData("Олена", "Коваль", "+38093abc1122")]
+        [InlineData("Олена", "Коваль", "+12345")]
+        public async Task UpdateUserAsync_InvalidData_ReturnsFailureAndSkipsRepository(
+            string firstName, string lastName, string phone)
+        {
+            // Arrange
+            var command = CreateUpdateCommand();
+            command.FirstName = firstName;
+            command.LastName = lastName;
+            command.Phone = phone;
+
+            // Act
+            var result = await _sut.UpdateUserAsync(command);
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            _userRepository.Verify(r => r.FindByIdAsync(It.IsAny<int>()), Times.Never());
+            _userRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_NullCommand_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.UpdateUserAsync(null!));
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_FindByIdFails_ReturnsFailureAndDoesNotSave()
+        {
+            // Arrange
+            _userRepository
+                .Setup(r => r.FindByIdAsync(It.IsAny<int>()))
+                .ThrowsAsync(new InvalidOperationException("DB is down"));
+
+            // Act
+            var result = await _sut.UpdateUserAsync(CreateUpdateCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            _userRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_UpdateFails_ReturnsFailure()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByIdAsync(7)).ReturnsAsync(CreateStoredUser());
+            _userRepository
+                .Setup(r => r.UpdateAsync(It.IsAny<User>()))
+                .ThrowsAsync(new InvalidOperationException("DB is down"));
+
+            // Act
+            var result = await _sut.UpdateUserAsync(CreateUpdateCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+        }
+
+        private static UpdateUserCommand CreateUpdateCommand() => new()
+        {
+            UserId = 7,
+            FirstName = "Олена",
+            LastName = "Коваль",
+            Phone = "+380931112233"
+        };
 
         private static LoginUserCommand CreateLoginCommand(
             string email = "reader@mail.com",

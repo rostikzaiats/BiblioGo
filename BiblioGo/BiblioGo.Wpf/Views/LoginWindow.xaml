@@ -1,18 +1,48 @@
 ﻿<Window x:Class="BiblioGo.Wpf.Views.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Увійти у BiblioGo" Height="480" Width="350" WindowStartupLocation="CenterScreen">
-    <StackPanel Margin="20">
-        <TextBlock Text="Email:" FontWeight="Bold" Margin="0,0,0,5"/>
-        <TextBox x:Name="EmailInput" Margin="0,0,0,10" Height="25"/>
+        Title="Увійти у BiblioGo" Height="420" Width="380"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True">
 
-        <TextBlock Text="Пароль:" FontWeight="Bold" Margin="0,0,0,5"/>
-        <PasswordBox x:Name="PasswordInput" Margin="0,0,0,10" Height="25"/>
+    <Border Style="{StaticResource CardBorder}">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="18" ShadowDepth="0" Opacity="0.55"/>
+        </Border.Effect>
+        <Grid>
+            <Grid Style="{StaticResource TitleBarPanel}"
+                  MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Button x:Name="CloseButton"
+                        Content="✕"
+                        Style="{StaticResource CloseButton}"
+                        HorizontalAlignment="Right"
+                        Margin="0,5,10,0"
+                        Click="CloseButton_Click"/>
+            </Grid>
 
+            <StackPanel Margin="32,40,32,24">
+                <TextBlock Text="З поверненням" Style="{StaticResource TitleText}"/>
+                <TextBlock Text="Увійдіть до свого акаунта BiblioGo"
+                           Style="{StaticResource SubtitleText}"
+                           Margin="0,0,0,24"/>
 
+                <TextBlock Text="Email" Style="{StaticResource LabelText}"/>
+                <TextBox x:Name="EmailInput" Style="{StaticResource InputBox}"/>
 
-        <Button x:Name="LoginButton" Content="Увійти" Click="LoginButton_Click" Height="35" FontWeight="Bold"/>
+                <TextBlock Text="Пароль" Style="{StaticResource LabelText}"/>
+                <PasswordBox x:Name="PasswordInput" Style="{StaticResource PasswordBoxStyle}"
+                             Margin="0,0,0,20"/>
 
-        <TextBlock x:Name="StatusText" Margin="0,15,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
-    </StackPanel>
+                <Button x:Name="LoginButton"
+                        Content="Увійти"
+                        Style="{StaticResource PrimaryButton}"
+                        Click="LoginButton_Click"/>
+
+                <TextBlock x:Name="StatusText" Style="{StaticResource ErrorText}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>
