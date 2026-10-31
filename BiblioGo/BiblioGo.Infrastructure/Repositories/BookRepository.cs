@@ -61,14 +61,14 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<Book?> GetByIdAsync(int id)
+        // Use case 8: книга за ідентифікатором
+        public async Task<Book?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
-        }
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
-        public Task<int> GetAvailableCopiesCountAsync(int bookId)
-        {
-            throw new NotImplementedException();
+            return await context.Books
+                .AsNoTracking()
+                .FirstOrDefaultAsync(book => book.Id == id, cancellationToken);
         }
 
         // Екранування спецсимволів LIKE, щоб '%' та '_' у назві чи імені автора шукались як звичайні символи

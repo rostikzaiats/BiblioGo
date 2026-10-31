@@ -17,10 +17,7 @@ namespace BiblioGo.Application.Interfaces
         // Для випадайок: усі книги, відсортовані за назвою та автором
         Task<IReadOnlyList<Book>> GetAllAsync(CancellationToken cancellationToken = default);
 
-        // Use case 8: перегляд інформації про конкретну книгу
-        Task<Book?> GetByIdAsync(int id);
-
-        // Use case 9: перевірка доступності (кількість вільних примірників)
-        Task<int> GetAvailableCopiesCountAsync(int bookId);
+        // Use case 8: книга за ідентифікатором (null, якщо такої немає)
+        Task<Book?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     }
 }

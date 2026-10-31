@@ -57,6 +57,19 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        // UC 8 (Каталог): примірники книги, крім списаних, разом із філією
+        public async Task<IReadOnlyList<BookCopy>> GetNotWrittenOffByBookAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.BookCopies
+                .AsNoTracking()
+                .Include(copy => copy.Library)
+                .Where(copy => copy.BookId == bookId && copy.Status != BookCopyStatus.WrittenOff)
+                .OrderBy(copy => copy.InventoryNumber)
+                .ToListAsync(cancellationToken);
+        }
+
         // Use case 4: додати примірники з новими інвентарними номерами (наступні після найбільшого наявного).
         // Serializable-транзакція не дає двом одночасним додаванням отримати однакові номери
         public async Task<IReadOnlyList<BookCopy>> AddCopiesAsync(int bookId, int libraryId, int quantity, CancellationToken cancellationToken = default)
