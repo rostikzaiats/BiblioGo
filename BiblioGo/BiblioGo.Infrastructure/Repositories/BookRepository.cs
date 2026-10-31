@@ -1,3 +1,4 @@
+using BiblioGo.Application.Books.Queries;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Infrastructure.Persistence;
@@ -15,9 +16,53 @@ namespace BiblioGo.Infrastructure.Repositories
             _contextFactory = contextFactory;
         }
 
-        public Task<IEnumerable<Book>> GetCatalogAsync(string? genre, int? year, string? sortBy, int pageNumber, int pageSize)
+        // Use case 1: сторінка каталогу. Сортування завжди має другий ключ (назву), щоб порядок між сторінками був стабільним
+        public async Task<IReadOnlyList<Book>> GetCatalogPageAsync(
+            string? genre,
+            int? year,
+            CatalogSortBy sortBy,
+            int skip,
+            int take,
+            CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var books = ApplyCatalogFilters(context.Books.AsNoTracking(), genre, year);
+
+            IOrderedQueryable<Book> sorted = sortBy switch
+            {
+                CatalogSortBy.Author => books.OrderBy(book => book.Author).ThenBy(book => book.Title),
+                CatalogSortBy.YearNewest => books.OrderByDescending(book => book.Year).ThenBy(book => book.Title),
+                CatalogSortBy.YearOldest => books.OrderBy(book => book.Year).ThenBy(book => book.Title),
+                _ => books.OrderBy(book => book.Title).ThenBy(book => book.Author)
+            };
+
+            return await sorted
+                .ThenBy(book => book.Id)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync(cancellationToken);
+        }
+
+        // Use case 1: кількість книг під фільтрами
+        public async Task<int> CountCatalogAsync(string? genre, int? year, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await ApplyCatalogFilters(context.Books, genre, year).CountAsync(cancellationToken);
+        }
+
+        // Use case 1: різні жанри для випадайки
+        public async Task<IReadOnlyList<string>> GetGenresAsync(CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Books
+                .Where(book => book.Genre != string.Empty)
+                .Select(book => book.Genre)
+                .Distinct()
+                .OrderBy(genre => genre)
+                .ToListAsync(cancellationToken);
         }
 
         // Для випадайок: усі книги, відсортовані за назвою та автором
@@ -69,6 +114,23 @@ namespace BiblioGo.Infrastructure.Repositories
             return await context.Books
                 .AsNoTracking()
                 .FirstOrDefaultAsync(book => book.Id == id, cancellationToken);
+        }
+
+        // Жанр порівнюється повністю, але без урахування регістру (ILIKE без % — точний збіг)
+        private static IQueryable<Book> ApplyCatalogFilters(IQueryable<Book> books, string? genre, int? year)
+        {
+            if (genre is not null)
+            {
+                var genrePattern = EscapeLikePattern(genre);
+                books = books.Where(book => EF.Functions.ILike(book.Genre, genrePattern));
+            }
+
+            if (year is not null)
+            {
+                books = books.Where(book => book.Year == year);
+            }
+
+            return books;
         }
 
         // Екранування спецсимволів LIKE, щоб '%' та '_' у назві чи імені автора шукались як звичайні символи
