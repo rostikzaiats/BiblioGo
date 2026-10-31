@@ -176,6 +176,10 @@
                               VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Text="КАТАЛОГ" Style="{StaticResource SectionTitle}" Margin="2,0,0,8"/>
+                        <Button x:Name="BookCatalogButton"
+                                Content="Каталог книг"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="BookCatalogButton_Click"/>
                         <Button x:Name="BookSearchButton"
                                 Content="Пошук книги за назвою"
                                 Style="{StaticResource MenuCardButton}"

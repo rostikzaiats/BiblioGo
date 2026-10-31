@@ -1,12 +1,25 @@
 ﻿
+using BiblioGo.Application.Books.Queries;
 using BiblioGo.Domain.Entities;
 
 namespace BiblioGo.Application.Interfaces
 {
     public interface IBookRepository
     {
-        // Use case 1, 4, 5, 6, 7: перегляд каталогу з опційними фільтром, сортуванням і пагінацією
-        Task<IEnumerable<Book>> GetCatalogAsync(string? genre, int? year, string? sortBy, int pageNumber, int pageSize);
+        // Use case 1: одна сторінка каталогу (skip/take) з опційними фільтрами за жанром і роком та сортуванням
+        Task<IReadOnlyList<Book>> GetCatalogPageAsync(
+            string? genre,
+            int? year,
+            CatalogSortBy sortBy,
+            int skip,
+            int take,
+            CancellationToken cancellationToken = default);
+
+        // Use case 1: скільки книг підходить під фільтри (для кількості сторінок)
+        Task<int> CountCatalogAsync(string? genre, int? year, CancellationToken cancellationToken = default);
+
+        // Use case 1: усі жанри каталогу для випадайки фільтра, за алфавітом
+        Task<IReadOnlyList<string>> GetGenresAsync(CancellationToken cancellationToken = default);
 
         // Use case 2: пошук за назвою (входження підрядка без урахування регістру)
         Task<IReadOnlyList<Book>> SearchByTitleAsync(string title, CancellationToken cancellationToken = default);

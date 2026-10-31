@@ -1,4 +1,6 @@
+using System.Globalization;
 using BiblioGo.Application.Books.Dtos;
+using BiblioGo.Application.Books.Queries;
 using BiblioGo.Application.Common;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
@@ -14,6 +16,10 @@ namespace BiblioGo.Application.Books.Services
         public const int MaxSearchTitleLength = 200;
         public const int MinSearchAuthorLength = 2;
         public const int MaxSearchAuthorLength = 100;
+        public const int MaxCatalogPageSize = 50;
+        public const int MaxCatalogPageNumber = 100_000;
+        public const int MaxCatalogGenreLength = 50;
+        public const int MinCatalogYear = 1000;
 
         private readonly IBookRepository _bookRepository;
         private readonly IBookCopyRepository _bookCopyRepository;
@@ -153,6 +159,124 @@ namespace BiblioGo.Application.Books.Services
                     .ThenBy(library => library.LibraryName, StringComparer.CurrentCulture)
                     .ToList()
             };
+        }
+
+        // Use case 1: переглянути каталог книг (фільтр за жанром і роком, сортування, сторінки)
+        public async Task<Result<CatalogPageDto>> GetCatalogAsync(GetCatalogQuery query, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(query);
+
+            var genre = string.IsNullOrWhiteSpace(query.Genre) ? null : query.Genre.Trim();
+            var validationError = ValidateCatalogQuery(query, genre, out var year);
+
+            if (validationError is not null)
+            {
+                _logger.LogWarning(
+                    "Catalog view rejected: {ValidationError} (page {PageNumber}, size {PageSize}, genre {Genre}, year {Year}, sort {SortBy})",
+                    validationError,
+                    query.PageNumber,
+                    query.PageSize,
+                    query.Genre,
+                    query.Year,
+                    query.SortBy);
+                return Result.Failure<CatalogPageDto>(validationError);
+            }
+
+            _logger.LogInformation(
+                "Loading catalog page {PageNumber} (genre {Genre}, year {Year}, sort {SortBy})",
+                query.PageNumber,
+                genre,
+                year,
+                query.SortBy);
+
+            try
+            {
+                var totalCount = await _bookRepository.CountCatalogAsync(genre, year, cancellationToken);
+                var skip = (query.PageNumber - 1) * query.PageSize;
+                var books = await _bookRepository.GetCatalogPageAsync(genre, year, query.SortBy, skip, query.PageSize, cancellationToken);
+
+                _logger.LogInformation(
+                    "Loaded catalog page {PageNumber}: {BookCount} of {TotalCount} book(s)",
+                    query.PageNumber,
+                    books.Count,
+                    totalCount);
+
+                return Result.Success(new CatalogPageDto
+                {
+                    Books = books,
+                    PageNumber = query.PageNumber,
+                    PageSize = query.PageSize,
+                    TotalCount = totalCount,
+                    TotalPages = (totalCount + query.PageSize - 1) / query.PageSize
+                });
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Failed to load catalog page {PageNumber}", query.PageNumber);
+                return Result.Failure<CatalogPageDto>("Не вдалося завантажити каталог. Спробуйте пізніше.");
+            }
+        }
+
+        // Use case 1: жанри для випадайки фільтра каталогу
+        public async Task<Result<IReadOnlyList<string>>> GetGenresAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var genres = await _bookRepository.GetGenresAsync(cancellationToken);
+
+                _logger.LogInformation("Loaded {GenreCount} genre(s) for catalog filter", genres.Count);
+                return Result.Success(genres);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Failed to load genres for catalog filter");
+                return Result.Failure<IReadOnlyList<string>>("Не вдалося завантажити список жанрів. Спробуйте пізніше.");
+            }
+        }
+
+        private static string? ValidateCatalogQuery(GetCatalogQuery query, string? genre, out int? year)
+        {
+            year = null;
+
+            if (!Enum.IsDefined(query.SortBy))
+            {
+                return "Оберіть спосіб сортування.";
+            }
+
+            if (query.PageNumber < 1 || query.PageNumber > MaxCatalogPageNumber)
+            {
+                return $"Номер сторінки має бути від 1 до {MaxCatalogPageNumber}.";
+            }
+
+            if (query.PageSize < 1 || query.PageSize > MaxCatalogPageSize)
+            {
+                return $"Кількість книг на сторінці має бути від 1 до {MaxCatalogPageSize}.";
+            }
+
+            if (genre is not null && genre.Length > MaxCatalogGenreLength)
+            {
+                return $"Жанр не може бути довшим за {MaxCatalogGenreLength} символів.";
+            }
+
+            var yearText = query.Year?.Trim();
+            if (string.IsNullOrEmpty(yearText))
+            {
+                return null;
+            }
+
+            var maxYear = DateTime.Now.Year;
+            if (!int.TryParse(yearText, NumberStyles.None, CultureInfo.InvariantCulture, out var parsedYear))
+            {
+                return "Рік має бути цілим числом, наприклад 1840.";
+            }
+
+            if (parsedYear < MinCatalogYear || parsedYear > maxYear)
+            {
+                return $"Рік має бути від {MinCatalogYear} до {maxYear}.";
+            }
+
+            year = parsedYear;
+            return null;
         }
 
         private static string? ValidateSearchTitle(string searchTitle)
