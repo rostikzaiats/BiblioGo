@@ -1,3 +1,4 @@
+using BiblioGo.Application.Books.Dtos;
 using BiblioGo.Application.Common;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
@@ -15,11 +16,16 @@ namespace BiblioGo.Application.Books.Services
         public const int MaxSearchAuthorLength = 100;
 
         private readonly IBookRepository _bookRepository;
+        private readonly IBookCopyRepository _bookCopyRepository;
         private readonly ILogger<BookCatalogService> _logger;
 
-        public BookCatalogService(IBookRepository bookRepository, ILogger<BookCatalogService> logger)
+        public BookCatalogService(
+            IBookRepository bookRepository,
+            IBookCopyRepository bookCopyRepository,
+            ILogger<BookCatalogService> logger)
         {
             _bookRepository = bookRepository;
+            _bookCopyRepository = bookCopyRepository;
             _logger = logger;
         }
 
@@ -79,6 +85,74 @@ namespace BiblioGo.Application.Books.Services
                 _logger.LogError(ex, "Failed to search books by author {Author}", searchAuthor);
                 throw;
             }
+        }
+
+        // Use case 8: переглянути інформацію про книгу (опис + де і скільки вільних примірників)
+        public async Task<Result<BookDetailsDto>> GetBookDetailsAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            if (bookId <= 0)
+            {
+                const string validationError = "Оберіть книгу.";
+                _logger.LogWarning("Book details for {BookId} rejected: {ValidationError}", bookId, validationError);
+                return Result.Failure<BookDetailsDto>(validationError);
+            }
+
+            _logger.LogInformation("Loading details of book {BookId}", bookId);
+
+            try
+            {
+                var book = await _bookRepository.GetByIdAsync(bookId, cancellationToken);
+
+                if (book is null)
+                {
+                    _logger.LogWarning("Book details rejected: book {BookId} not found", bookId);
+                    return Result.Failure<BookDetailsDto>("Книгу не знайдено.");
+                }
+
+                var loanableCopies = await _bookCopyRepository.GetLoanableByBookAsync(bookId, cancellationToken);
+                var issuedCopies = await _bookCopyRepository.CountIssuedByBookAsync(bookId, cancellationToken);
+                var details = CreateDetails(book, loanableCopies, issuedCopies);
+
+                _logger.LogInformation(
+                    "Loaded details of book {BookId}: {AvailableCopies} available, {IssuedCopies} issued",
+                    bookId,
+                    details.AvailableCopies,
+                    details.IssuedCopies);
+
+                return Result.Success(details);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Failed to load details of book {BookId}", bookId);
+                return Result.Failure<BookDetailsDto>("Не вдалося завантажити інформацію про книгу. Спробуйте пізніше.");
+            }
+        }
+
+        // Групуємо вільні примірники за філіями (філії з найбільшою кількістю — першими)
+        private static BookDetailsDto CreateDetails(Book book, IReadOnlyList<BookCopy> availableCopies, int issuedCopies)
+        {
+            return new BookDetailsDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                Genre = book.Genre,
+                Year = book.Year,
+                Description = book.Description,
+                AvailableCopies = availableCopies.Count,
+                IssuedCopies = issuedCopies,
+                AvailableInLibraries = availableCopies
+                    .GroupBy(copy => copy.LibraryId)
+                    .Select(group => new LibraryAvailabilityDto
+                    {
+                        LibraryName = group.First().Library.Name,
+                        Address = group.First().Library.Address,
+                        AvailableCopies = group.Count()
+                    })
+                    .OrderByDescending(library => library.AvailableCopies)
+                    .ThenBy(library => library.LibraryName, StringComparer.CurrentCulture)
+                    .ToList()
+            };
         }
 
         private static string? ValidateSearchTitle(string searchTitle)

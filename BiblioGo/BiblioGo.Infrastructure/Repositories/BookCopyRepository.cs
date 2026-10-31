@@ -57,6 +57,31 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        // UC 8 (Каталог): примірники, які можна взяти зараз. Заброньовані заявкою Requested не рахуємо,
+        // інакше вікно показало б вільний примірник, а заявка на нього отримала б відмову
+        public async Task<IReadOnlyList<BookCopy>> GetLoanableByBookAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.BookCopies
+                .AsNoTracking()
+                .Include(copy => copy.Library)
+                .Where(copy => copy.BookId == bookId
+                    && copy.Status == BookCopyStatus.Available
+                    && !context.Loans.Any(loan => loan.BookCopyId == copy.Id && loan.Status == LoanStatus.Requested))
+                .OrderBy(copy => copy.InventoryNumber)
+                .ToListAsync(cancellationToken);
+        }
+
+        // UC 8 (Каталог): скільки примірників книги зараз на руках у читачів
+        public async Task<int> CountIssuedByBookAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.BookCopies
+                .CountAsync(copy => copy.BookId == bookId && copy.Status == BookCopyStatus.Issued, cancellationToken);
+        }
+
         // Use case 4: додати примірники з новими інвентарними номерами (наступні після найбільшого наявного).
         // Serializable-транзакція не дає двом одночасним додаванням отримати однакові номери
         public async Task<IReadOnlyList<BookCopy>> AddCopiesAsync(int bookId, int libraryId, int quantity, CancellationToken cancellationToken = default)

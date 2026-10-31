@@ -184,6 +184,10 @@
                                 Content="Пошук книги за автором"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookSearchByAuthorButton_Click"/>
+                        <Button x:Name="BookDetailsButton"
+                                Content="Інформація про книгу"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="BookDetailsButton_Click"/>
                         <Button x:Name="CreateLoanRequestButton"
                                 Content="Оформити заявку на отримання"
                                 Style="{StaticResource MenuCardButton}"
