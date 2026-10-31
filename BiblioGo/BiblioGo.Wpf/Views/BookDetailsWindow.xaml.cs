@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using BiblioGo.Application.Books.Dtos;
 using BiblioGo.Application.Books.Services;
@@ -36,6 +37,13 @@ namespace BiblioGo.Wpf.Views
             ShowButton.IsEnabled = true;
         }
 
+        // Обрано іншу книгу: ховаємо інформацію про попередню, щоб її не сплутати з новою
+        private void BookComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DetailsPanel.Visibility = Visibility.Collapsed;
+            ShowInfo(string.Empty);
+        }
+
         private async void ShowButton_Click(object sender, RoutedEventArgs e)
         {
             // Нічого не обрано — 0, сервіс поверне помилку валідації «Оберіть книгу.»
@@ -57,6 +65,12 @@ namespace BiblioGo.Wpf.Views
 
                 ShowDetails(result.Value);
                 ShowInfo(string.Empty);
+            }
+            catch (Exception)
+            {
+                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
+                DetailsPanel.Visibility = Visibility.Collapsed;
+                ShowError("Не вдалося завантажити інформацію про книгу. Спробуйте пізніше.");
             }
             finally
             {

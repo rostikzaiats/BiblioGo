@@ -10,7 +10,7 @@ namespace BiblioGo.Application.Books.Dtos
         public int Year { get; set; }
         public string Description { get; set; } = string.Empty;
 
-        // Примірники на полицях (можна взяти зараз) і на руках у читачів; списані не враховуються
+        // Примірники, які можна взяти зараз (без чужої заявки), і примірники на руках у читачів
         public int AvailableCopies { get; set; }
         public int IssuedCopies { get; set; }
 

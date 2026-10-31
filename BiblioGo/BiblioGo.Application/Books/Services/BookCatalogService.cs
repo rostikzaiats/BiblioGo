@@ -2,7 +2,6 @@ using BiblioGo.Application.Books.Dtos;
 using BiblioGo.Application.Common;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
-using BiblioGo.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace BiblioGo.Application.Books.Services
@@ -110,8 +109,9 @@ namespace BiblioGo.Application.Books.Services
                     return Result.Failure<BookDetailsDto>("Книгу не знайдено.");
                 }
 
-                var copies = await _bookCopyRepository.GetNotWrittenOffByBookAsync(bookId, cancellationToken);
-                var details = CreateDetails(book, copies);
+                var loanableCopies = await _bookCopyRepository.GetLoanableByBookAsync(bookId, cancellationToken);
+                var issuedCopies = await _bookCopyRepository.CountIssuedByBookAsync(bookId, cancellationToken);
+                var details = CreateDetails(book, loanableCopies, issuedCopies);
 
                 _logger.LogInformation(
                     "Loaded details of book {BookId}: {AvailableCopies} available, {IssuedCopies} issued",
@@ -128,11 +128,9 @@ namespace BiblioGo.Application.Books.Services
             }
         }
 
-        // Рахуємо вільні й видані примірники та групуємо вільні за філіями (філії з найбільшою кількістю — першими)
-        private static BookDetailsDto CreateDetails(Book book, IReadOnlyList<BookCopy> copies)
+        // Групуємо вільні примірники за філіями (філії з найбільшою кількістю — першими)
+        private static BookDetailsDto CreateDetails(Book book, IReadOnlyList<BookCopy> availableCopies, int issuedCopies)
         {
-            var availableCopies = copies.Where(copy => copy.Status == BookCopyStatus.Available).ToList();
-
             return new BookDetailsDto
             {
                 Id = book.Id,
@@ -142,7 +140,7 @@ namespace BiblioGo.Application.Books.Services
                 Year = book.Year,
                 Description = book.Description,
                 AvailableCopies = availableCopies.Count,
-                IssuedCopies = copies.Count(copy => copy.Status == BookCopyStatus.Issued),
+                IssuedCopies = issuedCopies,
                 AvailableInLibraries = availableCopies
                     .GroupBy(copy => copy.LibraryId)
                     .Select(group => new LibraryAvailabilityDto

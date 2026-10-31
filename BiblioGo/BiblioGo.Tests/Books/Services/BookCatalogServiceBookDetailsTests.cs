@@ -1,7 +1,6 @@
 using BiblioGo.Application.Books.Services;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
-using BiblioGo.Domain.Enums;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -33,7 +32,7 @@ namespace BiblioGo.Tests.Books.Services
         {
             // Arrange
             SetupBook(CreateBook());
-            SetupCopies([]);
+            SetupAvailability([], issuedCopies: 0);
 
             // Act
             var result = await _service.GetBookDetailsAsync(BookId);
@@ -49,16 +48,13 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task GetBookDetailsAsync_AvailableAndIssuedCopies_CountsEachStatus()
+        public async Task GetBookDetailsAsync_LoanableAndIssuedCopies_ReturnsBothCounts()
         {
             // Arrange
             SetupBook(CreateBook());
-            SetupCopies(
-            [
-                CreateCopy(1, BookCopyStatus.Available, CentralLibrary),
-                CreateCopy(2, BookCopyStatus.Available, RiversideLibrary),
-                CreateCopy(3, BookCopyStatus.Issued, CentralLibrary)
-            ]);
+            SetupAvailability(
+                [CreateCopy(1, CentralLibrary), CreateCopy(2, RiversideLibrary)],
+                issuedCopies: 1);
 
             // Act
             var result = await _service.GetBookDetailsAsync(BookId);
@@ -73,13 +69,9 @@ namespace BiblioGo.Tests.Books.Services
         {
             // Arrange
             SetupBook(CreateBook());
-            SetupCopies(
-            [
-                CreateCopy(1, BookCopyStatus.Available, CentralLibrary),
-                CreateCopy(2, BookCopyStatus.Available, RiversideLibrary),
-                CreateCopy(3, BookCopyStatus.Available, RiversideLibrary),
-                CreateCopy(4, BookCopyStatus.Issued, CentralLibrary)
-            ]);
+            SetupAvailability(
+                [CreateCopy(1, CentralLibrary), CreateCopy(2, RiversideLibrary), CreateCopy(3, RiversideLibrary)],
+                issuedCopies: 1);
 
             // Act
             var result = await _service.GetBookDetailsAsync(BookId);
@@ -99,7 +91,7 @@ namespace BiblioGo.Tests.Books.Services
         {
             // Arrange
             SetupBook(CreateBook());
-            SetupCopies([CreateCopy(1, BookCopyStatus.Issued, CentralLibrary)]);
+            SetupAvailability([], issuedCopies: 1);
 
             // Act
             var result = await _service.GetBookDetailsAsync(BookId);
@@ -116,7 +108,7 @@ namespace BiblioGo.Tests.Books.Services
         {
             // Arrange
             SetupBook(CreateBook());
-            SetupCopies([]);
+            SetupAvailability([], issuedCopies: 0);
 
             // Act
             var result = await _service.GetBookDetailsAsync(BookId);
@@ -150,7 +142,10 @@ namespace BiblioGo.Tests.Books.Services
             // Assert
             _bookRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
             _bookCopyRepository.Verify(
-                r => r.GetNotWrittenOffByBookAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                r => r.GetLoanableByBookAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+            _bookCopyRepository.Verify(
+                r => r.CountIssuedByBookAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
                 Times.Never);
         }
 
@@ -167,7 +162,7 @@ namespace BiblioGo.Tests.Books.Services
             Assert.True(result.IsFailure);
             Assert.Equal("Книгу не знайдено.", result.Error);
             _bookCopyRepository.Verify(
-                r => r.GetNotWrittenOffByBookAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                r => r.GetLoanableByBookAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
                 Times.Never);
         }
 
@@ -193,7 +188,27 @@ namespace BiblioGo.Tests.Books.Services
             // Arrange
             SetupBook(CreateBook());
             _bookCopyRepository
-                .Setup(r => r.GetNotWrittenOffByBookAsync(BookId, It.IsAny<CancellationToken>()))
+                .Setup(r => r.GetLoanableByBookAsync(BookId, It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
+
+            // Act
+            var result = await _service.GetBookDetailsAsync(BookId);
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.Equal(LoadFailedMessage, result.Error);
+        }
+
+        [Fact]
+        public async Task GetBookDetailsAsync_IssuedCountFails_ReturnsFailureWithLoadFailedMessage()
+        {
+            // Arrange
+            SetupBook(CreateBook());
+            _bookCopyRepository
+                .Setup(r => r.GetLoanableByBookAsync(BookId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync([]);
+            _bookCopyRepository
+                .Setup(r => r.CountIssuedByBookAsync(BookId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
 
             // Act
@@ -226,14 +241,15 @@ namespace BiblioGo.Tests.Books.Services
             // Arrange
             using var cancellationTokenSource = new CancellationTokenSource();
             SetupBook(CreateBook());
-            SetupCopies([]);
+            SetupAvailability([], issuedCopies: 0);
 
             // Act
             await _service.GetBookDetailsAsync(BookId, cancellationTokenSource.Token);
 
             // Assert
             _bookRepository.Verify(r => r.GetByIdAsync(BookId, cancellationTokenSource.Token), Times.Once);
-            _bookCopyRepository.Verify(r => r.GetNotWrittenOffByBookAsync(BookId, cancellationTokenSource.Token), Times.Once);
+            _bookCopyRepository.Verify(r => r.GetLoanableByBookAsync(BookId, cancellationTokenSource.Token), Times.Once);
+            _bookCopyRepository.Verify(r => r.CountIssuedByBookAsync(BookId, cancellationTokenSource.Token), Times.Once);
         }
 
         private void SetupBook(Book? book)
@@ -243,11 +259,14 @@ namespace BiblioGo.Tests.Books.Services
                 .ReturnsAsync(book);
         }
 
-        private void SetupCopies(IReadOnlyList<BookCopy> copies)
+        private void SetupAvailability(IReadOnlyList<BookCopy> loanableCopies, int issuedCopies)
         {
             _bookCopyRepository
-                .Setup(r => r.GetNotWrittenOffByBookAsync(BookId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(copies);
+                .Setup(r => r.GetLoanableByBookAsync(BookId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(loanableCopies);
+            _bookCopyRepository
+                .Setup(r => r.CountIssuedByBookAsync(BookId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(issuedCopies);
         }
 
         private static Book CreateBook()
@@ -263,14 +282,13 @@ namespace BiblioGo.Tests.Books.Services
             };
         }
 
-        private static BookCopy CreateCopy(int id, BookCopyStatus status, Library library)
+        private static BookCopy CreateCopy(int id, Library library)
         {
             return new BookCopy
             {
                 Id = id,
                 BookId = BookId,
                 InventoryNumber = 1000 + id,
-                Status = status,
                 LibraryId = library.Id,
                 Library = library
             };

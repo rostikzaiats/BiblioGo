@@ -12,7 +12,8 @@
                 <Button x:Name="ShowButton" DockPanel.Dock="Right" Content="Показати" Margin="10,0,0,0" Padding="15,3"
                         IsDefault="True" Click="ShowButton_Click"/>
                 <ComboBox x:Name="BookComboBox" Height="25" VerticalContentAlignment="Center"
-                          DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                          DisplayMemberPath="Name" SelectedValuePath="Id"
+                          SelectionChanged="BookComboBox_SelectionChanged"/>
             </DockPanel>
         </StackPanel>
 
