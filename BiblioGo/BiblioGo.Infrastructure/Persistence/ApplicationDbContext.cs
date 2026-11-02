@@ -18,7 +18,6 @@ namespace BiblioGo.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Пошта унікальна на рівні БД: захист від дубля при одночасній реєстрації
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
         }
     }
