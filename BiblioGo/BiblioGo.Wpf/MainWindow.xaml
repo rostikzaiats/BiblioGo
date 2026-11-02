@@ -150,6 +150,10 @@
                                 Content="Оновити профіль"
                                 Style="{StaticResource SidebarButton}"
                                 Click="UpdateUserProfileButton_Click"/>
+                        <Button x:Name="ChangePasswordButton"
+                                Content="Змінити пароль"
+                                Style="{StaticResource SidebarButton}"
+                                Click="ChangePasswordButton_Click"/>
                         <Button x:Name="UserLoansButton"
                                 Content="Мої позики"
                                 Style="{StaticResource SidebarButton}"

@@ -211,6 +211,7 @@ namespace BiblioGo.Tests.Users.Services
             Assert.Equal("reader@mail.com", dto.Email);
             Assert.Equal("Іван", dto.FirstName);
             Assert.Equal("Петренко", dto.LastName);
+            Assert.Equal("+380501234567", dto.Phone);
             Assert.Equal(UserRole.Reader, dto.Role);
         }
 
@@ -473,6 +474,161 @@ namespace BiblioGo.Tests.Users.Services
             // Assert
             Assert.True(result.IsFailure);
             Assert.False(string.IsNullOrWhiteSpace(result.Error));
+        }
+
+        // ---------- ChangePassword (Use case 4) ----------
+
+        [Fact]
+        public async Task ChangePasswordAsync_ValidCommand_ReturnsSuccessAndSavesNewHash()
+        {
+            // Arrange
+            SetupStoredUserWithCorrectCurrentPassword();
+            _passwordHasher.Setup(h => h.Hash("NewPass456")).Returns("new_hash");
+
+            // Act
+            var result = await _sut.ChangePasswordAsync(CreateChangePasswordCommand());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            _userRepository.Verify(
+                r => r.UpdateAsync(It.Is<User>(u => u.Id == 7 && u.PasswordHash == "new_hash")),
+                Times.Once());
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_ValidCommand_DoesNotChangeOtherUserData()
+        {
+            // Arrange
+            SetupStoredUserWithCorrectCurrentPassword();
+            _passwordHasher.Setup(h => h.Hash("NewPass456")).Returns("new_hash");
+
+            // Act
+            var result = await _sut.ChangePasswordAsync(CreateChangePasswordCommand());
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            _userRepository.Verify(
+                r => r.UpdateAsync(It.Is<User>(u =>
+                    u.Email == "reader@mail.com"
+                    && u.FirstName == "Іван"
+                    && u.LastName == "Петренко"
+                    && u.Phone == "+380501234567"
+                    && u.Role == UserRole.Reader)),
+                Times.Once());
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_WrongCurrentPassword_ReturnsFailureAndDoesNotSave()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByIdAsync(7)).ReturnsAsync(CreateStoredUser());
+            _passwordHasher.Setup(h => h.Verify("OldPass123", "stored_hash")).Returns(false);
+
+            // Act
+            var result = await _sut.ChangePasswordAsync(CreateChangePasswordCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            _passwordHasher.Verify(h => h.Hash(It.IsAny<string>()), Times.Never());
+            _userRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_UserNotFound_ReturnsFailureAndDoesNotSave()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByIdAsync(7)).ReturnsAsync((User?)null);
+
+            // Act
+            var result = await _sut.ChangePasswordAsync(CreateChangePasswordCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            _passwordHasher.Verify(h => h.Verify(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            _userRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never());
+        }
+
+        [Theory]
+        [InlineData("", "NewPass456")]
+        [InlineData("   ", "NewPass456")]
+        [InlineData("OldPass123", "")]
+        [InlineData("OldPass123", "short1")]
+        [InlineData("OldPass123", "onlyletters")]
+        [InlineData("OldPass123", "12345678")]
+        [InlineData("OldPass123", "OldPass123")]
+        public async Task ChangePasswordAsync_InvalidData_ReturnsFailureAndSkipsRepository(
+            string currentPassword, string newPassword)
+        {
+            // Arrange
+            var command = CreateChangePasswordCommand();
+            command.CurrentPassword = currentPassword;
+            command.NewPassword = newPassword;
+
+            // Act
+            var result = await _sut.ChangePasswordAsync(command);
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            _userRepository.Verify(r => r.FindByIdAsync(It.IsAny<int>()), Times.Never());
+            _userRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_NullCommand_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.ChangePasswordAsync(null!));
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_FindByIdFails_ReturnsFailureAndDoesNotSave()
+        {
+            // Arrange
+            _userRepository
+                .Setup(r => r.FindByIdAsync(It.IsAny<int>()))
+                .ThrowsAsync(new InvalidOperationException("DB is down"));
+
+            // Act
+            var result = await _sut.ChangePasswordAsync(CreateChangePasswordCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+            _userRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task ChangePasswordAsync_UpdateFails_ReturnsFailure()
+        {
+            // Arrange
+            SetupStoredUserWithCorrectCurrentPassword();
+            _passwordHasher.Setup(h => h.Hash("NewPass456")).Returns("new_hash");
+            _userRepository
+                .Setup(r => r.UpdateAsync(It.IsAny<User>()))
+                .ThrowsAsync(new InvalidOperationException("DB is down"));
+
+            // Act
+            var result = await _sut.ChangePasswordAsync(CreateChangePasswordCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.False(string.IsNullOrWhiteSpace(result.Error));
+        }
+
+        private static ChangePasswordCommand CreateChangePasswordCommand() => new()
+        {
+            UserId = 7,
+            CurrentPassword = "OldPass123",
+            NewPassword = "NewPass456"
+        };
+
+        private void SetupStoredUserWithCorrectCurrentPassword()
+        {
+            _userRepository.Setup(r => r.FindByIdAsync(7)).ReturnsAsync(CreateStoredUser());
+            _passwordHasher.Setup(h => h.Verify("OldPass123", "stored_hash")).Returns(true);
         }
 
         private static UpdateUserCommand CreateUpdateCommand() => new()
