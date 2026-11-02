@@ -23,6 +23,13 @@ namespace BiblioGo.Application.Interfaces
         // Для випадайки списання: вільні (Available) примірники книги разом із філією, за інвентарним номером
         Task<IReadOnlyList<BookCopy>> GetAvailableByBookAsync(int bookId, CancellationToken cancellationToken = default);
 
+        // UC 8 (Каталог): примірники книги, які можна взяти зараз (Available і без незакритої заявки Requested —
+        // те саме правило, що й у FindAvailableCopyAsync), разом із філією
+        Task<IReadOnlyList<BookCopy>> GetLoanableByBookAsync(int bookId, CancellationToken cancellationToken = default);
+
+        // UC 8 (Каталог): кількість примірників книги на руках у читачів (статус Issued)
+        Task<int> CountIssuedByBookAsync(int bookId, CancellationToken cancellationToken = default);
+
         // UC 6: зберегти зміни примірника (статус)
         Task UpdateAsync(BookCopy bookCopy);
 
