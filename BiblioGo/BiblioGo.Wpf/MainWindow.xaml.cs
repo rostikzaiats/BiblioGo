@@ -17,6 +17,13 @@ namespace BiblioGo.Wpf
             InitializeComponent();
         }
 
+        private void BookCatalogButton_Click(object sender, RoutedEventArgs e)
+        {
+            var bookCatalogWindow = _serviceProvider.GetRequiredService<BookCatalogWindow>();
+            bookCatalogWindow.Owner = this;
+            bookCatalogWindow.Show();
+        }
+
         private void BookSearchButton_Click(object sender, RoutedEventArgs e)
         {
             var bookSearchWindow = _serviceProvider.GetRequiredService<BookSearchWindow>();
@@ -29,6 +36,13 @@ namespace BiblioGo.Wpf
             var bookSearchByAuthorWindow = _serviceProvider.GetRequiredService<BookSearchByAuthorWindow>();
             bookSearchByAuthorWindow.Owner = this;
             bookSearchByAuthorWindow.Show();
+        }
+
+        private void BookDetailsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var bookDetailsWindow = _serviceProvider.GetRequiredService<BookDetailsWindow>();
+            bookDetailsWindow.Owner = this;
+            bookDetailsWindow.Show();
         }
 
         private void RegistrationButton_Click(object sender, RoutedEventArgs e)
@@ -49,6 +63,13 @@ namespace BiblioGo.Wpf
             var updateUserProfileWindow = _serviceProvider.GetRequiredService<UpdateUserProfileWindow>();
             updateUserProfileWindow.Owner = this;
             updateUserProfileWindow.Show();
+        }
+
+        private void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            var changePasswordWindow = _serviceProvider.GetRequiredService<ChangePasswordWindow>();
+            changePasswordWindow.Owner = this;
+            changePasswordWindow.Show();
         }
 
         private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)

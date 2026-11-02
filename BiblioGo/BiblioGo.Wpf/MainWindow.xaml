@@ -150,6 +150,10 @@
                                 Content="Оновити профіль"
                                 Style="{StaticResource SidebarButton}"
                                 Click="UpdateUserProfileButton_Click"/>
+                        <Button x:Name="ChangePasswordButton"
+                                Content="Змінити пароль"
+                                Style="{StaticResource SidebarButton}"
+                                Click="ChangePasswordButton_Click"/>
                         <Button x:Name="UserLoansButton"
                                 Content="Мої позики"
                                 Style="{StaticResource SidebarButton}"
@@ -176,6 +180,10 @@
                               VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Text="КАТАЛОГ" Style="{StaticResource SectionTitle}" Margin="2,0,0,8"/>
+                        <Button x:Name="BookCatalogButton"
+                                Content="Каталог книг"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="BookCatalogButton_Click"/>
                         <Button x:Name="BookSearchButton"
                                 Content="Пошук книги за назвою"
                                 Style="{StaticResource MenuCardButton}"
@@ -184,6 +192,10 @@
                                 Content="Пошук книги за автором"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookSearchByAuthorButton_Click"/>
+                        <Button x:Name="BookDetailsButton"
+                                Content="Інформація про книгу"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="BookDetailsButton_Click"/>
                         <Button x:Name="CreateLoanRequestButton"
                                 Content="Оформити заявку на отримання"
                                 Style="{StaticResource MenuCardButton}"

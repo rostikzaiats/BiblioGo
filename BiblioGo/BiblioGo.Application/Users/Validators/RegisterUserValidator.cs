@@ -37,7 +37,7 @@ namespace BiblioGo.Application.Users.Validators
             return isValid ? null : "Некоректний формат email";
         }
 
-        private static string? ValidatePassword(string password)
+        internal static string? ValidatePassword(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
                 return "Вкажіть пароль";

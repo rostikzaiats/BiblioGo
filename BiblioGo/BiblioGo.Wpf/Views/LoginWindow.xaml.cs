@@ -36,8 +36,8 @@ namespace BiblioGo.Wpf.Views
                 }
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = $"Готово! Користувач увійшов, id: {result.Value.UserId}";
-                DialogResult = true;
                 _session.User = result.Value;
+                DialogResult = true;
             }
             finally
             {

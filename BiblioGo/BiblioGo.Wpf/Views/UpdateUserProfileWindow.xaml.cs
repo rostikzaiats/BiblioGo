@@ -46,9 +46,10 @@ namespace BiblioGo.Wpf.Views
                     StatusText.Text = result.Error;
                     return ;
                 }
-                user.FirstName = command.FirstName;
-                user.LastName = command.LastName;
-                user.Phone = command.Phone;
+                // Сервіс зберіг обрізані значення, тож у сесію кладемо такі самі
+                user.FirstName = command.FirstName.Trim();
+                user.LastName = command.LastName.Trim();
+                user.Phone = command.Phone.Trim();
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = "Готово! Профіль оновлено";
             }

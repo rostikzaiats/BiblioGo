@@ -90,6 +90,7 @@ namespace BiblioGo.Application.Users.Services
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
+                    Phone = user.Phone,
                     Role = user.Role });
             }
             catch (Exception ex)
@@ -98,8 +99,9 @@ namespace BiblioGo.Application.Users.Services
                 return Result.Failure<UserDto>("Не вдалося виконати вхід. Спробуйте пізніше.");
             }
         }
-    // Use case 3: Оновити користувача
-    public async Task<Result> UpdateUserAsync(UpdateUserCommand command)
+
+        // Use case 3: оновити користувача
+        public async Task<Result> UpdateUserAsync(UpdateUserCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             var error = UpdateUserValidator.Validate(command);
@@ -127,6 +129,45 @@ namespace BiblioGo.Application.Users.Services
             {
                 _logger.LogError(ex, "Failed to update user");
                 return Result.Failure("Не вдалося оновити користувача. Спробуйте пізніше.");
+            }
+        }
+
+        // Use case 4: змінити пароль
+        public async Task<Result> ChangePasswordAsync(ChangePasswordCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+
+            var error = ChangePasswordValidator.Validate(command);
+            if (error is not null)
+            {
+                _logger.LogWarning("Change password rejected: {Reason}", error);
+                return Result.Failure(error);
+            }
+
+            try
+            {
+                var user = await _users.FindByIdAsync(command.UserId);
+                if (user is null)
+                {
+                    _logger.LogWarning("Change password rejected: user not found");
+                    return Result.Failure("Користувача не знайдено");
+                }
+
+                if (!_hasher.Verify(command.CurrentPassword, user.PasswordHash))
+                {
+                    _logger.LogWarning("Change password rejected: wrong current password for user {UserId}", user.Id);
+                    return Result.Failure("Поточний пароль введено невірно");
+                }
+
+                user.PasswordHash = _hasher.Hash(command.NewPassword);
+                await _users.UpdateAsync(user);
+                _logger.LogInformation("Password changed for user {UserId}", user.Id);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to change password");
+                return Result.Failure("Не вдалося змінити пароль. Спробуйте пізніше.");
             }
         }
     }

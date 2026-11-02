@@ -15,5 +15,11 @@ namespace BiblioGo.Infrastructure.Persistence
         public DbSet<BookCopy> BookCopies => Set<BookCopy>();
         public DbSet<Loan> Loans => Set<Loan>();
         public DbSet<Library> Libraries => Set<Library>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Пошта унікальна на рівні БД: захист від дубля при одночасній реєстрації
+            modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+        }
     }
 }
