@@ -2,7 +2,6 @@ using System.Windows;
 using System.Windows.Media;
 using BiblioGo.Application.Books.Commands;
 using BiblioGo.Application.Books.Services;
-using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Lookups.Services;
 using BiblioGo.Domain.Entities;
 
@@ -73,26 +72,28 @@ namespace BiblioGo.Wpf.Views
 
             try
             {
-                var copies = await _bookCopyService.AddCopiesAsync(new AddBookCopiesCommand
+                var result = await _bookCopyService.AddCopiesAsync(new AddBookCopiesCommand
                 {
                     BookId = bookId,
                     LibraryId = libraryId,
                     Quantity = quantity
                 });
 
+                if (result.IsFailure)
+                {
+                    ShowError(result.Error);
+                    return;
+                }
+
                 BookComboBox.SelectedIndex = -1;
                 LibraryComboBox.SelectedIndex = -1;
                 QuantityTextBox.Text = "1";
                 StatusTextBlock.Foreground = Brushes.Green;
-                StatusTextBlock.Text = DescribeAddedCopies(copies);
-            }
-            catch (BiblioGoException ex)
-            {
-                ShowError(ex.Message);
+                StatusTextBlock.Text = DescribeAddedCopies(result.Value);
             }
             catch (Exception)
             {
-                // Подробиці помилки вже залоговані сервісом
+                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
                 ShowError("Не вдалося додати примірники. Спробуйте пізніше.");
             }
             finally
