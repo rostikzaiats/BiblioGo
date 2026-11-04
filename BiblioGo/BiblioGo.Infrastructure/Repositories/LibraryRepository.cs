@@ -25,5 +25,13 @@ namespace BiblioGo.Infrastructure.Repositories
                 .OrderBy(library => library.Name)
                 .ToListAsync(cancellationToken);
         }
+
+        // Фонд, use case 4 і 5: чи існує філія
+        public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Libraries.AnyAsync(library => library.Id == id, cancellationToken);
+        }
     }
 }

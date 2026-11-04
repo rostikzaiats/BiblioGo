@@ -1,5 +1,4 @@
 using System.Data;
-using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
@@ -89,16 +88,6 @@ namespace BiblioGo.Infrastructure.Repositories
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
             await using var transaction = await context.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-            if (!await context.Books.AnyAsync(book => book.Id == bookId, cancellationToken))
-            {
-                throw new NotFoundException($"Книгу {bookId} не знайдено.");
-            }
-
-            if (!await context.Libraries.AnyAsync(library => library.Id == libraryId, cancellationToken))
-            {
-                throw new NotFoundException($"Філію {libraryId} не знайдено.");
-            }
-
             var lastInventoryNumber = await context.BookCopies
                 .MaxAsync(copy => (int?)copy.InventoryNumber, cancellationToken) ?? 0;
 
@@ -129,8 +118,26 @@ namespace BiblioGo.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        // UC 6: змінити статус примірника (один UPDATE без попереднього читання запису)
-        public async Task SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default)
+        // UC 5: кількість примірників книги за статусами (статуси без примірників у результат не потрапляють)
+        public async Task<IReadOnlyDictionary<BookCopyStatus, int>> CountByStatusAsync(int bookId, int? libraryId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var copies = context.BookCopies.Where(copy => copy.BookId == bookId);
+
+            if (libraryId is not null)
+            {
+                copies = copies.Where(copy => copy.LibraryId == libraryId);
+            }
+
+            return await copies
+                .GroupBy(copy => copy.Status)
+                .Select(group => new { Status = group.Key, Count = group.Count() })
+                .ToDictionaryAsync(item => item.Status, item => item.Count, cancellationToken);
+        }
+
+        // UC 6: змінити статус примірника (один UPDATE без попереднього читання запису); false, якщо примірника немає
+        public async Task<bool> SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default)
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -138,10 +145,7 @@ namespace BiblioGo.Infrastructure.Repositories
                 .Where(copy => copy.Id == bookCopyId)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(copy => copy.Status, status), cancellationToken);
 
-            if (updatedRows == 0)
-            {
-                throw new NotFoundException($"Примірник {bookCopyId} не знайдено.");
-            }
+            return updatedRows > 0;
         }
     }
 }

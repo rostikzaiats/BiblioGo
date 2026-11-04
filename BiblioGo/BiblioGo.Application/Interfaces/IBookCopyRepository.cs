@@ -17,7 +17,7 @@ namespace BiblioGo.Application.Interfaces
         Task<bool> IsAvailableAsync(int bookCopyId);
 
         // UC 4: додати quantity нових примірників (статус Available) книги у філію з новими унікальними
-        // інвентарними номерами (NotFoundException, якщо книги або філії не існує)
+        // інвентарними номерами. Існування книги і філії перевіряє сервіс
         Task<IReadOnlyList<BookCopy>> AddCopiesAsync(int bookId, int libraryId, int quantity, CancellationToken cancellationToken = default);
 
         // Для випадайки списання: вільні (Available) примірники книги разом із філією, за інвентарним номером
@@ -33,7 +33,10 @@ namespace BiblioGo.Application.Interfaces
         // UC 6: зберегти зміни примірника (статус)
         Task UpdateAsync(BookCopy bookCopy);
 
-        // UC 6: змінити статус примірника (NotFoundException, якщо примірника не існує)
-        Task SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default);
+        // UC 6: змінити статус примірника; false, якщо такого примірника немає
+        Task<bool> SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default);
+
+        // UC 5: кількість примірників книги за статусами (опційно лише в одній філії); відсутній статус означає 0
+        Task<IReadOnlyDictionary<BookCopyStatus, int>> CountByStatusAsync(int bookId, int? libraryId, CancellationToken cancellationToken = default);
     }
 }

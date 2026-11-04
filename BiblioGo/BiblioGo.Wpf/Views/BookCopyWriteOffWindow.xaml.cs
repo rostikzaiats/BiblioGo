@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using BiblioGo.Application.Books.Commands;
 using BiblioGo.Application.Books.Services;
-using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Lookups.Dtos;
 using BiblioGo.Application.Lookups.Services;
 
@@ -97,7 +96,13 @@ namespace BiblioGo.Wpf.Views
 
             try
             {
-                await _bookCopyService.WriteOffAsync(new WriteOffBookCopyCommand { BookCopyId = bookCopyId });
+                var result = await _bookCopyService.WriteOffAsync(new WriteOffBookCopyCommand { BookCopyId = bookCopyId });
+
+                if (result.IsFailure)
+                {
+                    ShowError(result.Error);
+                    return;
+                }
 
                 // Списаний примірник більше не вільний: прибираємо його зі списку без повторного запиту до БД
                 CopyComboBox.ItemsSource = CopyComboBox.Items
@@ -108,13 +113,9 @@ namespace BiblioGo.Wpf.Views
                 StatusTextBlock.Foreground = Brushes.Green;
                 StatusTextBlock.Text = $"Примірник «{copy.Name}» списано.";
             }
-            catch (BiblioGoException ex)
-            {
-                ShowError(ex.Message);
-            }
             catch (Exception)
             {
-                // Подробиці помилки вже залоговані сервісом
+                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
                 ShowError("Не вдалося списати примірник. Спробуйте пізніше.");
             }
             finally

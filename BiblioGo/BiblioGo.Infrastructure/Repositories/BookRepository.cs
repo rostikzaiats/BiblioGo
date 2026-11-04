@@ -116,6 +116,31 @@ namespace BiblioGo.Infrastructure.Repositories
                 .FirstOrDefaultAsync(book => book.Id == id, cancellationToken);
         }
 
+        // Фонд, use case 1: чи є книга з такою назвою та автором (ILIKE без % — точний збіг без урахування регістру)
+        public async Task<bool> ExistsAsync(string title, string author, CancellationToken cancellationToken = default)
+        {
+            var titlePattern = EscapeLikePattern(title);
+            var authorPattern = EscapeLikePattern(author);
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Books
+                .AnyAsync(
+                    book => EF.Functions.ILike(book.Title, titlePattern) && EF.Functions.ILike(book.Author, authorPattern),
+                    cancellationToken);
+        }
+
+        // Фонд, use case 1: додати книгу до каталогу
+        public async Task<int> AddAsync(Book book, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            context.Books.Add(book);
+            await context.SaveChangesAsync(cancellationToken);
+
+            return book.Id;
+        }
+
         // Жанр порівнюється повністю, але без урахування регістру (ILIKE без % — точний збіг)
         private static IQueryable<Book> ApplyCatalogFilters(IQueryable<Book> books, string? genre, int? year)
         {
