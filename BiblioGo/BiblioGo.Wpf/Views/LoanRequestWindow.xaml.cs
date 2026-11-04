@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Media;
-using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Loans.Commands;
 using BiblioGo.Application.Loans.Services;
 using BiblioGo.Application.Lookups.Services;
@@ -87,26 +86,23 @@ namespace BiblioGo.Wpf.Views
 
             try
             {
-                var loanId = await _loanService.CreateRequestAsync(new CreateLoanRequestCommand
+                var result = await _loanService.CreateRequestAsync(new CreateLoanRequestCommand
                 {
                     UserId = user.UserId,
                     BookId = bookId,
                     LibraryId = libraryId
                 });
 
+                if (result.IsFailure)
+                {
+                    ShowError(result.Error);
+                    return;
+                }
+
                 BookComboBox.SelectedIndex = -1;
                 LibraryComboBox.SelectedIndex = -1;
                 StatusTextBlock.Foreground = Brushes.Green;
-                StatusTextBlock.Text = $"Заявку оформлено, очікує підтвердження бібліотекаря. Номер заявки: {loanId}";
-            }
-            catch (BiblioGoException ex)
-            {
-                ShowError(ex.Message);
-            }
-            catch (Exception)
-            {
-                // Подробиці помилки вже залоговані сервісом
-                ShowError("Не вдалося оформити заявку. Спробуйте пізніше.");
+                StatusTextBlock.Text = $"Заявку оформлено, очікує підтвердження бібліотекаря. Номер заявки: {result.Value}";
             }
             finally
             {

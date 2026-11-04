@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Media;
-using BiblioGo.Application.Exceptions;
 using BiblioGo.Application.Loans.Dtos;
 using BiblioGo.Application.Loans.Queries;
 using BiblioGo.Application.Loans.Services;
@@ -67,27 +66,24 @@ namespace BiblioGo.Wpf.Views
 
             try
             {
-                var loans = await _loanService.GetUserLoansAsync(new GetUserLoansQuery
+                var result = await _loanService.GetUserLoansAsync(new GetUserLoansQuery
                 {
                     UserId = userId,
                     Status = StatusFilters[StatusComboBox.SelectedIndex]
                 });
 
+                if (result.IsFailure)
+                {
+                    LoansDataGrid.ItemsSource = null;
+                    ShowError(result.Error);
+                    return;
+                }
+
+                var loans = result.Value;
                 LoansDataGrid.ItemsSource = loans.Select(ToRow).ToList();
                 StatusTextBlock.Text = loans.Count == 0
                     ? "Позик не знайдено."
                     : $"Знайдено позик: {loans.Count}";
-            }
-            catch (BiblioGoException ex)
-            {
-                LoansDataGrid.ItemsSource = null;
-                ShowError(ex.Message);
-            }
-            catch (Exception)
-            {
-                // Подробиці помилки вже залоговані сервісом
-                LoansDataGrid.ItemsSource = null;
-                ShowError("Не вдалося завантажити позики. Спробуйте пізніше.");
             }
             finally
             {
@@ -104,6 +100,7 @@ namespace BiblioGo.Wpf.Views
         private static LoanRow ToRow(LoanDto loan)
         {
             return new LoanRow(
+                loan.LoanId,
                 loan.BookTitle,
                 loan.BookAuthor,
                 loan.LibraryName,
@@ -138,6 +135,7 @@ namespace BiblioGo.Wpf.Views
 
         // Рядок таблиці: уже готові до показу значення
         public sealed record LoanRow(
+            int LoanId,
             string BookTitle,
             string BookAuthor,
             string LibraryName,
