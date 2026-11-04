@@ -63,9 +63,84 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<Loan?> GetByIdAsync(int loanId)
+        // Use case 4, 5: позика за ідентифікатором
+        public async Task<Loan?> GetByIdAsync(int loanId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Loans
+                .AsNoTracking()
+                .FirstOrDefaultAsync(loan => loan.Id == loanId, cancellationToken);
+        }
+
+        // Use case 4: видача. Умовні UPDATE у транзакції не дають підтвердити заявку, яка вже змінилась, або видати
+        // примірник двічі; якщо хоч одна умова не виконалась — транзакція відкочується (Dispose без Commit)
+        public async Task<bool> ConfirmIssueAsync(int loanId, int bookCopyId, DateTime issueDate, DateTime dueDate, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+
+            var updatedLoans = await context.Loans
+                .Where(loan => loan.Id == loanId && loan.Status == LoanStatus.Requested)
+                .ExecuteUpdateAsync(
+                    setters => setters
+                        .SetProperty(loan => loan.Status, LoanStatus.Issued)
+                        .SetProperty(loan => loan.IssueDate, issueDate)
+                        .SetProperty(loan => loan.DueDate, dueDate),
+                    cancellationToken);
+
+            if (updatedLoans == 0)
+            {
+                return false;
+            }
+
+            var updatedCopies = await context.BookCopies
+                .Where(copy => copy.Id == bookCopyId && copy.Status == BookCopyStatus.Available)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(copy => copy.Status, BookCopyStatus.Issued),
+                    cancellationToken);
+
+            if (updatedCopies == 0)
+            {
+                return false;
+            }
+
+            await transaction.CommitAsync(cancellationToken);
+            return true;
+        }
+
+        // Use case 5: повернення, та сама схема, що й у ConfirmIssueAsync
+        public async Task<bool> ReturnAsync(int loanId, int bookCopyId, DateTime returnDate, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+
+            var updatedLoans = await context.Loans
+                .Where(loan => loan.Id == loanId && loan.Status == LoanStatus.Issued)
+                .ExecuteUpdateAsync(
+                    setters => setters
+                        .SetProperty(loan => loan.Status, LoanStatus.Returned)
+                        .SetProperty(loan => loan.ReturnDate, (DateTime?)returnDate),
+                    cancellationToken);
+
+            if (updatedLoans == 0)
+            {
+                return false;
+            }
+
+            var updatedCopies = await context.BookCopies
+                .Where(copy => copy.Id == bookCopyId && copy.Status == BookCopyStatus.Issued)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(copy => copy.Status, BookCopyStatus.Available),
+                    cancellationToken);
+
+            if (updatedCopies == 0)
+            {
+                return false;
+            }
+
+            await transaction.CommitAsync(cancellationToken);
+            return true;
         }
 
         public Task UpdateAsync(Loan loan)

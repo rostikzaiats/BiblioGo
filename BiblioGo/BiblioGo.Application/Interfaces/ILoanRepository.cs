@@ -13,7 +13,15 @@ namespace BiblioGo.Application.Interfaces
         Task<IReadOnlyList<Loan>> GetByUserIdAsync(int userId, LoanStatus? status, CancellationToken cancellationToken = default);
 
         // UC 4, 5: отримати позику за ідентифікатором
-        Task<Loan?> GetByIdAsync(int loanId);
+        Task<Loan?> GetByIdAsync(int loanId, CancellationToken cancellationToken = default);
+
+        // UC 4: в одній транзакції позика Requested -> Issued (дати видачі та повернення) і примірник
+        // Available -> Issued. false — якщо за цей час стан позики або примірника змінився (нічого не збережено)
+        Task<bool> ConfirmIssueAsync(int loanId, int bookCopyId, DateTime issueDate, DateTime dueDate, CancellationToken cancellationToken = default);
+
+        // UC 5: в одній транзакції позика Issued -> Returned (дата повернення) і примірник Issued -> Available.
+        // false — якщо за цей час стан позики або примірника змінився (нічого не збережено)
+        Task<bool> ReturnAsync(int loanId, int bookCopyId, DateTime returnDate, CancellationToken cancellationToken = default);
 
         // UC 4, 5: зберегти зміни існуючої позики (статус, дати)
         Task UpdateAsync(Loan loan);

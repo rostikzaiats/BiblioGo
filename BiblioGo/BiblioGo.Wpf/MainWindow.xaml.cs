@@ -99,5 +99,19 @@ namespace BiblioGo.Wpf
             userLoansWindow.Owner = this;
             userLoansWindow.Show();
         }
+
+        private void ConfirmLoanIssueButton_Click(object sender, RoutedEventArgs e)
+        {
+            var confirmLoanIssueWindow = _serviceProvider.GetRequiredService<ConfirmLoanIssueWindow>();
+            confirmLoanIssueWindow.Owner = this;
+            confirmLoanIssueWindow.Show();
+        }
+
+        private void ReturnBookButton_Click(object sender, RoutedEventArgs e)
+        {
+            var returnBookWindow = _serviceProvider.GetRequiredService<ReturnBookWindow>();
+            returnBookWindow.Owner = this;
+            returnBookWindow.Show();
+        }
     }
 }

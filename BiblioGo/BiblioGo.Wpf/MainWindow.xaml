@@ -212,6 +212,18 @@
                                 Content="Списати примірник"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="WriteOffBookCopyButton_Click"/>
+
+                        <TextBlock Text="ВИДАЧА ТА ПОВЕРНЕННЯ КНИГ"
+                                   Style="{StaticResource SectionTitle}"
+                                   Foreground="{StaticResource ErrorBrush}"/>
+                        <Button x:Name="ConfirmLoanIssueButton"
+                                Content="Підтвердити та оформити видачу книги"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="ConfirmLoanIssueButton_Click"/>
+                        <Button x:Name="ReturnBookButton"
+                                Content="Оформити повернення книги"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="ReturnBookButton_Click"/>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
