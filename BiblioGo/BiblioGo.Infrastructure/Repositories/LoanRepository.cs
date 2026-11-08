@@ -148,68 +148,9 @@ namespace BiblioGo.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        // Use case 7: сторінка журналу філії. Сортування має другий ключ (Id), щоб порядок між сторінками був стабільним
-        public async Task<IReadOnlyList<Loan>> GetJournalPageAsync(
-            int libraryId,
-            LoanStatus? status,
-            DateTime? issuedFrom,
-            DateTime? issuedTo,
-            int skip,
-            int take,
-            CancellationToken cancellationToken = default)
+        public Task<IEnumerable<Loan>> GetJournalAsync(int libraryId, LoanStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageNumber, int pageSize)
         {
-            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
-
-            return await ApplyJournalFilters(context.Loans.AsNoTracking(), libraryId, status, issuedFrom, issuedTo)
-                .Include(loan => loan.User)
-                .Include(loan => loan.BookCopy).ThenInclude(copy => copy.Book)
-                .OrderByDescending(loan => loan.IssueDate)
-                .ThenByDescending(loan => loan.Id)
-                .Skip(skip)
-                .Take(take)
-                .ToListAsync(cancellationToken);
-        }
-
-        // Use case 7: кількість позик філії під фільтрами
-        public async Task<int> CountJournalAsync(
-            int libraryId,
-            LoanStatus? status,
-            DateTime? issuedFrom,
-            DateTime? issuedTo,
-            CancellationToken cancellationToken = default)
-        {
-            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
-
-            return await ApplyJournalFilters(context.Loans, libraryId, status, issuedFrom, issuedTo)
-                .CountAsync(cancellationToken);
-        }
-
-        // Філія позики — філія її примірника; дата — дата оформлення (для заявки це час її подання)
-        private static IQueryable<Loan> ApplyJournalFilters(
-            IQueryable<Loan> loans,
-            int libraryId,
-            LoanStatus? status,
-            DateTime? issuedFrom,
-            DateTime? issuedTo)
-        {
-            loans = loans.Where(loan => loan.BookCopy.LibraryId == libraryId);
-
-            if (status.HasValue)
-            {
-                loans = loans.Where(loan => loan.Status == status.Value);
-            }
-
-            if (issuedFrom.HasValue)
-            {
-                loans = loans.Where(loan => loan.IssueDate >= issuedFrom.Value);
-            }
-
-            if (issuedTo.HasValue)
-            {
-                loans = loans.Where(loan => loan.IssueDate < issuedTo.Value);
-            }
-
-            return loans;
+            throw new NotImplementedException();
         }
     }
 }

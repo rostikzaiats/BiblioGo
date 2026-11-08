@@ -127,12 +127,5 @@ namespace BiblioGo.Wpf
             returnBookWindow.Owner = this;
             returnBookWindow.Show();
         }
-
-        private void LoanJournalButton_Click(object sender, RoutedEventArgs e)
-        {
-            var loanJournalWindow = _serviceProvider.GetRequiredService<LoanJournalWindow>();
-            loanJournalWindow.Owner = this;
-            loanJournalWindow.Show();
-        }
     }
 }

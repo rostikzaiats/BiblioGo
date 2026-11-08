@@ -184,6 +184,19 @@ namespace BiblioGo.Tests.Loans.Services
             Assert.Equal(LogLevel.Information, logger.LatestRecord.Level);
         }
 
+        [Fact]
+        public async Task GetUserLoansAsync_NullQuery_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var sut = CreateService();
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => sut.GetUserLoansAsync(null!));
+
+            // Assert
+            Assert.IsType<ArgumentNullException>(exception);
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
@@ -276,6 +289,63 @@ namespace BiblioGo.Tests.Loans.Services
 
             // Assert
             Assert.Equal(LogLevel.Warning, logger.LatestRecord.Level);
+        }
+
+        [Fact]
+        public async Task GetUserLoansAsync_RepositoryFails_ReturnsFailureWithoutTechnicalDetails()
+        {
+            // Arrange
+            SetupUserFound();
+            _loanRepository
+                .Setup(r => r.GetByUserIdAsync(UserId, It.IsAny<LoanStatus?>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
+            var sut = CreateService();
+
+            // Act
+            var result = await sut.GetUserLoansAsync(CreateValidQuery());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.DoesNotContain("Database is unavailable.", result.Error);
+        }
+
+        [Fact]
+        public async Task GetUserLoansAsync_RepositoryFails_LogsErrorWithException()
+        {
+            // Arrange
+            var repositoryException = new InvalidOperationException("Database is unavailable.");
+            SetupUserFound();
+            _loanRepository
+                .Setup(r => r.GetByUserIdAsync(UserId, It.IsAny<LoanStatus?>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(repositoryException);
+            var logger = new FakeLogger<LoanService>();
+            var sut = CreateService(logger);
+
+            // Act
+            await sut.GetUserLoansAsync(CreateValidQuery());
+
+            // Assert
+            Assert.Equal(LogLevel.Error, logger.LatestRecord.Level);
+            Assert.Same(repositoryException, logger.LatestRecord.Exception);
+        }
+
+        [Fact]
+        public async Task GetUserLoansAsync_RequestCanceled_ThrowsOperationCanceledAndDoesNotLogError()
+        {
+            // Arrange
+            SetupUserFound();
+            _loanRepository
+                .Setup(r => r.GetByUserIdAsync(UserId, It.IsAny<LoanStatus?>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new OperationCanceledException());
+            var logger = new FakeLogger<LoanService>();
+            var sut = CreateService(logger);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => sut.GetUserLoansAsync(CreateValidQuery()));
+
+            // Assert
+            Assert.IsType<OperationCanceledException>(exception);
+            Assert.DoesNotContain(logger.Collector.GetSnapshot(), record => record.Level == LogLevel.Error);
         }
 
         private LoanService CreateService(ILogger<LoanService>? logger = null)

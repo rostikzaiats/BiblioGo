@@ -5,7 +5,6 @@ namespace BiblioGo.Application.Loans.Queries
     // UC 7 (Бібліотекар): Переглянути журнал позик
     public class GetLoanJournalQuery
     {
-        public int LibrarianId { get; set; }
         public int LibraryId { get; set; }
         public LoanStatus? Status { get; set; }
         public DateTime? DateFrom { get; set; }

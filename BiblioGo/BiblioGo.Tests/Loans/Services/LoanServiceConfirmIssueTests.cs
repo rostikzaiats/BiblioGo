@@ -112,6 +112,19 @@ namespace BiblioGo.Tests.Loans.Services
             Assert.Equal(LogLevel.Information, logger.LatestRecord.Level);
         }
 
+        [Fact]
+        public async Task ConfirmIssueAsync_NullCommand_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var sut = CreateService();
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => sut.ConfirmIssueAsync(null!));
+
+            // Assert
+            Assert.IsType<ArgumentNullException>(exception);
+        }
+
         [Theory]
         [InlineData(0, LibrarianId)]
         [InlineData(-1, LibrarianId)]
@@ -343,6 +356,63 @@ namespace BiblioGo.Tests.Loans.Services
 
             // Assert
             Assert.Equal(LogLevel.Warning, logger.LatestRecord.Level);
+            Assert.DoesNotContain(logger.Collector.GetSnapshot(), record => record.Level == LogLevel.Error);
+        }
+
+        [Fact]
+        public async Task ConfirmIssueAsync_RepositoryFails_ReturnsFailureWithoutTechnicalDetails()
+        {
+            // Arrange
+            SetupHappyPath();
+            _loanRepository
+                .Setup(r => r.ConfirmIssueAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
+            var sut = CreateService();
+
+            // Act
+            var result = await sut.ConfirmIssueAsync(CreateValidCommand());
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.DoesNotContain("Database is unavailable.", result.Error);
+        }
+
+        [Fact]
+        public async Task ConfirmIssueAsync_RepositoryFails_LogsErrorWithException()
+        {
+            // Arrange
+            SetupHappyPath();
+            var repositoryException = new InvalidOperationException("Database is unavailable.");
+            _loanRepository
+                .Setup(r => r.ConfirmIssueAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(repositoryException);
+            var logger = new FakeLogger<LoanService>();
+            var sut = CreateService(logger);
+
+            // Act
+            await sut.ConfirmIssueAsync(CreateValidCommand());
+
+            // Assert
+            Assert.Equal(LogLevel.Error, logger.LatestRecord.Level);
+            Assert.Same(repositoryException, logger.LatestRecord.Exception);
+        }
+
+        [Fact]
+        public async Task ConfirmIssueAsync_RequestCanceled_ThrowsOperationCanceledAndDoesNotLogError()
+        {
+            // Arrange
+            SetupHappyPath();
+            _loanRepository
+                .Setup(r => r.ConfirmIssueAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new OperationCanceledException());
+            var logger = new FakeLogger<LoanService>();
+            var sut = CreateService(logger);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => sut.ConfirmIssueAsync(CreateValidCommand()));
+
+            // Assert
+            Assert.IsType<OperationCanceledException>(exception);
             Assert.DoesNotContain(logger.Collector.GetSnapshot(), record => record.Level == LogLevel.Error);
         }
 

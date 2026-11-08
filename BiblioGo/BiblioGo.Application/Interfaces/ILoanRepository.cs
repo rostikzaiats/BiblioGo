@@ -26,12 +26,8 @@ namespace BiblioGo.Application.Interfaces
         // UC 4, 5: зберегти зміни існуючої позики (статус, дати)
         Task UpdateAsync(Loan loan);
 
-        // UC 7 (Бібліотекар): сторінка журналу позик філії (разом із читачем, книгою та примірником), нові першими.
-        // issuedFrom — включно, issuedTo — виключно (обидва UTC, фільтр за датою оформлення), skip/take — пагінація
-        Task<IReadOnlyList<Loan>> GetJournalPageAsync(int libraryId, LoanStatus? status, DateTime? issuedFrom, DateTime? issuedTo, int skip, int take, CancellationToken cancellationToken = default);
-
-        // UC 7: кількість позик філії під тими самими фільтрами
-        Task<int> CountJournalAsync(int libraryId, LoanStatus? status, DateTime? issuedFrom, DateTime? issuedTo, CancellationToken cancellationToken = default);
+        // UC 7 (Бібліотекар): журнал позик філії з фільтром, пагінацією
+        Task<IEnumerable<Loan>> GetJournalAsync(int libraryId, LoanStatus? status, DateTime? dateFrom, DateTime? dateTo, int pageNumber, int pageSize);
 
         // UC 1: чи має користувач активну (Requested або Issued) заявку/позику на цю книгу
         Task<bool> HasActiveLoanForBookAsync(int userId, int bookId, CancellationToken cancellationToken = default);
