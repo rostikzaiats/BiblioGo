@@ -20,6 +20,7 @@ namespace BiblioGo.Application.Books.Services
         public const int MaxCatalogPageNumber = 100_000;
         public const int MaxCatalogGenreLength = 50;
         public const int MinCatalogYear = 1000;
+        public const int MaxPopularBooksTop = 50;
 
         private readonly IBookRepository _bookRepository;
         private readonly IBookCopyRepository _bookCopyRepository;
@@ -232,6 +233,72 @@ namespace BiblioGo.Application.Books.Services
                 _logger.LogError(ex, "Failed to load genres for catalog filter");
                 return Result.Failure<IReadOnlyList<string>>("Не вдалося завантажити список жанрів. Спробуйте пізніше.");
             }
+        }
+
+        // Use case «Переглянути популярні книги»: рейтинг книг за кількістю видач за обраний період
+        public async Task<Result<IReadOnlyList<PopularBookDto>>> GetPopularBooksAsync(GetPopularBooksQuery query, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(query);
+
+            var validationError = ValidatePopularBooksQuery(query);
+
+            if (validationError is not null)
+            {
+                _logger.LogWarning(
+                    "Popular books rejected: {ValidationError} (period {Period}, top {Top})",
+                    validationError,
+                    query.Period,
+                    query.Top);
+                return Result.Failure<IReadOnlyList<PopularBookDto>>(validationError);
+            }
+
+            _logger.LogInformation("Loading top {Top} popular books for period {Period}", query.Top, query.Period);
+
+            try
+            {
+                var books = await _bookRepository.GetPopularAsync(GetIssuedFrom(query.Period), query.Top, cancellationToken);
+
+                for (var index = 0; index < books.Count; index++)
+                {
+                    books[index].Rank = index + 1;
+                }
+
+                _logger.LogInformation("Loaded {BookCount} popular book(s) for period {Period}", books.Count, query.Period);
+
+                return Result.Success(books);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Failed to load popular books for period {Period}", query.Period);
+                return Result.Failure<IReadOnlyList<PopularBookDto>>("Не вдалося завантажити популярні книги. Спробуйте пізніше.");
+            }
+        }
+
+        private static string? ValidatePopularBooksQuery(GetPopularBooksQuery query)
+        {
+            if (!Enum.IsDefined(query.Period))
+            {
+                return "Оберіть період.";
+            }
+
+            if (query.Top < 1 || query.Top > MaxPopularBooksTop)
+            {
+                return $"Кількість книг у рейтингу має бути від 1 до {MaxPopularBooksTop}.";
+            }
+
+            return null;
+        }
+
+        // Дати видачі в базі зберігаються в UTC
+        private static DateTime? GetIssuedFrom(PopularBooksPeriod period)
+        {
+            return period switch
+            {
+                PopularBooksPeriod.LastMonth => DateTime.UtcNow.AddMonths(-1),
+                PopularBooksPeriod.LastThreeMonths => DateTime.UtcNow.AddMonths(-3),
+                PopularBooksPeriod.LastYear => DateTime.UtcNow.AddYears(-1),
+                _ => null
+            };
         }
 
         private static string? ValidateCatalogQuery(GetCatalogQuery query, string? genre, out int? year)
