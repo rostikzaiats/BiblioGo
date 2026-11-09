@@ -1,0 +1,54 @@
+﻿<Window x:Class="BiblioGo.Wpf.Views.ChangeUserRoleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Зміна ролі користувача" Height="440" Width="380"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True">
+
+    <Border Style="{StaticResource CardBorder}">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="18" ShadowDepth="0" Opacity="0.55"/>
+        </Border.Effect>
+        <Grid>
+            <Grid Style="{StaticResource TitleBarPanel}"
+                  MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Button x:Name="CloseButton"
+                        Content="✕"
+                        Style="{StaticResource CloseButton}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"
+                        Click="CloseButton_Click"/>
+            </Grid>
+
+            <StackPanel Margin="32,48,32,24">
+                <TextBlock Text="Зміна ролі" Style="{StaticResource TitleText}"/>
+                <TextBlock Text="Вкажіть пошту користувача і нову роль"
+                           Style="{StaticResource SubtitleText}"
+                           Margin="0,0,0,24"/>
+
+                <TextBlock Text="Email користувача" Style="{StaticResource LabelText}"/>
+                <TextBox x:Name="EmailInput" Style="{StaticResource InputBox}"/>
+
+                <TextBlock Text="Нова роль" Style="{StaticResource LabelText}"/>
+                <ComboBox x:Name="RoleComboBox"
+                          Height="38"
+                          Margin="0,0,0,20"
+                          VerticalContentAlignment="Center"
+                          DisplayMemberPath="Name"
+                          SelectedValuePath="Role"/>
+
+                <Button x:Name="ChangeButton"
+                        Content="Змінити роль"
+                        Style="{StaticResource PrimaryButton}"
+                        IsDefault="True"
+                        Click="ChangeButton_Click"/>
+
+                <TextBlock x:Name="StatusText" Style="{StaticResource ErrorText}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

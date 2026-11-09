@@ -79,6 +79,13 @@ namespace BiblioGo.Wpf
             changePasswordWindow.Show();
         }
 
+        private void ChangeUserRoleButton_Click(object sender, RoutedEventArgs e)
+        {
+            var changeUserRoleWindow = _serviceProvider.GetRequiredService<ChangeUserRoleWindow>();
+            changeUserRoleWindow.Owner = this;
+            changeUserRoleWindow.Show();
+        }
+
         private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)
         {
             var writeOffWindow = _serviceProvider.GetRequiredService<BookCopyWriteOffWindow>();

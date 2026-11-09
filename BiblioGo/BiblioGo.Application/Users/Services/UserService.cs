@@ -86,12 +86,15 @@ namespace BiblioGo.Application.Users.Services
                     return Result.Failure<UserDto>("Невірна пошта або пароль");
                 }
                 _logger.LogInformation("User logged in {UserId}", user.Id);
-                return Result.Success(new UserDto { UserId = user.Id,
+                return Result.Success(new UserDto
+                {
+                    UserId = user.Id,
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Phone = user.Phone,
-                    Role = user.Role });
+                    Role = user.Role
+                });
             }
             catch (Exception ex)
             {
@@ -168,6 +171,51 @@ namespace BiblioGo.Application.Users.Services
             {
                 _logger.LogError(ex, "Failed to change password");
                 return Result.Failure("Не вдалося змінити пароль. Спробуйте пізніше.");
+            }
+        }
+        // Use case 5: змінити роль користувача
+        public async Task<Result> ChangeUserRoleAsync(ChangeUserRoleCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            var error = ChangeUserRoleValidator.Validate(command);
+            if (error is not null)
+            {
+                _logger.LogWarning("Change user role rejected: {Reason}", error);
+                return Result.Failure(error);
+            }
+            try
+            {
+                var actor = await _users.FindByIdAsync(command.ActorId);
+                if (actor is null || actor.Role != UserRole.Administrator)
+                {
+                    _logger.LogWarning("Change user role rejected: actor not found or not admin");
+                    return Result.Failure("Ви не маєте прав для зміни ролі користувача");
+                }
+                var target = await _users.FindByEmailAsync(command.TargetEmail.Trim().ToLowerInvariant());
+                if (target is null)
+                {
+                    _logger.LogWarning("Change user role rejected: user not found");
+                    return Result.Failure("Користувача не знайдено");
+                }
+                if (target.Id == actor.Id)
+                {
+                    _logger.LogWarning("Change user role rejected: admin cannot change own role");
+                    return Result.Failure("Ви не можете змінювати власну роль");
+                }
+                if (target.Role == command.NewRole)
+                {
+                    _logger.LogWarning("Change user role rejected: cannot change role of another admin");
+                    return Result.Failure("Користувач вже має цю роль");
+                }
+                target.Role = command.NewRole;
+                await _users.UpdateAsync(target);
+                _logger.LogInformation("User role changed for user {UserId} to {NewRole}", target.Id, target.Role);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to change user role");
+                return Result.Failure("Не вдалося змінити роль користувача. Спробуйте пізніше.");
             }
         }
     }

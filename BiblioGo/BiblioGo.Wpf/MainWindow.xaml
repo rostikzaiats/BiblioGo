@@ -158,6 +158,10 @@
                                 Content="Мої позики"
                                 Style="{StaticResource SidebarButton}"
                                 Click="UserLoansButton_Click"/>
+                        <Button x:Name="ChangeUserRoleButton"
+                                Content="Змінити роль користувача"
+                                Style="{StaticResource SidebarButton}"
+                                Click="ChangeUserRoleButton_Click"/>
                     </StackPanel>
                 </Grid>
             </Border>
