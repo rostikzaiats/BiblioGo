@@ -80,6 +80,7 @@ namespace BiblioGo.Wpf
             services.AddSingleton<CurrentUserSession>();
             services.AddTransient<UpdateUserProfileWindow>();
             services.AddTransient<ChangePasswordWindow>();
+            services.AddTransient<ChangeUserRoleWindow>();
 
             return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
         }
