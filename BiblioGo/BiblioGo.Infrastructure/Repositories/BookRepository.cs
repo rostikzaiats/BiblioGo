@@ -1,6 +1,8 @@
+using BiblioGo.Application.Books.Dtos;
 using BiblioGo.Application.Books.Queries;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
+using BiblioGo.Domain.Enums;
 using BiblioGo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -74,6 +76,46 @@ namespace BiblioGo.Infrastructure.Repositories
                 .AsNoTracking()
                 .OrderBy(book => book.Title)
                 .ThenBy(book => book.Author)
+                .ToListAsync(cancellationToken);
+        }
+
+        // Use case «Популярні книги»: групуємо видачі за книгою. Статус Requested не рахуємо: книгу ще не видали,
+        // а IssueDate такої заявки містить лише час її подання
+        public async Task<IReadOnlyList<PopularBookDto>> GetPopularAsync(DateTime? issuedFrom, int top, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var loans = context.Loans
+                .AsNoTracking()
+                .Where(loan => loan.Status != LoanStatus.Requested);
+
+            if (issuedFrom is not null)
+            {
+                loans = loans.Where(loan => loan.IssueDate >= issuedFrom);
+            }
+
+            return await loans
+                .GroupBy(loan => new
+                {
+                    loan.BookCopy.Book.Id,
+                    loan.BookCopy.Book.Title,
+                    loan.BookCopy.Book.Author,
+                    loan.BookCopy.Book.Genre,
+                    loan.BookCopy.Book.Year
+                })
+                .Select(group => new PopularBookDto
+                {
+                    BookId = group.Key.Id,
+                    Title = group.Key.Title,
+                    Author = group.Key.Author,
+                    Genre = group.Key.Genre,
+                    Year = group.Key.Year,
+                    IssueCount = group.Count()
+                })
+                .OrderByDescending(book => book.IssueCount)
+                .ThenBy(book => book.Title)
+                .ThenBy(book => book.BookId)
+                .Take(top)
                 .ToListAsync(cancellationToken);
         }
 

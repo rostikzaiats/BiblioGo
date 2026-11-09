@@ -1,4 +1,5 @@
-﻿
+
+using BiblioGo.Application.Books.Dtos;
 using BiblioGo.Application.Books.Queries;
 using BiblioGo.Domain.Entities;
 
@@ -20,6 +21,10 @@ namespace BiblioGo.Application.Interfaces
 
         // Use case 1: усі жанри каталогу для випадайки фільтра, за алфавітом
         Task<IReadOnlyList<string>> GetGenresAsync(CancellationToken cancellationToken = default);
+
+        // Use case «Популярні книги»: книги, які найчастіше видавали (з датою видачі не раніше issuedFrom, якщо вона задана),
+        // від найпопулярнішої; заявки, за якими книгу ще не видали, не рахуються
+        Task<IReadOnlyList<PopularBookDto>> GetPopularAsync(DateTime? issuedFrom, int top, CancellationToken cancellationToken = default);
 
         // Use case 2: пошук за назвою (входження підрядка без урахування регістру)
         Task<IReadOnlyList<Book>> SearchByTitleAsync(string title, CancellationToken cancellationToken = default);

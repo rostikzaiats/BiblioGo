@@ -24,6 +24,13 @@ namespace BiblioGo.Wpf
             bookCatalogWindow.Show();
         }
 
+        private void PopularBooksButton_Click(object sender, RoutedEventArgs e)
+        {
+            var popularBooksWindow = _serviceProvider.GetRequiredService<PopularBooksWindow>();
+            popularBooksWindow.Owner = this;
+            popularBooksWindow.Show();
+        }
+
         private void BookSearchButton_Click(object sender, RoutedEventArgs e)
         {
             var bookSearchWindow = _serviceProvider.GetRequiredService<BookSearchWindow>();
