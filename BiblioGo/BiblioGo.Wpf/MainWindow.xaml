@@ -200,10 +200,6 @@
                                 Content="Інформація про книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookDetailsButton_Click"/>
-                        <Button x:Name="CreateLoanRequestButton"
-                                Content="Оформити заявку на отримання"
-                                Style="{StaticResource MenuCardButton}"
-                                Click="CreateLoanRequestButton_Click"/>
 
                         <TextBlock Text="АДМІНІСТРУВАННЯ ФОНДУ"
                                    Style="{StaticResource SectionTitle}"
@@ -228,6 +224,10 @@
                         <TextBlock Text="ВИДАЧА ТА ПОВЕРНЕННЯ КНИГ"
                                    Style="{StaticResource SectionTitle}"
                                    Foreground="{StaticResource ErrorBrush}"/>
+                        <Button x:Name="CreateLoanRequestButton"
+                                Content="Оформити заявку на отримання"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="CreateLoanRequestButton_Click"/>
                         <Button x:Name="ConfirmLoanIssueButton"
                                 Content="Підтвердити та оформити видачу книги"
                                 Style="{StaticResource MenuCardButton}"
@@ -236,6 +236,10 @@
                                 Content="Оформити повернення книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="ReturnBookButton_Click"/>
+                        <Button x:Name="LoanJournalButton"
+                                Content="Переглянути журнал позик"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="LoanJournalButton_Click"/>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
