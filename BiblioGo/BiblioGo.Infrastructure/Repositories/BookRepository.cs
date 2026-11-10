@@ -183,6 +183,41 @@ namespace BiblioGo.Infrastructure.Repositories
             return book.Id;
         }
 
+        // Фонд, use case 2: чи є інша книга (з іншим Id) з такою назвою та автором
+        public async Task<bool> ExistsAnotherAsync(string title, string author, int excludedBookId, CancellationToken cancellationToken = default)
+        {
+            var titlePattern = EscapeLikePattern(title);
+            var authorPattern = EscapeLikePattern(author);
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Books
+                .AnyAsync(
+                    book => book.Id != excludedBookId
+                        && EF.Functions.ILike(book.Title, titlePattern)
+                        && EF.Functions.ILike(book.Author, authorPattern),
+                    cancellationToken);
+        }
+
+        // Фонд, use case 2: оновити дані книги одним UPDATE; false, якщо книги з таким Id немає
+        public async Task<bool> UpdateAsync(Book book, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var updatedRows = await context.Books
+                .Where(existing => existing.Id == book.Id)
+                .ExecuteUpdateAsync(
+                    setters => setters
+                        .SetProperty(existing => existing.Title, book.Title)
+                        .SetProperty(existing => existing.Author, book.Author)
+                        .SetProperty(existing => existing.Genre, book.Genre)
+                        .SetProperty(existing => existing.Year, book.Year)
+                        .SetProperty(existing => existing.Description, book.Description),
+                    cancellationToken);
+
+            return updatedRows > 0;
+        }
+
         // Жанр порівнюється повністю, але без урахування регістру (ILIKE без % — точний збіг)
         private static IQueryable<Book> ApplyCatalogFilters(IQueryable<Book> books, string? genre, int? year)
         {

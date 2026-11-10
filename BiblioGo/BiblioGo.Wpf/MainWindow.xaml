@@ -212,6 +212,10 @@
                                 Content="Додати нову книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="AddBookButton_Click"/>
+                        <Button x:Name="UpdateBookButton"
+                                Content="Редагувати інформацію про книгу"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="UpdateBookButton_Click"/>
                         <Button x:Name="AddBookCopiesButton"
                                 Content="Додати примірники книги"
                                 Style="{StaticResource MenuCardButton}"

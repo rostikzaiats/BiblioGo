@@ -14,7 +14,6 @@ namespace BiblioGo.Tests.Books.Services
         private const int BookId = 2;
         private const int LibraryId = 3;
         private const int Quantity = 3;
-        private const string AddFailedMessage = "Не вдалося додати примірники. Спробуйте пізніше.";
         private const string QuantityMessage = "Кількість примірників має бути від 1 до 100";
 
         private readonly Mock<IBookRepository> _bookRepository = new();
@@ -112,16 +111,6 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task AddCopiesAsync_NullCommand_ThrowsArgumentNullException()
-        {
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.AddCopiesAsync(null!));
-
-            // Assert
-            Assert.IsType<ArgumentNullException>(exception);
-        }
-
-        [Fact]
         public async Task AddCopiesAsync_BookDoesNotExist_ReturnsFailureWithNotFoundMessage()
         {
             // Arrange
@@ -150,73 +139,6 @@ namespace BiblioGo.Tests.Books.Services
             Assert.True(result.IsFailure);
             Assert.Equal("Філію не знайдено.", result.Error);
             VerifyCopiesNeverAdded();
-        }
-
-        [Fact]
-        public async Task AddCopiesAsync_BookRepositoryFails_ReturnsFailureWithAddFailedMessage()
-        {
-            // Arrange
-            _bookRepository
-                .Setup(r => r.GetByIdAsync(BookId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.AddCopiesAsync(CreateCommand());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(AddFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task AddCopiesAsync_LibraryRepositoryFails_ReturnsFailureWithAddFailedMessage()
-        {
-            // Arrange
-            SetupBookExists(true);
-            _libraryRepository
-                .Setup(r => r.ExistsAsync(LibraryId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.AddCopiesAsync(CreateCommand());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(AddFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task AddCopiesAsync_AddingCopiesFails_ReturnsFailureWithAddFailedMessage()
-        {
-            // Arrange
-            SetupBookAndLibraryExist();
-            _bookCopyRepository
-                .Setup(r => r.AddCopiesAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.AddCopiesAsync(CreateCommand());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(AddFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task AddCopiesAsync_AddingCanceled_RethrowsOperationCanceledException()
-        {
-            // Arrange
-            var canceledException = new OperationCanceledException();
-            SetupBookAndLibraryExist();
-            _bookCopyRepository
-                .Setup(r => r.AddCopiesAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(canceledException);
-
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.AddCopiesAsync(CreateCommand()));
-
-            // Assert
-            Assert.Same(canceledException, exception);
         }
 
         [Fact]

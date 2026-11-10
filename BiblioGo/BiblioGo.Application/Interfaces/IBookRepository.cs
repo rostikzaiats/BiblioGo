@@ -43,5 +43,11 @@ namespace BiblioGo.Application.Interfaces
 
         // Фонд, use case 1: додати книгу до каталогу, повертає ідентифікатор створеної книги
         Task<int> AddAsync(Book book, CancellationToken cancellationToken = default);
+
+        // Фонд, use case 2: чи є інша книга (з іншим Id) з такою назвою та автором (без урахування регістру)
+        Task<bool> ExistsAnotherAsync(string title, string author, int excludedBookId, CancellationToken cancellationToken = default);
+
+        // Фонд, use case 2: оновити дані книги за її Id; false, якщо такої книги немає
+        Task<bool> UpdateAsync(Book book, CancellationToken cancellationToken = default);
     }
 }

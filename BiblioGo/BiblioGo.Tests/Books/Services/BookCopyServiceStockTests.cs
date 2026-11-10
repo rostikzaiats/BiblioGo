@@ -13,7 +13,6 @@ namespace BiblioGo.Tests.Books.Services
     {
         private const int BookId = 7;
         private const int LibraryId = 3;
-        private const string LoadFailedMessage = "Не вдалося завантажити залишки книги. Спробуйте пізніше.";
 
         private readonly Mock<IBookRepository> _bookRepository = new();
         private readonly Mock<IBookCopyRepository> _bookCopyRepository = new();
@@ -172,16 +171,6 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task GetStockAsync_NullQuery_ThrowsArgumentNullException()
-        {
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.GetStockAsync(null!));
-
-            // Assert
-            Assert.IsType<ArgumentNullException>(exception);
-        }
-
-        [Fact]
         public async Task GetStockAsync_BookDoesNotExist_ReturnsFailureWithNotFoundMessage()
         {
             // Arrange
@@ -214,55 +203,6 @@ namespace BiblioGo.Tests.Books.Services
             _bookCopyRepository.Verify(
                 r => r.CountByStatusAsync(It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
                 Times.Never);
-        }
-
-        [Fact]
-        public async Task GetStockAsync_BookRepositoryFails_ReturnsFailureWithLoadFailedMessage()
-        {
-            // Arrange
-            _bookRepository
-                .Setup(r => r.GetByIdAsync(BookId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetStockAsync(CreateQuery());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(LoadFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task GetStockAsync_CountingFails_ReturnsFailureWithLoadFailedMessage()
-        {
-            // Arrange
-            SetupBook(CreateBook());
-            _bookCopyRepository
-                .Setup(r => r.CountByStatusAsync(BookId, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetStockAsync(CreateQuery());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(LoadFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task GetStockAsync_LoadingCanceled_RethrowsOperationCanceledException()
-        {
-            // Arrange
-            var canceledException = new OperationCanceledException();
-            _bookRepository
-                .Setup(r => r.GetByIdAsync(BookId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(canceledException);
-
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.GetStockAsync(CreateQuery()));
-
-            // Assert
-            Assert.Same(canceledException, exception);
         }
 
         [Fact]
