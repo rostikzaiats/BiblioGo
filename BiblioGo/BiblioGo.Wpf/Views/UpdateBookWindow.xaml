@@ -1,0 +1,35 @@
+<Window x:Class="BiblioGo.Wpf.Views.UpdateBookWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Редагувати інформацію про книгу" Height="660" Width="460"
+        WindowStartupLocation="CenterOwner"
+        FocusManager.FocusedElement="{Binding ElementName=BookComboBox}"
+        Loaded="Window_Loaded">
+    <StackPanel Margin="20">
+        <TextBlock Text="Книга:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <ComboBox x:Name="BookComboBox" Margin="0,0,0,20" Height="25" VerticalContentAlignment="Center"
+                  DisplayMemberPath="Name" SelectedValuePath="Id"
+                  SelectionChanged="BookComboBox_SelectionChanged"/>
+
+        <TextBlock Text="Назва:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="TitleTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+
+        <TextBlock Text="Автор:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="AuthorTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+
+        <TextBlock Text="Жанр:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="GenreTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+
+        <TextBlock Text="Рік видання:" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="YearTextBox" Margin="0,0,0,15" Height="25" VerticalContentAlignment="Center"/>
+
+        <TextBlock Text="Опис (необов'язково):" FontWeight="Bold" Margin="0,0,0,5"/>
+        <TextBox x:Name="DescriptionTextBox" Margin="0,0,0,15" Height="80"
+                 AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+
+        <Button x:Name="SaveButton" Content="Зберегти зміни" Height="35" FontWeight="Bold"
+                IsEnabled="False" Click="SaveButton_Click"/>
+
+        <TextBlock x:Name="StatusTextBlock" Margin="0,15,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
+    </StackPanel>
+</Window>

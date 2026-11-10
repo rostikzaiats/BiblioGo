@@ -100,6 +100,13 @@ namespace BiblioGo.Wpf
             addBookWindow.Show();
         }
 
+        private void UpdateBookButton_Click(object sender, RoutedEventArgs e)
+        {
+            var updateBookWindow = _serviceProvider.GetRequiredService<UpdateBookWindow>();
+            updateBookWindow.Owner = this;
+            updateBookWindow.Show();
+        }
+
         private void BookStockButton_Click(object sender, RoutedEventArgs e)
         {
             var bookStockWindow = _serviceProvider.GetRequiredService<BookStockWindow>();

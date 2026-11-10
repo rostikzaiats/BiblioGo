@@ -10,8 +10,8 @@ using Microsoft.Extensions.Logging;
 
 namespace BiblioGo.Application.Books.Services
 {
-    // Сервіс підсистеми «Управління бібліотечним фондом»: валідація, бізнес-правила, логування, звернення до репозиторіїв.
-    // Помилки (валідація, бізнес-правила, збій БД) повертаються як неуспішний Result, а не винятком
+    // Сервіс підсистеми «Управління бібліотечним фондом»: валідація, бізнес-правила, логування відхилень, звернення до репозиторіїв.
+    // Помилки валідації та порушення бізнес-правил повертаються як неуспішний Result, а не винятком
     public class BookCopyService
     {
         private readonly IBookRepository _bookRepository;
@@ -34,8 +34,6 @@ namespace BiblioGo.Application.Books.Services
         // Use case 1: додати нову книгу до каталогу (повертає Id створеної книги)
         public async Task<Result<int>> AddBookAsync(AddBookCommand command, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(command);
-
             var validationError = AddBookValidator.Validate(command);
             if (validationError is not null)
             {
@@ -46,42 +44,71 @@ namespace BiblioGo.Application.Books.Services
             var title = command.Title.Trim();
             var author = command.Author.Trim();
 
-            _logger.LogInformation("Adding book {Title} by {Author}", title, author);
-
-            try
+            if (await _bookRepository.ExistsAsync(title, author, cancellationToken))
             {
-                if (await _bookRepository.ExistsAsync(title, author, cancellationToken))
+                _logger.LogWarning("Adding book rejected: book {Title} by {Author} already exists", title, author);
+                return Result.Failure<int>("Книга з такою назвою та автором уже є в каталозі.");
+            }
+
+            var bookId = await _bookRepository.AddAsync(
+                new Book
                 {
-                    _logger.LogWarning("Adding book rejected: book {Title} by {Author} already exists", title, author);
-                    return Result.Failure<int>("Книга з такою назвою та автором уже є в каталозі.");
-                }
+                    Title = title,
+                    Author = author,
+                    Genre = command.Genre.Trim(),
+                    Year = command.Year,
+                    Description = command.Description.Trim()
+                },
+                cancellationToken);
 
-                var bookId = await _bookRepository.AddAsync(
-                    new Book
-                    {
-                        Title = title,
-                        Author = author,
-                        Genre = command.Genre.Trim(),
-                        Year = command.Year,
-                        Description = command.Description.Trim()
-                    },
-                    cancellationToken);
+            return Result.Success(bookId);
+        }
 
-                _logger.LogInformation("Added book {BookId} ({Title} by {Author})", bookId, title, author);
-                return Result.Success(bookId);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+        // Use case 2: редагувати інформацію про книгу
+        public async Task<Result> UpdateBookAsync(UpdateBookCommand command, CancellationToken cancellationToken = default)
+        {
+            var validationError = UpdateBookValidator.Validate(command);
+            if (validationError is not null)
             {
-                _logger.LogError(ex, "Failed to add book {Title} by {Author}", title, author);
-                return Result.Failure<int>("Не вдалося додати книгу. Спробуйте пізніше.");
+                _logger.LogWarning("Updating book {BookId} rejected: {ValidationError}", command.BookId, validationError);
+                return Result.Failure(validationError);
             }
+
+            var title = command.Title.Trim();
+            var author = command.Author.Trim();
+
+            if (await _bookRepository.ExistsAnotherAsync(title, author, command.BookId, cancellationToken))
+            {
+                _logger.LogWarning(
+                    "Updating book {BookId} rejected: another book {Title} by {Author} already exists",
+                    command.BookId, title, author);
+                return Result.Failure("Книга з такою назвою та автором уже є в каталозі.");
+            }
+
+            var updated = await _bookRepository.UpdateAsync(
+                new Book
+                {
+                    Id = command.BookId,
+                    Title = title,
+                    Author = author,
+                    Genre = command.Genre.Trim(),
+                    Year = command.Year,
+                    Description = command.Description.Trim()
+                },
+                cancellationToken);
+
+            if (!updated)
+            {
+                _logger.LogWarning("Updating book rejected: book {BookId} not found", command.BookId);
+                return Result.Failure("Книгу не знайдено.");
+            }
+
+            return Result.Success();
         }
 
         // Use case 4: додати фізичні примірники книги (повертає створені примірники з інвентарними номерами)
         public async Task<Result<IReadOnlyList<BookCopy>>> AddCopiesAsync(AddBookCopiesCommand command, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(command);
-
             var validationError = AddBookCopiesValidator.Validate(command);
             if (validationError is not null)
             {
@@ -89,46 +116,27 @@ namespace BiblioGo.Application.Books.Services
                 return Result.Failure<IReadOnlyList<BookCopy>>(validationError);
             }
 
-            _logger.LogInformation(
-                "Adding {Quantity} copies of book {BookId} to library {LibraryId}",
-                command.Quantity, command.BookId, command.LibraryId);
-
-            try
+            if (await _bookRepository.GetByIdAsync(command.BookId, cancellationToken) is null)
             {
-                if (await _bookRepository.GetByIdAsync(command.BookId, cancellationToken) is null)
-                {
-                    _logger.LogWarning("Adding book copies rejected: book {BookId} not found", command.BookId);
-                    return Result.Failure<IReadOnlyList<BookCopy>>("Книгу не знайдено.");
-                }
-
-                if (!await _libraryRepository.ExistsAsync(command.LibraryId, cancellationToken))
-                {
-                    _logger.LogWarning("Adding book copies rejected: library {LibraryId} not found", command.LibraryId);
-                    return Result.Failure<IReadOnlyList<BookCopy>>("Філію не знайдено.");
-                }
-
-                var copies = await _bookCopyRepository.AddCopiesAsync(
-                    command.BookId, command.LibraryId, command.Quantity, cancellationToken);
-
-                _logger.LogInformation(
-                    "Added {Count} copies of book {BookId} to library {LibraryId}",
-                    copies.Count, command.BookId, command.LibraryId);
-                return Result.Success(copies);
+                _logger.LogWarning("Adding book copies rejected: book {BookId} not found", command.BookId);
+                return Result.Failure<IReadOnlyList<BookCopy>>("Книгу не знайдено.");
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+
+            if (!await _libraryRepository.ExistsAsync(command.LibraryId, cancellationToken))
             {
-                _logger.LogError(
-                    ex, "Failed to add copies of book {BookId} to library {LibraryId}",
-                    command.BookId, command.LibraryId);
-                return Result.Failure<IReadOnlyList<BookCopy>>("Не вдалося додати примірники. Спробуйте пізніше.");
+                _logger.LogWarning("Adding book copies rejected: library {LibraryId} not found", command.LibraryId);
+                return Result.Failure<IReadOnlyList<BookCopy>>("Філію не знайдено.");
             }
+
+            var copies = await _bookCopyRepository.AddCopiesAsync(
+                command.BookId, command.LibraryId, command.Quantity, cancellationToken);
+
+            return Result.Success(copies);
         }
 
         // Use case 5: переглянути кількість доступних та виданих книг (усі філії або лише одна)
         public async Task<Result<BookStockDto>> GetStockAsync(GetBookStockQuery query, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(query);
-
             var validationError = GetBookStockValidator.Validate(query);
             if (validationError is not null)
             {
@@ -138,43 +146,27 @@ namespace BiblioGo.Application.Books.Services
                 return Result.Failure<BookStockDto>(validationError);
             }
 
-            _logger.LogInformation("Loading stock of book {BookId} (library {LibraryId})", query.BookId, query.LibraryId);
-
-            try
+            var book = await _bookRepository.GetByIdAsync(query.BookId, cancellationToken);
+            if (book is null)
             {
-                var book = await _bookRepository.GetByIdAsync(query.BookId, cancellationToken);
-                if (book is null)
-                {
-                    _logger.LogWarning("Book stock view rejected: book {BookId} not found", query.BookId);
-                    return Result.Failure<BookStockDto>("Книгу не знайдено.");
-                }
-
-                if (query.LibraryId is { } libraryId && !await _libraryRepository.ExistsAsync(libraryId, cancellationToken))
-                {
-                    _logger.LogWarning("Book stock view rejected: library {LibraryId} not found", libraryId);
-                    return Result.Failure<BookStockDto>("Філію не знайдено.");
-                }
-
-                var counts = await _bookCopyRepository.CountByStatusAsync(query.BookId, query.LibraryId, cancellationToken);
-                var stock = CreateStock(book, counts);
-
-                _logger.LogInformation(
-                    "Loaded stock of book {BookId}: {AvailableCopies} available, {IssuedCopies} issued, {WrittenOffCopies} written off",
-                    query.BookId, stock.AvailableCopies, stock.IssuedCopies, stock.WrittenOffCopies);
-                return Result.Success(stock);
+                _logger.LogWarning("Book stock view rejected: book {BookId} not found", query.BookId);
+                return Result.Failure<BookStockDto>("Книгу не знайдено.");
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+
+            if (query.LibraryId is { } libraryId && !await _libraryRepository.ExistsAsync(libraryId, cancellationToken))
             {
-                _logger.LogError(ex, "Failed to load stock of book {BookId}", query.BookId);
-                return Result.Failure<BookStockDto>("Не вдалося завантажити залишки книги. Спробуйте пізніше.");
+                _logger.LogWarning("Book stock view rejected: library {LibraryId} not found", libraryId);
+                return Result.Failure<BookStockDto>("Філію не знайдено.");
             }
+
+            var counts = await _bookCopyRepository.CountByStatusAsync(query.BookId, query.LibraryId, cancellationToken);
+
+            return Result.Success(CreateStock(book, counts));
         }
 
         // Use case 6: списати примірник (виданий або вже списаний примірник списати не можна)
         public async Task<Result> WriteOffAsync(WriteOffBookCopyCommand command, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(command);
-
             var validationError = WriteOffBookCopyValidator.Validate(command);
             if (validationError is not null)
             {
@@ -182,43 +174,29 @@ namespace BiblioGo.Application.Books.Services
                 return Result.Failure(validationError);
             }
 
-            _logger.LogInformation("Writing off book copy {BookCopyId}", command.BookCopyId);
-
-            try
+            var bookCopy = await _bookCopyRepository.GetByIdAsync(command.BookCopyId, cancellationToken);
+            if (bookCopy is null)
             {
-                var bookCopy = await _bookCopyRepository.GetByIdAsync(command.BookCopyId, cancellationToken);
-
-                if (bookCopy is null)
-                {
-                    _logger.LogWarning("Write-off rejected: book copy {BookCopyId} not found", command.BookCopyId);
-                    return Result.Failure("Примірник не знайдено.");
-                }
-
-                var businessRuleError = GetWriteOffRestriction(bookCopy.Status);
-
-                if (businessRuleError is not null)
-                {
-                    _logger.LogWarning(
-                        "Write-off of book copy {BookCopyId} rejected: status is {Status}",
-                        command.BookCopyId,
-                        bookCopy.Status);
-                    return Result.Failure(businessRuleError);
-                }
-
-                if (!await _bookCopyRepository.SetStatusAsync(command.BookCopyId, BookCopyStatus.WrittenOff, cancellationToken))
-                {
-                    _logger.LogWarning("Write-off rejected: book copy {BookCopyId} disappeared before the status change", command.BookCopyId);
-                    return Result.Failure("Примірник не знайдено.");
-                }
-
-                _logger.LogInformation("Book copy {BookCopyId} written off", command.BookCopyId);
-                return Result.Success();
+                _logger.LogWarning("Write-off rejected: book copy {BookCopyId} not found", command.BookCopyId);
+                return Result.Failure("Примірник не знайдено.");
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+
+            var businessRuleError = GetWriteOffRestriction(bookCopy.Status);
+            if (businessRuleError is not null)
             {
-                _logger.LogError(ex, "Failed to write off book copy {BookCopyId}", command.BookCopyId);
-                return Result.Failure("Не вдалося списати примірник. Спробуйте пізніше.");
+                _logger.LogWarning(
+                    "Write-off of book copy {BookCopyId} rejected: status is {Status}",
+                    command.BookCopyId, bookCopy.Status);
+                return Result.Failure(businessRuleError);
             }
+
+            if (!await _bookCopyRepository.SetStatusAsync(command.BookCopyId, BookCopyStatus.WrittenOff, cancellationToken))
+            {
+                _logger.LogWarning("Write-off rejected: book copy {BookCopyId} disappeared before the status change", command.BookCopyId);
+                return Result.Failure("Примірник не знайдено.");
+            }
+
+            return Result.Success();
         }
 
         // Усього = примірники в обігу (на полицях і на руках); списані до загальної кількості не входять

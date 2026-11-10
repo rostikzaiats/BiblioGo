@@ -12,7 +12,6 @@ namespace BiblioGo.Tests.Books.Services
     public class BookCopyServiceTests
     {
         private const int BookCopyId = 7;
-        private const string WriteOffFailedMessage = "Не вдалося списати примірник. Спробуйте пізніше.";
 
         private readonly Mock<IBookRepository> _bookRepository = new();
         private readonly Mock<IBookCopyRepository> _bookCopyRepository = new();
@@ -128,65 +127,6 @@ namespace BiblioGo.Tests.Books.Services
             // Assert
             _bookCopyRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
             VerifyStatusNeverChanged();
-        }
-
-        [Fact]
-        public async Task WriteOffAsync_NullCommand_ThrowsArgumentNullException()
-        {
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.WriteOffAsync(null!));
-
-            // Assert
-            Assert.IsType<ArgumentNullException>(exception);
-        }
-
-        [Fact]
-        public async Task WriteOffAsync_GetCopyFails_ReturnsFailureWithWriteOffFailedMessage()
-        {
-            // Arrange
-            _bookCopyRepository
-                .Setup(r => r.GetByIdAsync(BookCopyId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.WriteOffAsync(CreateCommand());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(WriteOffFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task WriteOffAsync_SetStatusFails_ReturnsFailureWithWriteOffFailedMessage()
-        {
-            // Arrange
-            SetupCopy(CreateCopy(BookCopyStatus.Available));
-            _bookCopyRepository
-                .Setup(r => r.SetStatusAsync(BookCopyId, BookCopyStatus.WrittenOff, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.WriteOffAsync(CreateCommand());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(WriteOffFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task WriteOffAsync_WriteOffCanceled_RethrowsOperationCanceledException()
-        {
-            // Arrange
-            var canceledException = new OperationCanceledException();
-            _bookCopyRepository
-                .Setup(r => r.GetByIdAsync(BookCopyId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(canceledException);
-
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.WriteOffAsync(CreateCommand()));
-
-            // Assert
-            Assert.Same(canceledException, exception);
         }
 
         [Fact]
