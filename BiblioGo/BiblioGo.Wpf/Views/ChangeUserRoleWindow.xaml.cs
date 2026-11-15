@@ -62,11 +62,6 @@ namespace BiblioGo.Wpf.Views
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = "Готово! Роль змінено";
             }
-            catch (Exception)
-            {
-                // Подробиці помилки вже залоговані сервісом
-                StatusText.Text = "Не вдалося змінити роль. Спробуйте пізніше.";
-            }
             finally
             {
                 ChangeButton.IsEnabled = true;

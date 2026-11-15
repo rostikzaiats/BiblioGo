@@ -37,12 +37,6 @@ namespace BiblioGo.Wpf.Views
                     ? "Книг цього автора не знайдено."
                     : $"Знайдено книг: {books.Count}";
             }
-            catch (Exception)
-            {
-                // Подробиці помилки вже залоговані сервісом
-                BooksDataGrid.ItemsSource = null;
-                StatusTextBlock.Text = "Не вдалося виконати пошук. Спробуйте пізніше.";
-            }
             finally
             {
                 SearchButton.IsEnabled = true;

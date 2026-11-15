@@ -53,11 +53,6 @@ namespace BiblioGo.Wpf.Views
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = "Готово! Профіль оновлено";
             }
-            catch (Exception)
-            {
-                // Подробиці помилки вже залоговані сервісо
-                StatusText.Text = "Не вдалося виконати оновлення. Спробуйте пізніше.";
-            }
             finally
             {
                 UpdateButton.IsEnabled = true;
@@ -65,7 +60,6 @@ namespace BiblioGo.Wpf.Views
         }
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            try { DialogResult = false; } catch { }
             Close();
         }
         private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

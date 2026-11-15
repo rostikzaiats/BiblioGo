@@ -49,19 +49,11 @@ namespace BiblioGo.Application.Books.Services
 
             _logger.LogInformation("Searching books by title {Title}", searchTitle);
 
-            try
-            {
-                var books = await _bookRepository.SearchByTitleAsync(searchTitle, cancellationToken);
+            var books = await _bookRepository.SearchByTitleAsync(searchTitle, cancellationToken);
 
-                _logger.LogInformation("Found {BookCount} book(s) by title {Title}", books.Count, searchTitle);
+            _logger.LogInformation("Found {BookCount} book(s) by title {Title}", books.Count, searchTitle);
 
-                return Result.Success(books);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                _logger.LogError(ex, "Failed to search books by title {Title}", searchTitle);
-                throw;
-            }
+            return Result.Success(books);
         }
 
         // Use case 3: знайти книгу за автором
@@ -78,19 +70,11 @@ namespace BiblioGo.Application.Books.Services
 
             _logger.LogInformation("Searching books by author {Author}", searchAuthor);
 
-            try
-            {
-                var books = await _bookRepository.SearchByAuthorAsync(searchAuthor, cancellationToken);
+            var books = await _bookRepository.SearchByAuthorAsync(searchAuthor, cancellationToken);
 
-                _logger.LogInformation("Found {BookCount} book(s) by author {Author}", books.Count, searchAuthor);
+            _logger.LogInformation("Found {BookCount} book(s) by author {Author}", books.Count, searchAuthor);
 
-                return Result.Success(books);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                _logger.LogError(ex, "Failed to search books by author {Author}", searchAuthor);
-                throw;
-            }
+            return Result.Success(books);
         }
 
         // Use case 8: переглянути інформацію про книгу (опис + де і скільки вільних примірників)
@@ -105,33 +89,25 @@ namespace BiblioGo.Application.Books.Services
 
             _logger.LogInformation("Loading details of book {BookId}", bookId);
 
-            try
+            var book = await _bookRepository.GetByIdAsync(bookId, cancellationToken);
+
+            if (book is null)
             {
-                var book = await _bookRepository.GetByIdAsync(bookId, cancellationToken);
-
-                if (book is null)
-                {
-                    _logger.LogWarning("Book details rejected: book {BookId} not found", bookId);
-                    return Result.Failure<BookDetailsDto>("Книгу не знайдено.");
-                }
-
-                var loanableCopies = await _bookCopyRepository.GetLoanableByBookAsync(bookId, cancellationToken);
-                var issuedCopies = await _bookCopyRepository.CountIssuedByBookAsync(bookId, cancellationToken);
-                var details = CreateDetails(book, loanableCopies, issuedCopies);
-
-                _logger.LogInformation(
-                    "Loaded details of book {BookId}: {AvailableCopies} available, {IssuedCopies} issued",
-                    bookId,
-                    details.AvailableCopies,
-                    details.IssuedCopies);
-
-                return Result.Success(details);
+                _logger.LogWarning("Book details rejected: book {BookId} not found", bookId);
+                return Result.Failure<BookDetailsDto>("Книгу не знайдено.");
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                _logger.LogError(ex, "Failed to load details of book {BookId}", bookId);
-                return Result.Failure<BookDetailsDto>("Не вдалося завантажити інформацію про книгу. Спробуйте пізніше.");
-            }
+
+            var loanableCopies = await _bookCopyRepository.GetLoanableByBookAsync(bookId, cancellationToken);
+            var issuedCopies = await _bookCopyRepository.CountIssuedByBookAsync(bookId, cancellationToken);
+            var details = CreateDetails(book, loanableCopies, issuedCopies);
+
+            _logger.LogInformation(
+                "Loaded details of book {BookId}: {AvailableCopies} available, {IssuedCopies} issued",
+                bookId,
+                details.AvailableCopies,
+                details.IssuedCopies);
+
+            return Result.Success(details);
         }
 
         // Групуємо вільні примірники за філіями (філії з найбільшою кількістю — першими)
@@ -164,8 +140,6 @@ namespace BiblioGo.Application.Books.Services
         // Use case 1: переглянути каталог книг (фільтр за жанром і роком, сортування, сторінки)
         public async Task<Result<CatalogPageDto>> GetCatalogAsync(GetCatalogQuery query, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(query);
-
             var genre = string.IsNullOrWhiteSpace(query.Genre) ? null : query.Genre.Trim();
             var validationError = ValidateCatalogQuery(query, genre, out var year);
 
@@ -189,49 +163,33 @@ namespace BiblioGo.Application.Books.Services
                 year,
                 query.SortBy);
 
-            try
-            {
-                var totalCount = await _bookRepository.CountCatalogAsync(genre, year, cancellationToken);
-                var skip = (query.PageNumber - 1) * query.PageSize;
-                var books = await _bookRepository.GetCatalogPageAsync(genre, year, query.SortBy, skip, query.PageSize, cancellationToken);
+            var totalCount = await _bookRepository.CountCatalogAsync(genre, year, cancellationToken);
+            var skip = (query.PageNumber - 1) * query.PageSize;
+            var books = await _bookRepository.GetCatalogPageAsync(genre, year, query.SortBy, skip, query.PageSize, cancellationToken);
 
-                _logger.LogInformation(
-                    "Loaded catalog page {PageNumber}: {BookCount} of {TotalCount} book(s)",
-                    query.PageNumber,
-                    books.Count,
-                    totalCount);
+            _logger.LogInformation(
+                "Loaded catalog page {PageNumber}: {BookCount} of {TotalCount} book(s)",
+                query.PageNumber,
+                books.Count,
+                totalCount);
 
-                return Result.Success(new CatalogPageDto
-                {
-                    Books = books,
-                    PageNumber = query.PageNumber,
-                    PageSize = query.PageSize,
-                    TotalCount = totalCount,
-                    TotalPages = (totalCount + query.PageSize - 1) / query.PageSize
-                });
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            return Result.Success(new CatalogPageDto
             {
-                _logger.LogError(ex, "Failed to load catalog page {PageNumber}", query.PageNumber);
-                return Result.Failure<CatalogPageDto>("Не вдалося завантажити каталог. Спробуйте пізніше.");
-            }
+                Books = books,
+                PageNumber = query.PageNumber,
+                PageSize = query.PageSize,
+                TotalCount = totalCount,
+                TotalPages = (totalCount + query.PageSize - 1) / query.PageSize
+            });
         }
 
         // Use case 1: жанри для випадайки фільтра каталогу
         public async Task<Result<IReadOnlyList<string>>> GetGenresAsync(CancellationToken cancellationToken = default)
         {
-            try
-            {
-                var genres = await _bookRepository.GetGenresAsync(cancellationToken);
+            var genres = await _bookRepository.GetGenresAsync(cancellationToken);
 
-                _logger.LogInformation("Loaded {GenreCount} genre(s) for catalog filter", genres.Count);
-                return Result.Success(genres);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                _logger.LogError(ex, "Failed to load genres for catalog filter");
-                return Result.Failure<IReadOnlyList<string>>("Не вдалося завантажити список жанрів. Спробуйте пізніше.");
-            }
+            _logger.LogInformation("Loaded {GenreCount} genre(s) for catalog filter", genres.Count);
+            return Result.Success(genres);
         }
 
         private static string? ValidateCatalogQuery(GetCatalogQuery query, string? genre, out int? year)

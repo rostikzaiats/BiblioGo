@@ -55,11 +55,6 @@ namespace BiblioGo.Wpf.Views
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = "Готово! Пароль змінено";
             }
-            catch (Exception)
-            {
-                // Подробиці помилки вже залоговані сервісом
-                StatusText.Text = "Не вдалося змінити пароль. Спробуйте пізніше.";
-            }
             finally
             {
                 ChangeButton.IsEnabled = true;

@@ -47,7 +47,6 @@ namespace BiblioGo.Wpf.Views
         }
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            try { DialogResult = false; } catch { }
             Close();
         }
         private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

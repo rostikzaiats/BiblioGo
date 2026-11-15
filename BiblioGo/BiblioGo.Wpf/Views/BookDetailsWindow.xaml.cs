@@ -66,12 +66,6 @@ namespace BiblioGo.Wpf.Views
                 ShowDetails(result.Value);
                 ShowInfo(string.Empty);
             }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                DetailsPanel.Visibility = Visibility.Collapsed;
-                ShowError("Не вдалося завантажити інформацію про книгу. Спробуйте пізніше.");
-            }
             finally
             {
                 ShowButton.IsEnabled = true;

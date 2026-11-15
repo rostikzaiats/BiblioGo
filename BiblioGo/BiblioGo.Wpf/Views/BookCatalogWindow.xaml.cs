@@ -41,23 +41,15 @@ namespace BiblioGo.Wpf.Views
             ShowButton.IsEnabled = false;
             ShowInfo("Завантаження каталогу...");
 
-            try
+            var genresResult = await _bookCatalogService.GetGenresAsync();
+            if (genresResult.IsSuccess)
             {
-                var genresResult = await _bookCatalogService.GetGenresAsync();
-                if (genresResult.IsSuccess)
-                {
-                    GenreComboBox.ItemsSource = new[] { AllGenres }.Concat(genresResult.Value).ToList();
-                    GenreComboBox.SelectedIndex = 0;
-                }
-                else
-                {
-                    ShowError(genresResult.Error);
-                }
+                GenreComboBox.ItemsSource = new[] { AllGenres }.Concat(genresResult.Value).ToList();
+                GenreComboBox.SelectedIndex = 0;
             }
-            catch (Exception)
+            else
             {
-                // Подробиці помилки вже залоговані сервісом
-                ShowError("Не вдалося завантажити список жанрів. Спробуйте пізніше.");
+                ShowError(genresResult.Error);
             }
 
             await LoadPageAsync(CreateQueryFromFilters(pageNumber: 1));
@@ -127,11 +119,6 @@ namespace BiblioGo.Wpf.Views
                     ? string.Empty
                     : $"Сторінка {page.PageNumber} з {page.TotalPages} · усього книг: {page.TotalCount}";
                 ShowInfo(page.TotalCount == 0 ? "Книг за цими умовами не знайдено." : string.Empty);
-            }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                ShowError("Не вдалося завантажити каталог. Спробуйте пізніше.");
             }
             finally
             {

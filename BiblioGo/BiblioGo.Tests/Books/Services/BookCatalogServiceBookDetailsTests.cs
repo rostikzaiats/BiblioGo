@@ -167,59 +167,6 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task GetBookDetailsAsync_BookRepositoryFails_ReturnsFailureWithLoadFailedMessage()
-        {
-            // Arrange
-            _bookRepository
-                .Setup(r => r.GetByIdAsync(BookId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetBookDetailsAsync(BookId);
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(LoadFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task GetBookDetailsAsync_CopyRepositoryFails_ReturnsFailureWithLoadFailedMessage()
-        {
-            // Arrange
-            SetupBook(CreateBook());
-            _bookCopyRepository
-                .Setup(r => r.GetLoanableByBookAsync(BookId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetBookDetailsAsync(BookId);
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(LoadFailedMessage, result.Error);
-        }
-
-        [Fact]
-        public async Task GetBookDetailsAsync_IssuedCountFails_ReturnsFailureWithLoadFailedMessage()
-        {
-            // Arrange
-            SetupBook(CreateBook());
-            _bookCopyRepository
-                .Setup(r => r.GetLoanableByBookAsync(BookId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync([]);
-            _bookCopyRepository
-                .Setup(r => r.CountIssuedByBookAsync(BookId, It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetBookDetailsAsync(BookId);
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(LoadFailedMessage, result.Error);
-        }
-
-        [Fact]
         public async Task GetBookDetailsAsync_LoadingCanceled_RethrowsOperationCanceledException()
         {
             // Arrange
