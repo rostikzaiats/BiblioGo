@@ -39,11 +39,6 @@ namespace BiblioGo.Wpf.Views
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = $"Готово! Користувача створено, id: {result.Value}";
             }
-            catch (Exception)
-            {
-                // Подробиці помилки вже залоговані сервісо
-                StatusText.Text = "Не вдалося виконати реєстрацію. Спробуйте пізніше.";
-            }
             finally
             {
                 RegisterButton.IsEnabled = true;
@@ -51,7 +46,6 @@ namespace BiblioGo.Wpf.Views
         }
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            try {   DialogResult = false; } catch {}
             Close();
         }
         private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

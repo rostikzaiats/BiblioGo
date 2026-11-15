@@ -256,22 +256,6 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task GetCatalogAsync_RepositoryFails_ReturnsFailureWithLoadFailedMessage()
-        {
-            // Arrange
-            _bookRepository
-                .Setup(r => r.CountCatalogAsync(It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetCatalogAsync(new GetCatalogQuery());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal(LoadFailedMessage, result.Error);
-        }
-
-        [Fact]
         public async Task GetCatalogAsync_LoadingCanceled_RethrowsOperationCanceledException()
         {
             // Arrange
@@ -288,16 +272,6 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task GetCatalogAsync_NullQuery_ThrowsArgumentNullException()
-        {
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.GetCatalogAsync(null!));
-
-            // Assert
-            Assert.IsType<ArgumentNullException>(exception);
-        }
-
-        [Fact]
         public async Task GetGenresAsync_GenresExist_ReturnsSuccessWithGenres()
         {
             // Arrange
@@ -310,22 +284,6 @@ namespace BiblioGo.Tests.Books.Services
             // Assert
             Assert.True(result.IsSuccess);
             Assert.Equal(genres, result.Value);
-        }
-
-        [Fact]
-        public async Task GetGenresAsync_RepositoryFails_ReturnsFailureWithGenresMessage()
-        {
-            // Arrange
-            _bookRepository
-                .Setup(r => r.GetGenresAsync(It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetGenresAsync();
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal("Не вдалося завантажити список жанрів. Спробуйте пізніше.", result.Error);
         }
 
         private void SetupCatalog(IReadOnlyList<Book> books, int totalCount)

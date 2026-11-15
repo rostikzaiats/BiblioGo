@@ -17,7 +17,12 @@ namespace BiblioGo.Application.Users.Validators
         }
         public static string? ValidateTargetEmail(string targetEmail)
         {
-            return string.IsNullOrWhiteSpace(targetEmail) ? "Вкажіть електронну пошту користувача" : null;
+            if (string.IsNullOrWhiteSpace(targetEmail))
+            {
+                return "Вкажіть електронну пошту користувача";
+            }
+
+            return RegisterUserValidator.ValidateEmail(targetEmail);
         }
         public static string? ValidateNewRole(UserRole newRole)
         {

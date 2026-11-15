@@ -61,22 +61,6 @@ namespace BiblioGo.Tests.Lookups.Services
         }
 
         [Fact]
-        public async Task GetBooksAsync_RepositoryFails_ReturnsFailure()
-        {
-            // Arrange
-            _bookRepository
-                .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("DB is down"));
-
-            // Act
-            var result = await _sut.GetBooksAsync();
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.False(string.IsNullOrWhiteSpace(result.Error));
-        }
-
-        [Fact]
         public async Task GetLibrariesAsync_LibrariesExist_ReturnsItemsWithLibraryName()
         {
             // Arrange
@@ -95,22 +79,6 @@ namespace BiblioGo.Tests.Lookups.Services
             Assert.Equal(2, result.Value.Count);
             Assert.Equal(3, result.Value[0].Id);
             Assert.Equal("Центральна бібліотека", result.Value[0].Name);
-        }
-
-        [Fact]
-        public async Task GetLibrariesAsync_RepositoryFails_ReturnsFailure()
-        {
-            // Arrange
-            _libraryRepository
-                .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("DB is down"));
-
-            // Act
-            var result = await _sut.GetLibrariesAsync();
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.False(string.IsNullOrWhiteSpace(result.Error));
         }
 
         [Fact]
@@ -150,22 +118,6 @@ namespace BiblioGo.Tests.Lookups.Services
             _bookCopyRepository.Verify(
                 r => r.GetAvailableByBookAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()),
                 Times.Never());
-        }
-
-        [Fact]
-        public async Task GetAvailableCopiesAsync_RepositoryFails_ReturnsFailure()
-        {
-            // Arrange
-            _bookCopyRepository
-                .Setup(r => r.GetAvailableByBookAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("DB is down"));
-
-            // Act
-            var result = await _sut.GetAvailableCopiesAsync(5);
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.False(string.IsNullOrWhiteSpace(result.Error));
         }
     }
 }

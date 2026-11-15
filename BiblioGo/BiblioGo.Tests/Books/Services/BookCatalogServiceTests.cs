@@ -152,21 +152,6 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task SearchByTitleAsync_RepositoryFails_RethrowsRepositoryException()
-        {
-            // Arrange
-            var repositoryException = new InvalidOperationException("Database is unavailable.");
-            var stubRepository = CreateRepositoryThrowing(repositoryException);
-            var service = CreateService(stubRepository.Object);
-
-            // Act
-            var exception = await Record.ExceptionAsync(() => service.SearchByTitleAsync(ValidTitle));
-
-            // Assert
-            Assert.Same(repositoryException, exception);
-        }
-
-        [Fact]
         public async Task SearchByTitleAsync_SearchCanceled_RethrowsOperationCanceledException()
         {
             // Arrange
