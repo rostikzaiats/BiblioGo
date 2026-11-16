@@ -1,3 +1,7 @@
+using BiblioGo.Application.Users.Commands;
+using BiblioGo.Application.Users.Services;
+using BiblioGo.Domain.Enums;
+using BiblioGo.Wpf.Session;
 using BiblioGo.Wpf.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -10,13 +14,79 @@ namespace BiblioGo.Wpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly IServiceProvider _serviceProvider;
+                private readonly IServiceProvider _serviceProvider;
+        private readonly UserService _userService;
+        private readonly CurrentUserSession _session;
 
-        public MainWindow(IServiceProvider serviceProvider)
+        public MainWindow(IServiceProvider serviceProvider, UserService userService, CurrentUserSession session)
         {
             _serviceProvider = serviceProvider;
+            _userService = userService;
+            _session = session;
             InitializeComponent();
             ShowSection(CatalogSection, "Каталог");
+            ShowCurrentUser();
+
+            // клік по будь-якому пункту меню профілю закриває випадайку
+            ProfileMenu.AddHandler(Button.ClickEvent, new RoutedEventHandler((_, _) => ProfilePopup.IsOpen = false));
+        }
+
+        private void ShowCurrentUser()
+        {
+            var user = _session.User;
+            if (user is null)
+            {
+                return;
+            }
+
+            ChangeUserRoleButton.Visibility = user.Role == UserRole.Administrator ? Visibility.Visible : Visibility.Collapsed;
+            UserNameText.Text = $"{user.FirstName} {user.LastName}";
+            AvatarText.Text = user.FirstName.Length > 0 ? user.FirstName[..1].ToUpper() : "?";
+        }
+
+        private void MenuToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            SectionsPanel.Visibility = SectionsPanel.Visibility == Visibility.Visible
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+        }
+
+        private void ProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            // вирівнюємо правий край меню по правому краю кнопки профілю
+            ProfilePopup.HorizontalOffset = ProfileButton.ActualWidth - ProfileMenu.Width - 8;
+            ProfilePopup.IsOpen = !ProfilePopup.IsOpen;
+        }
+
+        private void Window_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (ProfilePopup.IsOpen && !ProfileButton.IsMouseOver && !ProfileMenu.IsMouseOver)
+            {
+                ProfilePopup.IsOpen = false;
+            }
+        }
+
+        private void Window_Deactivated(object? sender, EventArgs e)
+        {
+            ProfilePopup.IsOpen = false;
+        }
+
+        private async void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_session.User is null)
+            {
+                return;
+            }
+
+            var result = await _userService.LogoutAsync(new LogoutUserCommand { UserId = _session.User.UserId });
+            if (result.IsFailure)
+            {
+                MessageBox.Show(result.Error, "Вихід з акаунта", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            _session.User = null;
+            ((App)App.Current).Logout(this);
         }
         private void CatalogSectionButton_Click(object sender, RoutedEventArgs e)
         {
