@@ -40,7 +40,12 @@
                         Content="Увійти"
                         Style="{StaticResource PrimaryButton}"
                         Click="LoginButton_Click"/>
-
+                
+                <Button x:Name="RegisterButton"
+                        Content="Зареєструватися"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="RegisterButton_Click"
+                        Margin="0,8,0,0"/>
                 <TextBlock x:Name="StatusText" Style="{StaticResource ErrorText}"/>
             </StackPanel>
         </Grid>

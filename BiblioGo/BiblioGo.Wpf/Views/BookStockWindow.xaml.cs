@@ -92,12 +92,6 @@ namespace BiblioGo.Wpf.Views
                 ShowStock(result.Value, scope);
                 ShowInfo(string.Empty);
             }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                StockPanel.Visibility = Visibility.Collapsed;
-                ShowError("Не вдалося завантажити залишки книги. Спробуйте пізніше.");
-            }
             finally
             {
                 ShowButton.IsEnabled = true;

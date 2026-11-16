@@ -1,5 +1,6 @@
 ﻿using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using BiblioGo.Wpf.Session;
 namespace BiblioGo.Wpf.Views
@@ -8,11 +9,13 @@ namespace BiblioGo.Wpf.Views
     {
         private readonly UserService _userService;
         private readonly CurrentUserSession _session;
+        private readonly IServiceProvider _serviceProvider;
 
-        public LoginWindow(UserService userService, CurrentUserSession session)
+        public LoginWindow(UserService userService, CurrentUserSession session, IServiceProvider serviceProvider)
         {
             _userService = userService;
             _session = session;
+            _serviceProvider = serviceProvider;
             InitializeComponent();
         }
         private async void LoginButton_Click(object sender, RoutedEventArgs e)
@@ -54,6 +57,18 @@ namespace BiblioGo.Wpf.Views
             if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
             {
                 DragMove();
+            }
+        }
+
+        private void RegisterButton_Click(object sender, RoutedEventArgs e)
+        {
+            var registerWindow = _serviceProvider.GetRequiredService<RegistrationWindow>();
+            registerWindow.Owner = this;
+            registerWindow.ShowDialog();
+            if(registerWindow.ShowDialog() == true)
+            {
+                StatusText.Foreground = System.Windows.Media.Brushes.Green;
+                StatusText.Text = "Реєстрація успішна! Тепер ви можете увійти.";
             }
         }
     }

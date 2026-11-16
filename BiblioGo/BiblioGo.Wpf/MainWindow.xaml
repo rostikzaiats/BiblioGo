@@ -107,7 +107,6 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ==================== БІЧНА ПАНЕЛЬ ==================== -->
             <Border Grid.Column="0"
                     Background="{StaticResource SurfaceBrush}"
                     CornerRadius="14,0,0,14">
@@ -132,20 +131,29 @@
 
                     <!-- Навігація -->
                     <StackPanel Grid.Row="1" Margin="12,24,12,0">
-                        <TextBlock Text="КОРИСТУВАЧ"
+                        <TextBlock Text="РОЗДІЛИ"
                                    Foreground="{StaticResource TextMutedBrush}"
                                    FontSize="10"
                                    FontWeight="SemiBold"
                                    Margin="8,0,0,6"/>
+                        <Button x:Name="CatalogSectionButton"
+                                Content="Каталог"
+                                Style="{StaticResource SidebarButton}"
+                                Click="CatalogSectionButton_Click"/>
+                        <Button x:Name="FundSectionButton"
+                                Content="Фонд"
+                                Style="{StaticResource SidebarButton}"
+                                Click="FundSectionButton_Click"/>
+                        <Button x:Name="LoanSectionButton"
+                                Content="Видача та повернення"
+                                Style="{StaticResource SidebarButton}"
+                                Click="LoanSectionButton_Click"/>
 
-                        <Button x:Name="LoginButton"
-                                Content="Увійти"
-                                Style="{StaticResource SidebarButton}"
-                                Click="LoginButton_Click"/>
-                        <Button x:Name="RegistrationButton"
-                                Content="Реєстрація"
-                                Style="{StaticResource SidebarButton}"
-                                Click="RegistrationButton_Click"/>
+                        <TextBlock Text="КОРИСТУВАЧ"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Margin="8,18,0,6"/>
                         <Button x:Name="UpdateProfileButton"
                                 Content="Оновити профіль"
                                 Style="{StaticResource SidebarButton}"
@@ -173,7 +181,8 @@
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0" Margin="32,22,20,0">
-                    <TextBlock Text="Головне меню"
+                    <TextBlock x:Name="SectionTitleText"
+                               Text="Каталог"
                                FontSize="20"
                                FontWeight="SemiBold"
                                Foreground="{StaticResource TextPrimaryBrush}"
@@ -182,73 +191,70 @@
                 <ScrollViewer Grid.Row="1"
                               Margin="32,10,32,24"
                               VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <TextBlock Text="КАТАЛОГ" Style="{StaticResource SectionTitle}" Margin="2,0,0,8"/>
-                        <Button x:Name="BookCatalogButton"
+                    <Grid>
+                        <StackPanel x:Name="CatalogSection">
+                            <Button x:Name="BookCatalogButton"
                                 Content="Каталог книг"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookCatalogButton_Click"/>
-                        <Button x:Name="PopularBooksButton"
+                            <Button x:Name="PopularBooksButton"
                                 Content="Популярні книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="PopularBooksButton_Click"/>
-                        <Button x:Name="BookSearchButton"
+                            <Button x:Name="BookSearchButton"
                                 Content="Пошук книги за назвою"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookSearchButton_Click"/>
-                        <Button x:Name="BookSearchByAuthorButton"
+                            <Button x:Name="BookSearchByAuthorButton"
                                 Content="Пошук книги за автором"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookSearchByAuthorButton_Click"/>
-                        <Button x:Name="BookDetailsButton"
+                            <Button x:Name="BookDetailsButton"
                                 Content="Інформація про книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookDetailsButton_Click"/>
-
-                        <TextBlock Text="АДМІНІСТРУВАННЯ ФОНДУ"
-                                   Style="{StaticResource SectionTitle}"
-                                   Foreground="{StaticResource ErrorBrush}"/>
-                        <Button x:Name="AddBookButton"
+                        </StackPanel>
+                        <StackPanel x:Name="FundSection" Visibility="Collapsed">
+                            <Button x:Name="AddBookButton"
                                 Content="Додати нову книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="AddBookButton_Click"/>
-                        <Button x:Name="UpdateBookButton"
+                            <Button x:Name="UpdateBookButton"
                                 Content="Редагувати інформацію про книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="UpdateBookButton_Click"/>
-                        <Button x:Name="AddBookCopiesButton"
+                            <Button x:Name="AddBookCopiesButton"
                                 Content="Додати примірники книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="AddBookCopiesButton_Click"/>
-                        <Button x:Name="BookStockButton"
+                            <Button x:Name="BookStockButton"
                                 Content="Переглянути залишки книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookStockButton_Click"/>
-                        <Button x:Name="WriteOffBookCopyButton"
+                            <Button x:Name="WriteOffBookCopyButton"
                                 Content="Списати примірник"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="WriteOffBookCopyButton_Click"/>
-
-                        <TextBlock Text="ВИДАЧА ТА ПОВЕРНЕННЯ КНИГ"
-                                   Style="{StaticResource SectionTitle}"
-                                   Foreground="{StaticResource ErrorBrush}"/>
-                        <Button x:Name="CreateLoanRequestButton"
+                        </StackPanel>
+                        <StackPanel x:Name="LoanSection" Visibility="Collapsed">
+                            <Button x:Name="CreateLoanRequestButton"
                                 Content="Оформити заявку на отримання"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="CreateLoanRequestButton_Click"/>
-                        <Button x:Name="ConfirmLoanIssueButton"
+                            <Button x:Name="ConfirmLoanIssueButton"
                                 Content="Підтвердити та оформити видачу книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="ConfirmLoanIssueButton_Click"/>
-                        <Button x:Name="ReturnBookButton"
+                            <Button x:Name="ReturnBookButton"
                                 Content="Оформити повернення книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="ReturnBookButton_Click"/>
-                        <Button x:Name="LoanJournalButton"
+                            <Button x:Name="LoanJournalButton"
                                 Content="Переглянути журнал позик"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="LoanJournalButton_Click"/>
-                    </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </Grid>
         </Grid>

@@ -91,11 +91,6 @@ namespace BiblioGo.Wpf.Views
                 StatusTextBlock.Foreground = Brushes.Green;
                 StatusTextBlock.Text = DescribeAddedCopies(result.Value);
             }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                ShowError("Не вдалося додати примірники. Спробуйте пізніше.");
-            }
             finally
             {
                 AddCopiesButton.IsEnabled = true;

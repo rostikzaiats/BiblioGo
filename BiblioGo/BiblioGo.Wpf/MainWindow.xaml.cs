@@ -1,6 +1,7 @@
-using System.Windows;
 using BiblioGo.Wpf.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace BiblioGo.Wpf
 {
@@ -15,6 +16,31 @@ namespace BiblioGo.Wpf
         {
             _serviceProvider = serviceProvider;
             InitializeComponent();
+            ShowSection(CatalogSection, "Каталог");
+        }
+        private void CatalogSectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowSection(CatalogSection, "Каталог");
+        }
+
+        private void FundSectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowSection(FundSection, "Адміністрування фонду");
+        }
+
+        private void LoanSectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowSection(LoanSection, "Видача та повернення книг");
+        }
+
+        private void ShowSection(StackPanel section, string title)
+        {
+            CatalogSection.Visibility = Visibility.Collapsed;
+            FundSection.Visibility = Visibility.Collapsed;
+            LoanSection.Visibility = Visibility.Collapsed;
+
+            section.Visibility = Visibility.Visible;
+            SectionTitleText.Text = title;
         }
 
         private void BookCatalogButton_Click(object sender, RoutedEventArgs e)
@@ -50,20 +76,6 @@ namespace BiblioGo.Wpf
             var bookDetailsWindow = _serviceProvider.GetRequiredService<BookDetailsWindow>();
             bookDetailsWindow.Owner = this;
             bookDetailsWindow.Show();
-        }
-
-        private void RegistrationButton_Click(object sender, RoutedEventArgs e)
-        {
-            var registrationWindow = _serviceProvider.GetRequiredService<RegistrationWindow>();
-            registrationWindow.Owner = this;
-            registrationWindow.Show();
-        }
-
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
-        {
-            var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
-            loginWindow.Owner = this;
-            loginWindow.ShowDialog();
         }
         private void UpdateUserProfileButton_Click(object sender, RoutedEventArgs e)
         {
