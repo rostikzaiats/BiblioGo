@@ -26,8 +26,7 @@ namespace BiblioGo.Wpf
             InitializeComponent();
             ShowSection(CatalogSection, "Каталог");
             ShowCurrentUser();
-
-            // клік по будь-якому пункту меню профілю закриває випадайку
+            ApplyRole(_session.User?.Role ?? UserRole.Reader); // ролі нема -> дефолт користувач
             ProfileMenu.AddHandler(Button.ClickEvent, new RoutedEventHandler((_, _) => ProfilePopup.IsOpen = false));
         }
 
@@ -43,7 +42,25 @@ namespace BiblioGo.Wpf
             UserNameText.Text = $"{user.FirstName} {user.LastName}";
             AvatarText.Text = user.FirstName.Length > 0 ? user.FirstName[..1].ToUpper() : "?";
         }
+        private void ApplyRole(UserRole role)
+        {
+            var isStaff = role is UserRole.Librarian or UserRole.Administrator;
+            var isAdmin = role == UserRole.Administrator;
 
+            // тільки персонал
+            FundSectionButton.Visibility = ToVisibility(isStaff);
+            ConfirmLoanIssueButton.Visibility = ToVisibility(isStaff);
+            ReturnBookButton.Visibility = ToVisibility(isStaff);
+            LoanJournalButton.Visibility = ToVisibility(isStaff);
+
+            // тільки адмін
+            ChangeUserRoleButton.Visibility = ToVisibility(isAdmin);
+        }
+
+        private static Visibility ToVisibility(bool visible)
+        {
+            return visible ? Visibility.Visible : Visibility.Collapsed;
+        }
         private void MenuToggleButton_Click(object sender, RoutedEventArgs e)
         {
             SectionsPanel.Visibility = SectionsPanel.Visibility == Visibility.Visible
@@ -53,7 +70,6 @@ namespace BiblioGo.Wpf
 
         private void ProfileButton_Click(object sender, RoutedEventArgs e)
         {
-            // вирівнюємо правий край меню по правому краю кнопки профілю
             ProfilePopup.HorizontalOffset = ProfileButton.ActualWidth - ProfileMenu.Width - 8;
             ProfilePopup.IsOpen = !ProfilePopup.IsOpen;
         }
