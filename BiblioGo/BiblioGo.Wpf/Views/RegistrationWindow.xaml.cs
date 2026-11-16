@@ -38,6 +38,7 @@ namespace BiblioGo.Wpf.Views
                 PasswordInput.Clear();
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = $"Готово! Користувача створено, id: {result.Value}";
+                DialogResult = true;
             }
             finally
             {

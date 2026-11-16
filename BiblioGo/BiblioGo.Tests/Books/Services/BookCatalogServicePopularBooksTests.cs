@@ -155,22 +155,6 @@ namespace BiblioGo.Tests.Books.Services
         }
 
         [Fact]
-        public async Task GetPopularBooksAsync_RepositoryFails_ReturnsFailureWithLoadFailedMessage()
-        {
-            // Arrange
-            _bookRepository
-                .Setup(r => r.GetPopularAsync(It.IsAny<DateTime?>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("Database is unavailable."));
-
-            // Act
-            var result = await _service.GetPopularBooksAsync(new GetPopularBooksQuery());
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal("Не вдалося завантажити популярні книги. Спробуйте пізніше.", result.Error);
-        }
-
-        [Fact]
         public async Task GetPopularBooksAsync_LoadingCanceled_RethrowsOperationCanceledException()
         {
             // Arrange
@@ -198,16 +182,6 @@ namespace BiblioGo.Tests.Books.Services
 
             // Assert
             _bookRepository.Verify(r => r.GetPopularAsync(null, 10, cancellationTokenSource.Token), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetPopularBooksAsync_NullQuery_ThrowsArgumentNullException()
-        {
-            // Act
-            var exception = await Record.ExceptionAsync(() => _service.GetPopularBooksAsync(null!));
-
-            // Assert
-            Assert.IsType<ArgumentNullException>(exception);
         }
 
         private void SetupPopularBooks(IReadOnlyList<PopularBookDto> books)

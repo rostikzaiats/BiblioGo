@@ -66,12 +66,6 @@ namespace BiblioGo.Wpf.Views
                 BooksDataGrid.ItemsSource = result.Value;
                 ShowInfo(result.Value.Count == 0 ? "За цей період книг ще не видавали." : string.Empty);
             }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                BooksDataGrid.ItemsSource = null;
-                ShowError("Не вдалося завантажити популярні книги. Спробуйте пізніше.");
-            }
             finally
             {
                 ShowButton.IsEnabled = true;

@@ -50,11 +50,6 @@ namespace BiblioGo.Wpf.Views
                 StatusTextBlock.Foreground = Brushes.Green;
                 StatusTextBlock.Text = $"Книгу додано до каталогу (№ {result.Value}).";
             }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                ShowError("Не вдалося додати книгу. Спробуйте пізніше.");
-            }
             finally
             {
                 AddBookButton.IsEnabled = true;

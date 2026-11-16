@@ -113,11 +113,6 @@ namespace BiblioGo.Wpf.Views
                 StatusTextBlock.Foreground = Brushes.Green;
                 StatusTextBlock.Text = $"Примірник «{copy.Name}» списано.";
             }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                ShowError("Не вдалося списати примірник. Спробуйте пізніше.");
-            }
             finally
             {
                 WriteOffButton.IsEnabled = true;

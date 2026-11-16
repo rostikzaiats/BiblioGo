@@ -112,11 +112,6 @@ namespace BiblioGo.Wpf.Views
                     ShowSuccess("Дані книги оновлено.");
                 }
             }
-            catch (Exception)
-            {
-                // Сервіс сам повертає помилки як Result; сюди потрапляє лише непередбачене
-                ShowError("Не вдалося зберегти зміни. Спробуйте пізніше.");
-            }
             finally
             {
                 SaveButton.IsEnabled = BookComboBox.SelectedValue is int;

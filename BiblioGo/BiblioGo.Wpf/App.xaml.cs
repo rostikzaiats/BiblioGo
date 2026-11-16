@@ -30,10 +30,24 @@ namespace BiblioGo.Wpf
 
             _serviceProvider = ConfigureServices();
 
-            var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
+            ShowLoginThenMain();
+        }
+        public void Logout(Window currentMainWindow)
+        {
+            // інакше закриття головного вікна завершить усю програму
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            currentMainWindow.Close();
+            ShowLoginThenMain();
+        }
+
+        private void ShowLoginThenMain()
+        {
+            var serviceProvider = _serviceProvider!;
+
+            var loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
             if (loginWindow.ShowDialog() == true)
             {
-                var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
                 System.Windows.Application.Current.MainWindow = mainWindow;
                 ShutdownMode = ShutdownMode.OnMainWindowClose;
 
@@ -44,7 +58,6 @@ namespace BiblioGo.Wpf
                 Shutdown();
             }
         }
-
         protected override void OnExit(ExitEventArgs e)
         {
             Log.Information("BiblioGo stopped");

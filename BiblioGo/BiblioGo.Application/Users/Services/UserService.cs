@@ -171,5 +171,25 @@ namespace BiblioGo.Application.Users.Services
             _logger.LogInformation("User role changed for user {UserId} to {NewRole}", target.Id, target.Role);
             return Result.Success();
         }
+        // Use case 6: вийти з системи
+        public async Task<Result> LogoutAsync(LogoutUserCommand command)
+        {
+            var error = LogoutUserValidator.Validate(command);
+            if (error is not null)
+            {
+                _logger.LogWarning("Logout rejected: {Reason}", error);
+                return Result.Failure(error);
+            }
+
+            var user = await _users.FindByIdAsync(command.UserId);
+            if (user is null)
+            {
+                _logger.LogWarning("Logout rejected: user not found");
+                return Result.Failure("Користувача не знайдено");
+            }
+
+            _logger.LogInformation("User logged out {UserId}", user.Id);
+            return Result.Success();
+        }
     }
 }

@@ -196,8 +196,6 @@ namespace BiblioGo.Application.Books.Services
         // Use case «Переглянути популярні книги»: рейтинг книг за кількістю видач за обраний період
         public async Task<Result<IReadOnlyList<PopularBookDto>>> GetPopularBooksAsync(GetPopularBooksQuery query, CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(query);
-
             var validationError = ValidatePopularBooksQuery(query);
 
             if (validationError is not null)
@@ -212,24 +210,16 @@ namespace BiblioGo.Application.Books.Services
 
             _logger.LogInformation("Loading top {Top} popular books for period {Period}", query.Top, query.Period);
 
-            try
+            var books = await _bookRepository.GetPopularAsync(GetIssuedFrom(query.Period), query.Top, cancellationToken);
+
+            for (var index = 0; index < books.Count; index++)
             {
-                var books = await _bookRepository.GetPopularAsync(GetIssuedFrom(query.Period), query.Top, cancellationToken);
-
-                for (var index = 0; index < books.Count; index++)
-                {
-                    books[index].Rank = index + 1;
-                }
-
-                _logger.LogInformation("Loaded {BookCount} popular book(s) for period {Period}", books.Count, query.Period);
-
-                return Result.Success(books);
+                books[index].Rank = index + 1;
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                _logger.LogError(ex, "Failed to load popular books for period {Period}", query.Period);
-                return Result.Failure<IReadOnlyList<PopularBookDto>>("Не вдалося завантажити популярні книги. Спробуйте пізніше.");
-            }
+
+            _logger.LogInformation("Loaded {BookCount} popular book(s) for period {Period}", books.Count, query.Period);
+
+            return Result.Success(books);
         }
 
         private static string? ValidatePopularBooksQuery(GetPopularBooksQuery query)
