@@ -163,6 +163,13 @@ namespace BiblioGo.Wpf
             bookDetailsWindow.Owner = this;
             bookDetailsWindow.Show();
         }
+
+        private void SimilarBooksButton_Click(object sender, RoutedEventArgs e)
+        {
+            var similarBooksWindow = _serviceProvider.GetRequiredService<SimilarBooksWindow>();
+            similarBooksWindow.Owner = this;
+            similarBooksWindow.Show();
+        }
         private void UpdateUserProfileButton_Click(object sender, RoutedEventArgs e)
         {
             var updateUserProfileWindow = _serviceProvider.GetRequiredService<UpdateUserProfileWindow>();

@@ -21,6 +21,7 @@ namespace BiblioGo.Application.Books.Services
         public const int MaxCatalogGenreLength = 50;
         public const int MinCatalogYear = 1000;
         public const int MaxPopularBooksTop = 50;
+        public const int MaxSimilarBooksTop = 20;
 
         private readonly IBookRepository _bookRepository;
         private readonly IBookCopyRepository _bookCopyRepository;
@@ -220,6 +221,58 @@ namespace BiblioGo.Application.Books.Services
             _logger.LogInformation("Loaded {BookCount} popular book(s) for period {Period}", books.Count, query.Period);
 
             return Result.Success(books);
+        }
+
+        // Use case «Переглянути схожі книги»: інші книги того ж автора або жанру, що й обрана
+        public async Task<Result<IReadOnlyList<SimilarBookDto>>> GetSimilarBooksAsync(GetSimilarBooksQuery query, CancellationToken cancellationToken = default)
+        {
+            var validationError = ValidateSimilarBooksQuery(query);
+
+            if (validationError is not null)
+            {
+                _logger.LogWarning(
+                    "Similar books rejected: {ValidationError} (book {BookId}, top {Top})",
+                    validationError,
+                    query.BookId,
+                    query.Top);
+                return Result.Failure<IReadOnlyList<SimilarBookDto>>(validationError);
+            }
+
+            var book = await _bookRepository.GetByIdAsync(query.BookId, cancellationToken);
+
+            if (book is null)
+            {
+                _logger.LogWarning("Similar books rejected: book {BookId} not found", query.BookId);
+                return Result.Failure<IReadOnlyList<SimilarBookDto>>("Книгу не знайдено.");
+            }
+
+            _logger.LogInformation(
+                "Loading top {Top} books similar to book {BookId} (author {Author}, genre {Genre})",
+                query.Top,
+                book.Id,
+                book.Author,
+                book.Genre);
+
+            var books = await _bookRepository.GetSimilarAsync(book.Id, book.Author, book.Genre, query.Top, cancellationToken);
+
+            _logger.LogInformation("Found {BookCount} book(s) similar to book {BookId}", books.Count, book.Id);
+
+            return Result.Success(books);
+        }
+
+        private static string? ValidateSimilarBooksQuery(GetSimilarBooksQuery query)
+        {
+            if (query.BookId <= 0)
+            {
+                return "Оберіть книгу.";
+            }
+
+            if (query.Top < 1 || query.Top > MaxSimilarBooksTop)
+            {
+                return $"Кількість схожих книг має бути від 1 до {MaxSimilarBooksTop}.";
+            }
+
+            return null;
         }
 
         private static string? ValidatePopularBooksQuery(GetPopularBooksQuery query)

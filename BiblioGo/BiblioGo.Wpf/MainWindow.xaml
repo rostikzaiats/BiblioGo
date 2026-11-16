@@ -266,6 +266,10 @@
                                 Content="Інформація про книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookDetailsButton_Click"/>
+                            <Button x:Name="SimilarBooksButton"
+                                Content="Схожі книги"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="SimilarBooksButton_Click"/>
                         </StackPanel>
                         <StackPanel x:Name="FundSection" Visibility="Collapsed">
                             <Button x:Name="AddBookButton"

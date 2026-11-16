@@ -52,24 +52,19 @@ namespace BiblioGo.Wpf.Views
             ShowButton.IsEnabled = false;
             ShowInfo("Завантаження...");
 
-            try
-            {
-                var result = await _bookCatalogService.GetBookDetailsAsync(bookId);
+            var result = await _bookCatalogService.GetBookDetailsAsync(bookId);
 
-                if (result.IsFailure)
-                {
-                    DetailsPanel.Visibility = Visibility.Collapsed;
-                    ShowError(result.Error);
-                    return;
-                }
+            ShowButton.IsEnabled = true;
 
-                ShowDetails(result.Value);
-                ShowInfo(string.Empty);
-            }
-            finally
+            if (result.IsFailure)
             {
-                ShowButton.IsEnabled = true;
+                DetailsPanel.Visibility = Visibility.Collapsed;
+                ShowError(result.Error);
+                return;
             }
+
+            ShowDetails(result.Value);
+            ShowInfo(string.Empty);
         }
 
         private void ShowDetails(BookDetailsDto details)

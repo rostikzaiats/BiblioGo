@@ -46,30 +46,25 @@ namespace BiblioGo.Wpf.Views
             ShowButton.IsEnabled = false;
             ShowInfo("Завантаження...");
 
-            try
+            var query = new GetPopularBooksQuery
             {
-                var query = new GetPopularBooksQuery
-                {
-                    Period = PeriodComboBox.SelectedValue is PopularBooksPeriod period ? period : PopularBooksPeriod.AllTime,
-                    Top = TopComboBox.SelectedItem is int top ? top : 0
-                };
+                Period = PeriodComboBox.SelectedValue is PopularBooksPeriod period ? period : PopularBooksPeriod.AllTime,
+                Top = TopComboBox.SelectedItem is int top ? top : 0
+            };
 
-                var result = await _bookCatalogService.GetPopularBooksAsync(query);
+            var result = await _bookCatalogService.GetPopularBooksAsync(query);
 
-                if (result.IsFailure)
-                {
-                    BooksDataGrid.ItemsSource = null;
-                    ShowError(result.Error);
-                    return;
-                }
+            ShowButton.IsEnabled = true;
 
-                BooksDataGrid.ItemsSource = result.Value;
-                ShowInfo(result.Value.Count == 0 ? "За цей період книг ще не видавали." : string.Empty);
-            }
-            finally
+            if (result.IsFailure)
             {
-                ShowButton.IsEnabled = true;
+                BooksDataGrid.ItemsSource = null;
+                ShowError(result.Error);
+                return;
             }
+
+            BooksDataGrid.ItemsSource = result.Value;
+            ShowInfo(result.Value.Count == 0 ? "За цей період книг ще не видавали." : string.Empty);
         }
 
         private void ShowInfo(string message)
