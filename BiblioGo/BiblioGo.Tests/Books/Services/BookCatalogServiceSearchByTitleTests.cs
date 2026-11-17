@@ -7,7 +7,7 @@ using Moq;
 namespace BiblioGo.Tests.Books.Services
 {
     // Unit-тести юз кейсу «Знайти книгу за назвою» (BookCatalogService.SearchByTitleAsync)
-    public class BookCatalogServiceTests
+    public class BookCatalogServiceSearchByTitleTests
     {
         private const string ValidTitle = "Кобзар";
         private const string TooShortTitle = "К";

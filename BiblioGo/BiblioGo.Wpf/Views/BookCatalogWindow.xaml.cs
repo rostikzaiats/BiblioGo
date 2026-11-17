@@ -99,31 +99,26 @@ namespace BiblioGo.Wpf.Views
             SetControlsEnabled(false);
             ShowInfo("Завантаження...");
 
-            try
+            var result = await _bookCatalogService.GetCatalogAsync(query);
+
+            if (result.IsFailure)
             {
-                var result = await _bookCatalogService.GetCatalogAsync(query);
-
-                if (result.IsFailure)
-                {
-                    // Помилка валідації або завантаження: попередня сторінка лишається на екрані
-                    ShowError(result.Error);
-                    return;
-                }
-
-                var page = result.Value;
-                _appliedQuery = query;
-                _totalPages = page.TotalPages;
-
-                BooksDataGrid.ItemsSource = page.Books;
-                PageTextBlock.Text = page.TotalCount == 0
-                    ? string.Empty
-                    : $"Сторінка {page.PageNumber} з {page.TotalPages} · усього книг: {page.TotalCount}";
-                ShowInfo(page.TotalCount == 0 ? "Книг за цими умовами не знайдено." : string.Empty);
-            }
-            finally
-            {
+                // Помилка валідації або завантаження: попередня сторінка лишається на екрані
                 SetControlsEnabled(true);
+                ShowError(result.Error);
+                return;
             }
+
+            var page = result.Value;
+            _appliedQuery = query;
+            _totalPages = page.TotalPages;
+            SetControlsEnabled(true);
+
+            BooksDataGrid.ItemsSource = page.Books;
+            PageTextBlock.Text = page.TotalCount == 0
+                ? string.Empty
+                : $"Сторінка {page.PageNumber} з {page.TotalPages} · усього книг: {page.TotalCount}";
+            ShowInfo(page.TotalCount == 0 ? "Книг за цими умовами не знайдено." : string.Empty);
         }
 
         private void SetControlsEnabled(bool isEnabled)
