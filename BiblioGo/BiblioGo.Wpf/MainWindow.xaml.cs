@@ -1,4 +1,4 @@
-using BiblioGo.Application.Users.Commands;
+п»їusing BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
 using BiblioGo.Domain.Enums;
 using BiblioGo.Wpf.Session;
@@ -24,9 +24,9 @@ namespace BiblioGo.Wpf
             _userService = userService;
             _session = session;
             InitializeComponent();
-            ShowSection(CatalogSection, "Каталог");
+            ShowSection(CatalogSection, "РљР°С‚Р°Р»РѕРі");
             ShowCurrentUser();
-            ApplyRole(_session.User?.Role ?? UserRole.Reader); // ролі нема -> дефолт користувач
+            ApplyRole(_session.User?.Role ?? UserRole.Reader); // СЂРѕР»С– РЅРµРјР° -> РґРµС„РѕР»С‚ РєРѕСЂРёСЃС‚СѓРІР°С‡
             ProfileMenu.AddHandler(Button.ClickEvent, new RoutedEventHandler((_, _) => ProfilePopup.IsOpen = false));
         }
 
@@ -47,13 +47,14 @@ namespace BiblioGo.Wpf
             var isStaff = role is UserRole.Librarian or UserRole.Administrator;
             var isAdmin = role == UserRole.Administrator;
 
-            // тільки персонал
+            // С‚С–Р»СЊРєРё РїРµСЂСЃРѕРЅР°Р»
             FundSectionButton.Visibility = ToVisibility(isStaff);
+            CheckCopyAvailabilityButton.Visibility = ToVisibility(isStaff);
             ConfirmLoanIssueButton.Visibility = ToVisibility(isStaff);
             ReturnBookButton.Visibility = ToVisibility(isStaff);
             LoanJournalButton.Visibility = ToVisibility(isStaff);
 
-            // тільки адмін
+            // С‚С–Р»СЊРєРё Р°РґРјС–РЅ
             ChangeUserRoleButton.Visibility = ToVisibility(isAdmin);
         }
 
@@ -97,7 +98,7 @@ namespace BiblioGo.Wpf
             var result = await _userService.LogoutAsync(new LogoutUserCommand { UserId = _session.User.UserId });
             if (result.IsFailure)
             {
-                MessageBox.Show(result.Error, "Вихід з акаунта", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(result.Error, "Р’РёС…С–Рґ Р· Р°РєР°СѓРЅС‚Р°", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -106,17 +107,17 @@ namespace BiblioGo.Wpf
         }
         private void CatalogSectionButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowSection(CatalogSection, "Каталог");
+            ShowSection(CatalogSection, "РљР°С‚Р°Р»РѕРі");
         }
 
         private void FundSectionButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowSection(FundSection, "Адміністрування фонду");
+            ShowSection(FundSection, "РђРґРјС–РЅС–СЃС‚СЂСѓРІР°РЅРЅСЏ С„РѕРЅРґСѓ");
         }
 
         private void LoanSectionButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowSection(LoanSection, "Видача та повернення книг");
+            ShowSection(LoanSection, "Р’РёРґР°С‡Р° С‚Р° РїРѕРІРµСЂРЅРµРЅРЅСЏ РєРЅРёРі");
         }
 
         private void ShowSection(StackPanel section, string title)
@@ -238,6 +239,13 @@ namespace BiblioGo.Wpf
             var userLoansWindow = _serviceProvider.GetRequiredService<UserLoansWindow>();
             userLoansWindow.Owner = this;
             userLoansWindow.Show();
+        }
+
+        private void CheckCopyAvailabilityButton_Click(object sender, RoutedEventArgs e)
+        {
+            var checkCopyAvailabilityWindow = _serviceProvider.GetRequiredService<CheckCopyAvailabilityWindow>();
+            checkCopyAvailabilityWindow.Owner = this;
+            checkCopyAvailabilityWindow.Show();
         }
 
         private void ConfirmLoanIssueButton_Click(object sender, RoutedEventArgs e)
