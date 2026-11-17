@@ -205,6 +205,13 @@ namespace BiblioGo.Wpf
             updateBookWindow.Show();
         }
 
+        private void DeleteBookButton_Click(object sender, RoutedEventArgs e)
+        {
+            var deleteBookWindow = _serviceProvider.GetRequiredService<DeleteBookWindow>();
+            deleteBookWindow.Owner = this;
+            deleteBookWindow.Show();
+        }
+
         private void BookStockButton_Click(object sender, RoutedEventArgs e)
         {
             var bookStockWindow = _serviceProvider.GetRequiredService<BookStockWindow>();

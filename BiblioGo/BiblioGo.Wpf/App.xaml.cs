@@ -91,6 +91,7 @@ namespace BiblioGo.Wpf
             services.AddTransient<AddBookCopiesWindow>();
             services.AddTransient<AddBookWindow>();
             services.AddTransient<UpdateBookWindow>();
+            services.AddTransient<DeleteBookWindow>();
             services.AddTransient<BookStockWindow>();
             services.AddTransient<LoanRequestWindow>();
             services.AddTransient<UserLoansWindow>();

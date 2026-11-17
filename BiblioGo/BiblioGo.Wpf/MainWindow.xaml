@@ -276,6 +276,10 @@
                                 Content="Редагувати інформацію про книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="UpdateBookButton_Click"/>
+                            <Button x:Name="DeleteBookButton"
+                                Content="Видалити книгу з каталогу"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="DeleteBookButton_Click"/>
                             <Button x:Name="AddBookCopiesButton"
                                 Content="Додати примірники книги"
                                 Style="{StaticResource MenuCardButton}"
