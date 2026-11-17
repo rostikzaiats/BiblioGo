@@ -49,5 +49,11 @@ namespace BiblioGo.Application.Interfaces
 
         // Фонд, use case 2: оновити дані книги за її Id; false, якщо такої книги немає
         Task<bool> UpdateAsync(Book book, CancellationToken cancellationToken = default);
+
+        // Фонд, use case 3: чи є по книзі активні позики (заявка Requested або видача Issued на будь-який примірник)
+        Task<bool> HasActiveLoansAsync(int bookId, CancellationToken cancellationToken = default);
+
+        // Фонд, use case 3: видалити книгу разом з її примірниками; false, якщо такої книги немає
+        Task<bool> DeleteAsync(int bookId, CancellationToken cancellationToken = default);
     }
 }

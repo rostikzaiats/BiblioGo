@@ -219,6 +219,30 @@ namespace BiblioGo.Infrastructure.Repositories
         }
 
         // Жанр порівнюється повністю, але без урахування регістру (ILIKE без % — точний збіг)
+        // Фонд, use case 3: чи є по книзі активні позики
+        public async Task<bool> HasActiveLoansAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Loans
+                .AnyAsync(
+                    loan => loan.BookCopy.BookId == bookId
+                        && (loan.Status == LoanStatus.Requested || loan.Status == LoanStatus.Issued),
+                    cancellationToken);
+        }
+
+        // Фонд, use case 3: один DELETE; примірники та їхні (вже завершені) позики видаляє каскад у БД
+        public async Task<bool> DeleteAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var deletedRows = await context.Books
+                .Where(book => book.Id == bookId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return deletedRows > 0;
+        }
+
         private static IQueryable<Book> ApplyCatalogFilters(IQueryable<Book> books, string? genre, int? year)
         {
             if (genre is not null)
