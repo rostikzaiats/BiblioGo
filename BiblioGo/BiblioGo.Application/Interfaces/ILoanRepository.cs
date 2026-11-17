@@ -1,4 +1,4 @@
-
+﻿
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
 
@@ -14,6 +14,9 @@ namespace BiblioGo.Application.Interfaces
 
         // UC 4, 5: отримати позику за ідентифікатором
         Task<Loan?> GetByIdAsync(int loanId, CancellationToken cancellationToken = default);
+
+        // UC 3: позика разом із примірником, його книгою та філією (null, якщо такої немає)
+        Task<Loan?> GetWithCopyAsync(int loanId, CancellationToken cancellationToken = default);
 
         // UC 4: в одній транзакції позика Requested -> Issued (дати видачі та повернення) і примірник
         // Available -> Issued. false — якщо за цей час стан позики або примірника змінився (нічого не збережено)

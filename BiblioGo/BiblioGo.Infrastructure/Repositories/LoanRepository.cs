@@ -1,4 +1,4 @@
-using BiblioGo.Application.Interfaces;
+﻿using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
 using BiblioGo.Infrastructure.Persistence;
@@ -70,6 +70,18 @@ namespace BiblioGo.Infrastructure.Repositories
 
             return await context.Loans
                 .AsNoTracking()
+                .FirstOrDefaultAsync(loan => loan.Id == loanId, cancellationToken);
+        }
+
+        // Use case 3: позика разом із примірником, його книгою та філією (для перевірки перед видачею)
+        public async Task<Loan?> GetWithCopyAsync(int loanId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Loans
+                .AsNoTracking()
+                .Include(loan => loan.BookCopy).ThenInclude(copy => copy.Book)
+                .Include(loan => loan.BookCopy).ThenInclude(copy => copy.Library)
                 .FirstOrDefaultAsync(loan => loan.Id == loanId, cancellationToken);
         }
 
