@@ -113,8 +113,7 @@ namespace BiblioGo.Application.Loans.Services
         }
 
         // Use case 3: перевірити наявність примірника перед видачею. Перевіряється примірник, закріплений за заявкою:
-        // вільний (Available) — книгу можна видавати; виданий або списаний — ні (причина в UnavailableReason).
-        // Збій бази даних перехоплюється тут (try/catch), логується та повертається як неуспішний Result
+        // вільний (Available) — книгу можна видавати; виданий або списаний — ні (причина в UnavailableReason)
         public async Task<Result<CopyAvailabilityDto>> CheckCopyAvailabilityAsync(CheckCopyAvailabilityQuery query, CancellationToken cancellationToken = default)
         {
             var error = CheckCopyAvailabilityValidator.Validate(query);
@@ -126,53 +125,45 @@ namespace BiblioGo.Application.Loans.Services
                 return Result.Failure<CopyAvailabilityDto>(error);
             }
 
-            try
+            var librarianError = await CheckLibrarianAsync(query.LibrarianId);
+            if (librarianError is not null)
             {
-                var librarianError = await CheckLibrarianAsync(query.LibrarianId);
-                if (librarianError is not null)
-                {
-                    _logger.LogWarning(
-                        "Copy availability check rejected: {Reason} (librarian {LibrarianId})",
-                        librarianError, query.LibrarianId);
-                    return Result.Failure<CopyAvailabilityDto>(librarianError);
-                }
-
-                var loan = await _loans.GetWithCopyAsync(query.LoanId, cancellationToken);
-                if (loan is null)
-                {
-                    _logger.LogWarning("Copy availability check rejected: loan {LoanId} not found", query.LoanId);
-                    return Result.Failure<CopyAvailabilityDto>("Заявку не знайдено");
-                }
-
-                var loanError = GetIssueRestriction(loan.Status);
-                if (loanError is not null)
-                {
-                    _logger.LogWarning(
-                        "Copy availability check rejected: loan {LoanId} status is {Status}",
-                        loan.Id, loan.Status);
-                    return Result.Failure<CopyAvailabilityDto>(loanError);
-                }
-
-                var unavailableReason = GetCopyIssueRestriction(loan.BookCopy.Status);
-
-                return Result.Success(new CopyAvailabilityDto
-                {
-                    LoanId = loan.Id,
-                    BookCopyId = loan.BookCopyId,
-                    InventoryNumber = loan.BookCopy.InventoryNumber,
-                    BookTitle = loan.BookCopy.Book.Title,
-                    BookAuthor = loan.BookCopy.Book.Author,
-                    LibraryName = loan.BookCopy.Library.Name,
-                    CopyStatus = loan.BookCopy.Status,
-                    IsAvailable = unavailableReason is null,
-                    UnavailableReason = unavailableReason ?? string.Empty
-                });
+                _logger.LogWarning(
+                    "Copy availability check rejected: {Reason} (librarian {LibrarianId})",
+                    librarianError, query.LibrarianId);
+                return Result.Failure<CopyAvailabilityDto>(librarianError);
             }
-            catch (Exception exception)
+
+            var loan = await _loans.GetWithCopyAsync(query.LoanId, cancellationToken);
+            if (loan is null)
             {
-                _logger.LogError(exception, "Copy availability check of loan {LoanId} failed", query.LoanId);
-                return Result.Failure<CopyAvailabilityDto>("Не вдалося перевірити наявність примірника. Спробуйте ще раз пізніше");
+                _logger.LogWarning("Copy availability check rejected: loan {LoanId} not found", query.LoanId);
+                return Result.Failure<CopyAvailabilityDto>("Заявку не знайдено");
             }
+
+            var loanError = GetIssueRestriction(loan.Status);
+            if (loanError is not null)
+            {
+                _logger.LogWarning(
+                    "Copy availability check rejected: loan {LoanId} status is {Status}",
+                    loan.Id, loan.Status);
+                return Result.Failure<CopyAvailabilityDto>(loanError);
+            }
+
+            var unavailableReason = GetCopyIssueRestriction(loan.BookCopy.Status);
+
+            return Result.Success(new CopyAvailabilityDto
+            {
+                LoanId = loan.Id,
+                BookCopyId = loan.BookCopyId,
+                InventoryNumber = loan.BookCopy.InventoryNumber,
+                BookTitle = loan.BookCopy.Book.Title,
+                BookAuthor = loan.BookCopy.Book.Author,
+                LibraryName = loan.BookCopy.Library.Name,
+                CopyStatus = loan.BookCopy.Status,
+                IsAvailable = unavailableReason is null,
+                UnavailableReason = unavailableReason ?? string.Empty
+            });
         }
 
         // Use case 4: підтвердити та оформити видачу книги (бібліотекар задає граничну дату повернення).
