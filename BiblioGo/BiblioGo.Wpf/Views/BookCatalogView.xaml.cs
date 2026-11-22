@@ -1,12 +1,14 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using BiblioGo.Application.Books.Queries;
 using BiblioGo.Application.Books.Services;
 
 namespace BiblioGo.Wpf.Views
 {
-    // Вікно юз кейсу «Переглянути каталог книг»: фільтри за жанром і роком, сортування, перемикання сторінок
-    public partial class BookCatalogWindow : Window
+    // Юз кейс «Переглянути каталог книг»: каталог постійно показаний на головному екрані (розділ «Каталог»).
+    // Фільтри за жанром і роком, сортування, перемикання сторінок
+    public partial class BookCatalogView : UserControl
     {
         private const int PageSize = 10;
         private const string AllGenres = "Усі жанри";
@@ -22,37 +24,51 @@ namespace BiblioGo.Wpf.Views
         private readonly BookCatalogService _bookCatalogService;
 
         // Фільтри, з якими показано поточну сторінку: «Попередня»/«Наступна» гортають саме цей результат
-        private GetCatalogQuery _appliedQuery = new();
+        private GetCatalogQuery _appliedQuery = new() { PageSize = PageSize };
         private int _totalPages;
+        private bool _isLoaded;
 
-        public BookCatalogWindow(BookCatalogService bookCatalogService)
+        public BookCatalogView(BookCatalogService bookCatalogService)
         {
             _bookCatalogService = bookCatalogService;
             InitializeComponent();
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        // Loaded спрацьовує щоразу, коли контрол знову потрапляє на екран, тому завантажуємо лише перший раз
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            if (_isLoaded)
+            {
+                return;
+            }
+
+            _isLoaded = true;
             SortComboBox.ItemsSource = SortOptions;
             SortComboBox.SelectedIndex = 0;
             GenreComboBox.ItemsSource = new[] { AllGenres };
             GenreComboBox.SelectedIndex = 0;
 
-            ShowButton.IsEnabled = false;
             ShowInfo("Завантаження каталогу...");
-
-            var genresResult = await _bookCatalogService.GetGenresAsync();
-            if (genresResult.IsSuccess)
-            {
-                GenreComboBox.ItemsSource = new[] { AllGenres }.Concat(genresResult.Value).ToList();
-                GenreComboBox.SelectedIndex = 0;
-            }
-            else
-            {
-                ShowError(genresResult.Error);
-            }
-
+            await LoadGenresAsync();
             await LoadPageAsync(CreateQueryFromFilters(pageNumber: 1));
+        }
+
+        // Оновити каталог із тими самими фільтрами і сторінкою (наприклад, після змін у фонді)
+        public async Task RefreshAsync()
+        {
+            if (!_isLoaded)
+            {
+                return;
+            }
+
+            await LoadGenresAsync();
+            await LoadPageAsync(_appliedQuery);
+
+            // Книг стало менше і поточної сторінки вже немає — показуємо останню
+            if (_totalPages > 0 && _appliedQuery.PageNumber > _totalPages)
+            {
+                await LoadPageAsync(WithPage(_appliedQuery, _totalPages));
+            }
         }
 
         private async void ShowButton_Click(object sender, RoutedEventArgs e)
@@ -68,6 +84,25 @@ namespace BiblioGo.Wpf.Views
         private async void NextPageButton_Click(object sender, RoutedEventArgs e)
         {
             await LoadPageAsync(WithPage(_appliedQuery, _appliedQuery.PageNumber + 1));
+        }
+
+        // Жанри для випадайки; обраний жанр лишається обраним, якщо він досі є в каталозі
+        private async Task LoadGenresAsync()
+        {
+            var selectedGenre = GenreComboBox.SelectedIndex > 0 ? GenreComboBox.SelectedItem as string : null;
+
+            var genresResult = await _bookCatalogService.GetGenresAsync();
+            if (genresResult.IsFailure)
+            {
+                ShowError(genresResult.Error);
+                return;
+            }
+
+            var genres = new[] { AllGenres }.Concat(genresResult.Value).ToList();
+            GenreComboBox.ItemsSource = genres;
+            GenreComboBox.SelectedIndex = selectedGenre is not null && genres.Contains(selectedGenre)
+                ? genres.IndexOf(selectedGenre)
+                : 0;
         }
 
         private GetCatalogQuery CreateQueryFromFilters(int pageNumber)
@@ -103,7 +138,7 @@ namespace BiblioGo.Wpf.Views
 
             if (result.IsFailure)
             {
-                // Помилка валідації або завантаження: попередня сторінка лишається на екрані
+                // Помилка валідації: попередня сторінка лишається на екрані
                 SetControlsEnabled(true);
                 ShowError(result.Error);
                 return;
@@ -130,13 +165,13 @@ namespace BiblioGo.Wpf.Views
 
         private void ShowInfo(string message)
         {
-            StatusTextBlock.Foreground = Brushes.Black;
+            StatusTextBlock.Foreground = (Brush)FindResource("TextSecondaryBrush");
             StatusTextBlock.Text = message;
         }
 
         private void ShowError(string message)
         {
-            StatusTextBlock.Foreground = Brushes.Red;
+            StatusTextBlock.Foreground = (Brush)FindResource("ErrorBrush");
             StatusTextBlock.Text = message;
         }
 
