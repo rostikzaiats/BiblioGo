@@ -1,4 +1,5 @@
 using BiblioGo.Application.Books.Services;
+using BiblioGo.Application.Libraries.Services;
 using BiblioGo.Application.Loans.Services;
 using BiblioGo.Application.Lookups.Services;
 using BiblioGo.Application.Users.Services;
@@ -16,6 +17,7 @@ namespace BiblioGo.Application
             services.AddTransient<UserService>();
             services.AddTransient<LoanService>();
             services.AddTransient<LookupService>();
+            services.AddTransient<LibraryService>();
             return services;
         }
     }

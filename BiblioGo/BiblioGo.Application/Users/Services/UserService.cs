@@ -15,12 +15,14 @@ namespace BiblioGo.Application.Users.Services
         private readonly IUserRepository _users;
         private readonly IPasswordHasher _hasher;
         private readonly ILogger<UserService> _logger;
-
-        public UserService(IUserRepository users, IPasswordHasher hasher, ILogger<UserService> logger)
+        private readonly ICurrentUserSession _currentUserSession;
+        public UserService(IUserRepository users, IPasswordHasher hasher, ILogger<UserService> logger,
+            ICurrentUserSession session)
         {
             _users = users;
             _hasher = hasher;
             _logger = logger;
+            _currentUserSession = session;
         }
 
         // Use case 1: зареєструватися в системі
@@ -65,6 +67,7 @@ namespace BiblioGo.Application.Users.Services
                 _logger.LogWarning("Login rejected: {Reason}", error);
                 return Result.Failure<UserDto>(error);
             }
+
             var email = command.Email.Trim().ToLowerInvariant();
             var user = await _users.FindByEmailAsync(email);
             if (user is null || !_hasher.Verify(command.Password, user.PasswordHash))
@@ -72,8 +75,10 @@ namespace BiblioGo.Application.Users.Services
                 _logger.LogWarning("Login rejected: invalid credentials");
                 return Result.Failure<UserDto>("Невірна пошта або пароль");
             }
+
             _logger.LogInformation("User logged in {UserId}", user.Id);
-            return Result.Success(new UserDto
+
+            var userDto = new UserDto
             {
                 UserId = user.Id,
                 Email = user.Email,
@@ -81,7 +86,10 @@ namespace BiblioGo.Application.Users.Services
                 LastName = user.LastName,
                 Phone = user.Phone,
                 Role = user.Role
-            });
+            };
+
+            _currentUserSession.SignIn(userDto);
+            return Result.Success(userDto);
         }
 
         // Use case 3: оновити користувача
@@ -172,23 +180,17 @@ namespace BiblioGo.Application.Users.Services
             return Result.Success();
         }
         // Use case 6: вийти з системи
-        public async Task<Result> LogoutAsync(LogoutUserCommand command)
+        public Result Logout()
         {
-            var error = LogoutUserValidator.Validate(command);
-            if (error is not null)
+            var currentUser = _currentUserSession.User;
+            if (currentUser is null)
             {
-                _logger.LogWarning("Logout rejected: {Reason}", error);
-                return Result.Failure(error);
+                _logger.LogWarning("Logout rejected: nobody is logged in");
+                return Result.Failure("Ви не увійшли в систему");
             }
 
-            var user = await _users.FindByIdAsync(command.UserId);
-            if (user is null)
-            {
-                _logger.LogWarning("Logout rejected: user not found");
-                return Result.Failure("Користувача не знайдено");
-            }
-
-            _logger.LogInformation("User logged out {UserId}", user.Id);
+            _currentUserSession.SignOut();
+            _logger.LogInformation("User logged out {UserId}", currentUser.UserId);
             return Result.Success();
         }
     }

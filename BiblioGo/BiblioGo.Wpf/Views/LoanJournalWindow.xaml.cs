@@ -5,7 +5,7 @@ using BiblioGo.Application.Loans.Queries;
 using BiblioGo.Application.Loans.Services;
 using BiblioGo.Application.Lookups.Services;
 using BiblioGo.Domain.Enums;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Wpf.Views
 {
@@ -26,13 +26,13 @@ namespace BiblioGo.Wpf.Views
 
         private readonly LoanService _loanService;
         private readonly LookupService _lookupService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
         // Фільтри, з якими показано поточну сторінку: «Попередня»/«Наступна» гортають саме цей результат
         private GetLoanJournalQuery _appliedQuery = new();
         private int _totalPages;
 
-        public LoanJournalWindow(LoanService loanService, LookupService lookupService, CurrentUserSession session)
+        public LoanJournalWindow(LoanService loanService, LookupService lookupService, ICurrentUserSession session)
         {
             _loanService = loanService;
             _lookupService = lookupService;

@@ -2,19 +2,16 @@
 using BiblioGo.Application.Users.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using BiblioGo.Wpf.Session;
 namespace BiblioGo.Wpf.Views
 {
     public partial class LoginWindow : Window
     {
         private readonly UserService _userService;
-        private readonly CurrentUserSession _session;
         private readonly IServiceProvider _serviceProvider;
 
-        public LoginWindow(UserService userService, CurrentUserSession session, IServiceProvider serviceProvider)
+        public LoginWindow(UserService userService, IServiceProvider serviceProvider)
         {
             _userService = userService;
-            _session = session;
             _serviceProvider = serviceProvider;
             InitializeComponent();
         }
@@ -39,7 +36,6 @@ namespace BiblioGo.Wpf.Views
                 }
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 StatusText.Text = $"Готово! Користувач увійшов, id: {result.Value.UserId}";
-                _session.User = result.Value;
                 DialogResult = true;
             }
             finally
@@ -64,7 +60,6 @@ namespace BiblioGo.Wpf.Views
         {
             var registerWindow = _serviceProvider.GetRequiredService<RegistrationWindow>();
             registerWindow.Owner = this;
-            registerWindow.ShowDialog();
             if(registerWindow.ShowDialog() == true)
             {
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;

@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Media;
 using BiblioGo.Application.Loans.Commands;
 using BiblioGo.Application.Loans.Services;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Wpf.Views
 {
@@ -11,9 +11,9 @@ namespace BiblioGo.Wpf.Views
     public partial class ReturnBookWindow : Window
     {
         private readonly LoanService _loanService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public ReturnBookWindow(LoanService loanService, CurrentUserSession session)
+        public ReturnBookWindow(LoanService loanService, ICurrentUserSession session)
         {
             _loanService = loanService;
             _session = session;

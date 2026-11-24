@@ -18,7 +18,8 @@ namespace BiblioGo.Tests.Users.Services
             _sut = new UserService(
                 _userRepository.Object,
                 _passwordHasher.Object,
-                NullLogger<UserService>.Instance);
+                NullLogger<UserService>.Instance,
+                new FakeCurrentUserSession());
         }
 
         [Fact]

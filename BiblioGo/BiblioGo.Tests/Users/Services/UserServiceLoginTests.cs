@@ -13,6 +13,7 @@ namespace BiblioGo.Tests.Users.Services
     {
         private readonly Mock<IUserRepository> _userRepository = new();
         private readonly Mock<IPasswordHasher> _passwordHasher = new();
+        private readonly FakeCurrentUserSession _session = new();
         private readonly UserService _sut;
 
         public UserServiceLoginTests()
@@ -20,7 +21,8 @@ namespace BiblioGo.Tests.Users.Services
             _sut = new UserService(
                 _userRepository.Object,
                 _passwordHasher.Object,
-                NullLogger<UserService>.Instance);
+                NullLogger<UserService>.Instance,
+                _session);
         }
 
         [Fact]
@@ -134,6 +136,33 @@ namespace BiblioGo.Tests.Users.Services
             Assert.True(result.IsFailure);
             Assert.False(string.IsNullOrWhiteSpace(result.Error));
             _userRepository.Verify(r => r.FindByEmailAsync(It.IsAny<string>()), Times.Never());
+        }
+        [Fact]
+        public async Task LoginAsync_ValidCredentials_SignsUserIntoSession()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByEmailAsync("reader@mail.com")).ReturnsAsync(CreateStoredUser());
+            _passwordHasher.Setup(h => h.Verify("Password123", "stored_hash")).Returns(true);
+
+            // Act
+            await _sut.LoginAsync(CreateLoginCommand());
+
+            // Assert
+            Assert.Equal(7, _session.User?.UserId);
+        }
+
+        [Fact]
+        public async Task LoginAsync_WrongPassword_LeavesSessionEmpty()
+        {
+            // Arrange
+            _userRepository.Setup(r => r.FindByEmailAsync("reader@mail.com")).ReturnsAsync(CreateStoredUser());
+            _passwordHasher.Setup(h => h.Verify(It.IsAny<string>(), "stored_hash")).Returns(false);
+
+            // Act
+            await _sut.LoginAsync(CreateLoginCommand());
+
+            // Assert
+            Assert.Null(_session.User);
         }
 
         private static LoginUserCommand CreateLoginCommand(

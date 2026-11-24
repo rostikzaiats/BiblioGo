@@ -1,16 +1,16 @@
 using System.Windows;
 using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Wpf.Views
 {
     public partial class ChangePasswordWindow : Window
     {
         private readonly UserService _userService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public ChangePasswordWindow(UserService userService, CurrentUserSession session)
+        public ChangePasswordWindow(UserService userService, ICurrentUserSession session)
         {
             _userService = userService;
             _session = session;

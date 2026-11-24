@@ -1,7 +1,6 @@
-using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
 using BiblioGo.Domain.Enums;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 using BiblioGo.Wpf.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -16,9 +15,9 @@ namespace BiblioGo.Wpf
     {
                 private readonly IServiceProvider _serviceProvider;
         private readonly UserService _userService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public MainWindow(IServiceProvider serviceProvider, UserService userService, CurrentUserSession session)
+        public MainWindow(IServiceProvider serviceProvider, UserService userService, ICurrentUserSession session)
         {
             _serviceProvider = serviceProvider;
             _userService = userService;
@@ -49,6 +48,7 @@ namespace BiblioGo.Wpf
 
             // т≥льки персонал
             FundSectionButton.Visibility = ToVisibility(isStaff);
+            CheckCopyAvailabilityButton.Visibility = ToVisibility(isStaff);
             ConfirmLoanIssueButton.Visibility = ToVisibility(isStaff);
             ReturnBookButton.Visibility = ToVisibility(isStaff);
             LoanJournalButton.Visibility = ToVisibility(isStaff);
@@ -87,21 +87,15 @@ namespace BiblioGo.Wpf
             ProfilePopup.IsOpen = false;
         }
 
-        private async void LogoutButton_Click(object sender, RoutedEventArgs e)
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_session.User is null)
-            {
-                return;
-            }
-
-            var result = await _userService.LogoutAsync(new LogoutUserCommand { UserId = _session.User.UserId });
+            var result = _userService.Logout();
             if (result.IsFailure)
             {
                 MessageBox.Show(result.Error, "¬их≥д з акаунта", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            _session.User = null;
             ((App)App.Current).Logout(this);
         }
         private void CatalogSectionButton_Click(object sender, RoutedEventArgs e)
@@ -163,6 +157,13 @@ namespace BiblioGo.Wpf
             bookDetailsWindow.Owner = this;
             bookDetailsWindow.Show();
         }
+
+        private void SimilarBooksButton_Click(object sender, RoutedEventArgs e)
+        {
+            var similarBooksWindow = _serviceProvider.GetRequiredService<SimilarBooksWindow>();
+            similarBooksWindow.Owner = this;
+            similarBooksWindow.Show();
+        }
         private void UpdateUserProfileButton_Click(object sender, RoutedEventArgs e)
         {
             var updateUserProfileWindow = _serviceProvider.GetRequiredService<UpdateUserProfileWindow>();
@@ -183,7 +184,11 @@ namespace BiblioGo.Wpf
             changeUserRoleWindow.Owner = this;
             changeUserRoleWindow.Show();
         }
-
+        private void AddLibraryButton_Click(object sender, RoutedEventArgs e)
+        {
+            var addLibraryWindow = _serviceProvider.GetRequiredService<AddLibraryWindow>();
+            addLibraryWindow.Owner = this;
+        }
         private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)
         {
             var writeOffWindow = _serviceProvider.GetRequiredService<BookCopyWriteOffWindow>();
@@ -203,6 +208,13 @@ namespace BiblioGo.Wpf
             var updateBookWindow = _serviceProvider.GetRequiredService<UpdateBookWindow>();
             updateBookWindow.Owner = this;
             updateBookWindow.Show();
+        }
+
+        private void DeleteBookButton_Click(object sender, RoutedEventArgs e)
+        {
+            var deleteBookWindow = _serviceProvider.GetRequiredService<DeleteBookWindow>();
+            deleteBookWindow.Owner = this;
+            deleteBookWindow.Show();
         }
 
         private void BookStockButton_Click(object sender, RoutedEventArgs e)
@@ -231,6 +243,13 @@ namespace BiblioGo.Wpf
             var userLoansWindow = _serviceProvider.GetRequiredService<UserLoansWindow>();
             userLoansWindow.Owner = this;
             userLoansWindow.Show();
+        }
+
+        private void CheckCopyAvailabilityButton_Click(object sender, RoutedEventArgs e)
+        {
+            var checkCopyAvailabilityWindow = _serviceProvider.GetRequiredService<CheckCopyAvailabilityWindow>();
+            checkCopyAvailabilityWindow.Owner = this;
+            checkCopyAvailabilityWindow.Show();
         }
 
         private void ConfirmLoanIssueButton_Click(object sender, RoutedEventArgs e)
