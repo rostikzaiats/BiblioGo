@@ -292,6 +292,10 @@
                                 Content="Переглянути залишки книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookStockButton_Click"/>
+                            <Button x:Name="BookCopiesButton"
+                                Content="Переглянути примірники книги"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="BookCopiesButton_Click"/>
                             <Button x:Name="WriteOffBookCopyButton"
                                 Content="Списати примірник"
                                 Style="{StaticResource MenuCardButton}"

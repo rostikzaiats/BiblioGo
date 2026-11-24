@@ -131,6 +131,31 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToDictionaryAsync(item => item.Status, item => item.Count, cancellationToken);
         }
 
+        // UC 7: примірники книги разом із філією; фільтри за філією та статусом застосовуються лише якщо задані
+        public async Task<IReadOnlyList<BookCopy>> GetByBookAsync(int bookId, int? libraryId, BookCopyStatus? status, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var copies = context.BookCopies
+                .AsNoTracking()
+                .Include(copy => copy.Library)
+                .Where(copy => copy.BookId == bookId);
+
+            if (libraryId is not null)
+            {
+                copies = copies.Where(copy => copy.LibraryId == libraryId);
+            }
+
+            if (status is not null)
+            {
+                copies = copies.Where(copy => copy.Status == status);
+            }
+
+            return await copies
+                .OrderBy(copy => copy.InventoryNumber)
+                .ToListAsync(cancellationToken);
+        }
+
         // UC 6: змінити статус примірника (один UPDATE без попереднього читання запису); false, якщо примірника немає
         public async Task<bool> SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default)
         {
