@@ -42,5 +42,9 @@ namespace BiblioGo.Application.Interfaces
 
         // UC 5: кількість примірників книги за статусами (опційно лише в одній філії); відсутній статус означає 0
         Task<IReadOnlyDictionary<BookCopyStatus, int>> CountByStatusAsync(int bookId, int? libraryId, CancellationToken cancellationToken = default);
+
+        // UC 7: примірники книги разом із філією, за інвентарним номером
+        // (опційно лише в одній філії та/або лише в одному статусі). Існування книги і філії перевіряє сервіс
+        Task<IReadOnlyList<BookCopy>> GetByBookAsync(int bookId, int? libraryId, BookCopyStatus? status, CancellationToken cancellationToken = default);
     }
 }

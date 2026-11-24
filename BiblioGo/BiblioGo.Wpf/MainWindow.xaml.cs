@@ -228,6 +228,13 @@ namespace BiblioGo.Wpf
             bookStockWindow.Show();
         }
 
+        private void BookCopiesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var bookCopiesWindow = _serviceProvider.GetRequiredService<BookCopiesWindow>();
+            bookCopiesWindow.Owner = this;
+            bookCopiesWindow.Show();
+        }
+
         private void AddBookCopiesButton_Click(object sender, RoutedEventArgs e)
         {
             var addBookCopiesWindow = _serviceProvider.GetRequiredService<AddBookCopiesWindow>();

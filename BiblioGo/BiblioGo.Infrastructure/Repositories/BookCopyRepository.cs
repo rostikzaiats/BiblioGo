@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
