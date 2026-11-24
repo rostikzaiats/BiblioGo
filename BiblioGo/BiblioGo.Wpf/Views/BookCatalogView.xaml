@@ -1,0 +1,226 @@
+<UserControl x:Class="BiblioGo.Wpf.Views.BookCatalogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <Style x:Key="FilterLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+
+        <!-- Випадайки фільтрів у темній темі -->
+        <ControlTemplate x:Key="FilterComboBoxToggle" TargetType="ToggleButton">
+            <Border x:Name="border"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"
+                      Data="M0,0 L4,4 L8,0" Stroke="{StaticResource TextSecondaryBrush}" StrokeThickness="1.5"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource BorderFocusBrush}"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource BorderFocusBrush}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <Style x:Key="FilterComboBox" TargetType="ComboBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,0,18,8"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Template="{StaticResource FilterComboBoxToggle}"
+                                          Focusable="False" ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <ContentPresenter IsHitTestVisible="False" Margin="12,0,28,0"
+                                              HorizontalAlignment="Left" VerticalAlignment="Center"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"/>
+                            <Popup x:Name="PART_Popup" Placement="Bottom" AllowsTransparency="True" Focusable="False"
+                                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}">
+                                <Border Margin="0,4,0,0" Padding="4"
+                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                        Background="{StaticResource SurfaceBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="border" Background="Transparent" CornerRadius="6" Padding="10,6">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource SurfaceHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CatalogPrimaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Width" Value="110"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.4"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PagerButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.35"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Таблиця книг у темній темі головного вікна -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="AlternatingRowBackground" Value="{StaticResource BgBrush}"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="CanUserReorderColumns" Value="False"/>
+            <!-- Сортує сервіс (на всі сторінки), а не таблиця (лише поточну сторінку) -->
+            <Setter Property="CanUserSortColumns" Value="False"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridColumnHeader">
+                        <Border Background="{StaticResource BgBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="12,9">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Background="{TemplateBinding Background}" Padding="12,8">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Фільтри -->
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Жанр" Style="{StaticResource FilterLabel}" Margin="0,0,8,8"/>
+                <ComboBox x:Name="GenreComboBox" Width="170" Style="{StaticResource FilterComboBox}"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Рік" Style="{StaticResource FilterLabel}" Margin="0,0,8,8"/>
+                <TextBox x:Name="YearTextBox" Width="80" Height="32" Margin="0,0,18,8"
+                         Style="{StaticResource InputBox}"
+                         ToolTip="Необов'язково. Залиште порожнім, щоб показати книги всіх років"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Сортування" Style="{StaticResource FilterLabel}" Margin="0,0,8,8"/>
+                <ComboBox x:Name="SortComboBox" Width="160" Style="{StaticResource FilterComboBox}"
+                          DisplayMemberPath="Name" SelectedValuePath="Value"/>
+            </StackPanel>
+
+            <Button x:Name="ShowButton" Content="Показати" IsDefault="True"
+                    Style="{StaticResource CatalogPrimaryButton}" Click="ShowButton_Click"/>
+        </WrapPanel>
+
+        <!-- Сторінки та статус -->
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="PreviousPageButton" Grid.Column="0" Content="← Попередня" IsEnabled="False"
+                        Style="{StaticResource PagerButton}" Click="PreviousPageButton_Click"/>
+                <TextBlock x:Name="PageTextBlock" Grid.Column="1" VerticalAlignment="Center" TextAlignment="Center"
+                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="12,0"/>
+                <Button x:Name="NextPageButton" Grid.Column="2" Content="Наступна →" IsEnabled="False"
+                        Style="{StaticResource PagerButton}" Click="NextPageButton_Click"/>
+            </Grid>
+            <TextBlock x:Name="StatusTextBlock" Margin="0,8,0,0" TextWrapping="Wrap" FontSize="12"
+                       FontWeight="SemiBold" TextAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Книги -->
+        <DataGrid x:Name="BooksDataGrid" Margin="0,4,0,0" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="НАЗВА" Binding="{Binding Title}" Width="2*"/>
+                <DataGridTextColumn Header="АВТОР" Binding="{Binding Author}" Width="1.4*"/>
+                <DataGridTextColumn Header="ЖАНР" Binding="{Binding Genre}" Width="*"/>
+                <DataGridTextColumn Header="РІК" Binding="{Binding Year}" Width="70"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

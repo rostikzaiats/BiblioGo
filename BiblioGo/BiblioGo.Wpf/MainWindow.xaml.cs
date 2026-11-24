@@ -17,6 +17,7 @@ namespace BiblioGo.Wpf
                 private readonly IServiceProvider _serviceProvider;
         private readonly UserService _userService;
         private readonly CurrentUserSession _session;
+        private readonly BookCatalogView _catalogView;
 
         public MainWindow(IServiceProvider serviceProvider, UserService userService, CurrentUserSession session)
         {
@@ -24,6 +25,8 @@ namespace BiblioGo.Wpf
             _userService = userService;
             _session = session;
             InitializeComponent();
+            _catalogView = serviceProvider.GetRequiredService<BookCatalogView>();
+            CatalogHost.Content = _catalogView;
             ShowSection(CatalogSection, "Каталог");
             ShowCurrentUser();
             ApplyRole(_session.User?.Role ?? UserRole.Reader); // ролі нема -> дефолт користувач
@@ -105,9 +108,11 @@ namespace BiblioGo.Wpf
             _session.User = null;
             ((App)App.Current).Logout(this);
         }
-        private void CatalogSectionButton_Click(object sender, RoutedEventArgs e)
+        // Повертаємось у каталог: оновлюємо його, бо у фонді могли додати чи видалити книги
+        private async void CatalogSectionButton_Click(object sender, RoutedEventArgs e)
         {
             ShowSection(CatalogSection, "Каталог");
+            await _catalogView.RefreshAsync();
         }
 
         private void FundSectionButton_Click(object sender, RoutedEventArgs e)
@@ -120,21 +125,16 @@ namespace BiblioGo.Wpf
             ShowSection(LoanSection, "Видача та повернення книг");
         }
 
-        private void ShowSection(StackPanel section, string title)
+        // Каталог займає весь простір і має власне гортання сторінок, інші розділи — у прокручуваній області
+        private void ShowSection(Panel section, string title)
         {
             CatalogSection.Visibility = Visibility.Collapsed;
             FundSection.Visibility = Visibility.Collapsed;
             LoanSection.Visibility = Visibility.Collapsed;
 
             section.Visibility = Visibility.Visible;
+            OtherSectionsScrollViewer.Visibility = ToVisibility(section != CatalogSection);
             SectionTitleText.Text = title;
-        }
-
-        private void BookCatalogButton_Click(object sender, RoutedEventArgs e)
-        {
-            var bookCatalogWindow = _serviceProvider.GetRequiredService<BookCatalogWindow>();
-            bookCatalogWindow.Owner = this;
-            bookCatalogWindow.Show();
         }
 
         private void PopularBooksButton_Click(object sender, RoutedEventArgs e)

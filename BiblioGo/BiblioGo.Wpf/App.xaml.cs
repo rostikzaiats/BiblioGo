@@ -80,7 +80,7 @@ namespace BiblioGo.Wpf
             services.AddApplication();
             services.AddInfrastructure(configuration);
             services.AddTransient<MainWindow>();
-            services.AddTransient<BookCatalogWindow>();
+            services.AddTransient<BookCatalogView>();
             services.AddTransient<PopularBooksWindow>();
             services.AddTransient<BookSearchWindow>();
             services.AddTransient<BookSearchByAuthorWindow>();
