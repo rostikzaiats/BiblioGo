@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
@@ -131,29 +131,29 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToDictionaryAsync(item => item.Status, item => item.Count, cancellationToken);
         }
 
-        // UC 7: примірники книги разом із філією; фільтри за філією та статусом застосовуються лише якщо задані
-        public async Task<IReadOnlyList<BookCopy>> GetByBookAsync(int bookId, int? libraryId, BookCopyStatus? status, CancellationToken cancellationToken = default)
+        // UC 6 (Видача): примірник за інвентарним номером (номери унікальні в усій мережі) разом із книгою та філією
+        public async Task<BookCopy?> FindByInventoryNumberAsync(int inventoryNumber, CancellationToken cancellationToken = default)
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
-            var copies = context.BookCopies
+            return await context.BookCopies
                 .AsNoTracking()
+                .Include(copy => copy.Book)
                 .Include(copy => copy.Library)
-                .Where(copy => copy.BookId == bookId);
+                .FirstOrDefaultAsync(copy => copy.InventoryNumber == inventoryNumber, cancellationToken);
+        }
 
-            if (libraryId is not null)
-            {
-                copies = copies.Where(copy => copy.LibraryId == libraryId);
-            }
+        // UC 6 (Видача): один умовний UPDATE — статус змінюється, лише якщо примірник досі має currentStatus.
+        // Так ручна зміна не перезапише статус, який щойно виставили видача чи повернення книги
+        public async Task<bool> ChangeStatusAsync(int bookCopyId, BookCopyStatus currentStatus, BookCopyStatus newStatus, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
-            if (status is not null)
-            {
-                copies = copies.Where(copy => copy.Status == status);
-            }
+            var updatedRows = await context.BookCopies
+                .Where(copy => copy.Id == bookCopyId && copy.Status == currentStatus)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(copy => copy.Status, newStatus), cancellationToken);
 
-            return await copies
-                .OrderBy(copy => copy.InventoryNumber)
-                .ToListAsync(cancellationToken);
+            return updatedRows > 0;
         }
 
         // UC 6: змінити статус примірника (один UPDATE без попереднього читання запису); false, якщо примірника немає
@@ -168,4 +168,4 @@ namespace BiblioGo.Infrastructure.Repositories
             return updatedRows > 0;
         }
     }
-}
+}
