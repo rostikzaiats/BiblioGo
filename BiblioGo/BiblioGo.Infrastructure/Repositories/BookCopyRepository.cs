@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
@@ -106,11 +106,6 @@ namespace BiblioGo.Infrastructure.Repositories
             await transaction.CommitAsync(cancellationToken);
 
             return copies;
-        }
-
-        public Task<bool> IsAvailableAsync(int bookCopyId)
-        {
-            throw new NotImplementedException();
         }
 
         public Task UpdateAsync(BookCopy bookCopy)

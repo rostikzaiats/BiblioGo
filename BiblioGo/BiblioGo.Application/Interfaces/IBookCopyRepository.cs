@@ -1,4 +1,4 @@
-
+﻿
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
 
@@ -12,9 +12,6 @@ namespace BiblioGo.Application.Interfaces
         // UC 1: знайти вільний примірник книги у конкретній філії
         // (статус Available і без іншої незакритої заявки Requested на цей примірник)
         Task<BookCopy?> FindAvailableCopyAsync(int bookId, int libraryId, CancellationToken cancellationToken = default);
-
-        // UC 3: чи вільний примірник (статус Available)
-        Task<bool> IsAvailableAsync(int bookCopyId);
 
         // UC 4: додати quantity нових примірників (статус Available) книги у філію з новими унікальними
         // інвентарними номерами. Існування книги і філії перевіряє сервіс

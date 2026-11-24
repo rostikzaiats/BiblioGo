@@ -1,4 +1,4 @@
-<Window x:Class="BiblioGo.Wpf.MainWindow"
+﻿<Window x:Class="BiblioGo.Wpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -271,6 +271,10 @@
                                 Content="Інформація про книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookDetailsButton_Click"/>
+                            <Button x:Name="SimilarBooksButton"
+                                Content="Схожі книги"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="SimilarBooksButton_Click"/>
                         </StackPanel>
                         <StackPanel x:Name="FundSection" Visibility="Collapsed">
                             <Button x:Name="AddBookButton"
@@ -281,6 +285,10 @@
                                 Content="Редагувати інформацію про книгу"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="UpdateBookButton_Click"/>
+                            <Button x:Name="DeleteBookButton"
+                                Content="Видалити книгу з каталогу"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="DeleteBookButton_Click"/>
                             <Button x:Name="AddBookCopiesButton"
                                 Content="Додати примірники книги"
                                 Style="{StaticResource MenuCardButton}"
@@ -299,6 +307,10 @@
                                 Content="Оформити заявку на отримання"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="CreateLoanRequestButton_Click"/>
+                            <Button x:Name="CheckCopyAvailabilityButton"
+                                Content="Перевірити наявність примірника перед видачею"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="CheckCopyAvailabilityButton_Click"/>
                             <Button x:Name="ConfirmLoanIssueButton"
                                 Content="Підтвердити та оформити видачу книги"
                                 Style="{StaticResource MenuCardButton}"

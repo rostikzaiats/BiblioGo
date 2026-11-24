@@ -25,6 +25,7 @@ namespace BiblioGo.Application.Interfaces
         // Use case «Популярні книги»: книги, які найчастіше видавали (з датою видачі не раніше issuedFrom, якщо вона задана),
         // від найпопулярнішої; заявки, за якими книгу ще не видали, не рахуються
         Task<IReadOnlyList<PopularBookDto>> GetPopularAsync(DateTime? issuedFrom, int top, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<SimilarBookDto>> GetSimilarAsync(int bookId, string author, string genre, int top, CancellationToken cancellationToken = default);
 
         // Use case 2: пошук за назвою (входження підрядка без урахування регістру)
         Task<IReadOnlyList<Book>> SearchByTitleAsync(string title, CancellationToken cancellationToken = default);
@@ -49,5 +50,11 @@ namespace BiblioGo.Application.Interfaces
 
         // Фонд, use case 2: оновити дані книги за її Id; false, якщо такої книги немає
         Task<bool> UpdateAsync(Book book, CancellationToken cancellationToken = default);
+
+        // Фонд, use case 3: чи є по книзі активні позики (заявка Requested або видача Issued на будь-який примірник)
+        Task<bool> HasActiveLoansAsync(int bookId, CancellationToken cancellationToken = default);
+
+        // Фонд, use case 3: видалити книгу разом з її примірниками; false, якщо такої книги немає
+        Task<bool> DeleteAsync(int bookId, CancellationToken cancellationToken = default);
     }
 }

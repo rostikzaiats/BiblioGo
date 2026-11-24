@@ -106,6 +106,37 @@ namespace BiblioGo.Application.Books.Services
             return Result.Success();
         }
 
+        // Use case 3: видалити книгу з каталогу (лише за відсутності активних позик; примірники видаляються разом з нею)
+        public async Task<Result> DeleteBookAsync(DeleteBookCommand command, CancellationToken cancellationToken = default)
+        {
+            var validationError = DeleteBookValidator.Validate(command);
+            if (validationError is not null)
+            {
+                _logger.LogWarning("Deleting book {BookId} rejected: {ValidationError}", command.BookId, validationError);
+                return Result.Failure(validationError);
+            }
+
+            if (await _bookRepository.GetByIdAsync(command.BookId, cancellationToken) is null)
+            {
+                _logger.LogWarning("Deleting book rejected: book {BookId} not found", command.BookId);
+                return Result.Failure("Книгу не знайдено.");
+            }
+
+            if (await _bookRepository.HasActiveLoansAsync(command.BookId, cancellationToken))
+            {
+                _logger.LogWarning("Deleting book {BookId} rejected: book has active loans", command.BookId);
+                return Result.Failure("Не можна видалити книгу: за нею є активні заявки або видані примірники.");
+            }
+
+            if (!await _bookRepository.DeleteAsync(command.BookId, cancellationToken))
+            {
+                _logger.LogWarning("Deleting book rejected: book {BookId} disappeared before deletion", command.BookId);
+                return Result.Failure("Книгу не знайдено.");
+            }
+
+            return Result.Success();
+        }
+
         // Use case 4: додати фізичні примірники книги (повертає створені примірники з інвентарними номерами)
         public async Task<Result<IReadOnlyList<BookCopy>>> AddCopiesAsync(AddBookCopiesCommand command, CancellationToken cancellationToken = default)
         {

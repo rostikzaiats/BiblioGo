@@ -119,6 +119,45 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        // Use case «Схожі книги»: інші книги того ж автора або жанру (ILIKE без % — точний збіг без урахування регістру).
+        // Спочатку книги того ж автора і жанру, потім лише того ж автора, потім лише того ж жанру
+        public async Task<IReadOnlyList<SimilarBookDto>> GetSimilarAsync(
+            int bookId,
+            string author,
+            string genre,
+            int top,
+            CancellationToken cancellationToken = default)
+        {
+            var hasAuthor = !string.IsNullOrWhiteSpace(author);
+            var hasGenre = !string.IsNullOrWhiteSpace(genre);
+            var authorPattern = hasAuthor ? EscapeLikePattern(author.Trim()) : string.Empty;
+            var genrePattern = hasGenre ? EscapeLikePattern(genre.Trim()) : string.Empty;
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Books
+                .AsNoTracking()
+                .Where(book => book.Id != bookId
+                    && ((hasAuthor && EF.Functions.ILike(book.Author, authorPattern))
+                        || (hasGenre && EF.Functions.ILike(book.Genre, genrePattern))))
+                .OrderByDescending(book => hasAuthor && EF.Functions.ILike(book.Author, authorPattern))
+                .ThenByDescending(book => hasGenre && EF.Functions.ILike(book.Genre, genrePattern))
+                .ThenBy(book => book.Title)
+                .ThenBy(book => book.Id)
+                .Take(top)
+                .Select(book => new SimilarBookDto
+                {
+                    BookId = book.Id,
+                    Title = book.Title,
+                    Author = book.Author,
+                    Genre = book.Genre,
+                    Year = book.Year,
+                    SameAuthor = hasAuthor && EF.Functions.ILike(book.Author, authorPattern),
+                    SameGenre = hasGenre && EF.Functions.ILike(book.Genre, genrePattern)
+                })
+                .ToListAsync(cancellationToken);
+        }
+
         // Use case 2: пошук за назвою (PostgreSQL ILIKE — без урахування регістру)
         public async Task<IReadOnlyList<Book>> SearchByTitleAsync(string title, CancellationToken cancellationToken = default)
         {
@@ -219,6 +258,30 @@ namespace BiblioGo.Infrastructure.Repositories
         }
 
         // Жанр порівнюється повністю, але без урахування регістру (ILIKE без % — точний збіг)
+        // Фонд, use case 3: чи є по книзі активні позики
+        public async Task<bool> HasActiveLoansAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.Loans
+                .AnyAsync(
+                    loan => loan.BookCopy.BookId == bookId
+                        && (loan.Status == LoanStatus.Requested || loan.Status == LoanStatus.Issued),
+                    cancellationToken);
+        }
+
+        // Фонд, use case 3: один DELETE; примірники та їхні (вже завершені) позики видаляє каскад у БД
+        public async Task<bool> DeleteAsync(int bookId, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var deletedRows = await context.Books
+                .Where(book => book.Id == bookId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return deletedRows > 0;
+        }
+
         private static IQueryable<Book> ApplyCatalogFilters(IQueryable<Book> books, string? genre, int? year)
         {
             if (genre is not null)

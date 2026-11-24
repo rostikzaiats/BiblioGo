@@ -19,28 +19,23 @@ namespace BiblioGo.Wpf.Views
             SearchButton.IsEnabled = false;
             StatusTextBlock.Text = "Пошук...";
 
-            try
-            {
-                var result = await _bookCatalogService.SearchByAuthorAsync(AuthorTextBox.Text);
+            var result = await _bookCatalogService.SearchByAuthorAsync(AuthorTextBox.Text);
 
-                if (result.IsFailure)
-                {
-                    // Помилка валідації: показуємо її текст користувачу
-                    BooksDataGrid.ItemsSource = null;
-                    StatusTextBlock.Text = result.Error;
-                    return;
-                }
+            SearchButton.IsEnabled = true;
 
-                var books = result.Value;
-                BooksDataGrid.ItemsSource = books;
-                StatusTextBlock.Text = books.Count == 0
-                    ? "Книг цього автора не знайдено."
-                    : $"Знайдено книг: {books.Count}";
-            }
-            finally
+            if (result.IsFailure)
             {
-                SearchButton.IsEnabled = true;
+                // Помилка валідації: показуємо її текст користувачу
+                BooksDataGrid.ItemsSource = null;
+                StatusTextBlock.Text = result.Error;
+                return;
             }
+
+            var books = result.Value;
+            BooksDataGrid.ItemsSource = books;
+            StatusTextBlock.Text = books.Count == 0
+                ? "Книг цього автора не знайдено."
+                : $"Знайдено книг: {books.Count}";
         }
     }
 }

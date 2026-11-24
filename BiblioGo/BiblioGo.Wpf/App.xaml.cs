@@ -1,4 +1,4 @@
-using System.IO;
+п»їusing System.IO;
 using System.Windows;
 using BiblioGo.Application;
 using BiblioGo.Infrastructure;
@@ -33,7 +33,7 @@ namespace BiblioGo.Wpf
         }
         public void Logout(Window currentMainWindow)
         {
-            // інакше закриття головного вікна завершить усю програму
+            // С–РЅР°РєС€Рµ Р·Р°РєСЂРёС‚С‚СЏ РіРѕР»РѕРІРЅРѕРіРѕ РІС–РєРЅР° Р·Р°РІРµСЂС€РёС‚СЊ СѓСЃСЋ РїСЂРѕРіСЂР°РјСѓ
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             currentMainWindow.Close();
             ShowLoginThenMain();
@@ -84,15 +84,18 @@ namespace BiblioGo.Wpf
             services.AddTransient<BookSearchWindow>();
             services.AddTransient<BookSearchByAuthorWindow>();
             services.AddTransient<BookDetailsWindow>();
+            services.AddTransient<SimilarBooksWindow>();
             services.AddTransient<RegistrationWindow>();
             services.AddTransient<LoginWindow>();
             services.AddTransient<BookCopyWriteOffWindow>();
             services.AddTransient<AddBookCopiesWindow>();
             services.AddTransient<AddBookWindow>();
             services.AddTransient<UpdateBookWindow>();
+            services.AddTransient<DeleteBookWindow>();
             services.AddTransient<BookStockWindow>();
             services.AddTransient<LoanRequestWindow>();
             services.AddTransient<UserLoansWindow>();
+            services.AddTransient<CheckCopyAvailabilityWindow>();
             services.AddTransient<ConfirmLoanIssueWindow>();
             services.AddTransient<ReturnBookWindow>();
             services.AddTransient<LoanJournalWindow>();
