@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BiblioGo.Wpf"
         mc:Ignorable="d"
-        Title="BiblioGo" Height="560" Width="900"
+        Title="BiblioGo" Height="680" Width="1080"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         WindowStyle="None"
@@ -96,6 +96,13 @@
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="2,18,0,8"/>
+        </Style>
+
+        <!-- Компактна кнопка дії над каталогом -->
+        <Style x:Key="QuickActionButton" TargetType="Button" BasedOn="{StaticResource MenuCardButton}">
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="FontSize" Value="12"/>
         </Style>
     </Window.Resources>
 
@@ -246,36 +253,41 @@
                                 Click="LoanSectionButton_Click"/>
                     </StackPanel>
                 </Border>
-                <ScrollViewer Grid.Column="1"
+                <!-- Розділ «Каталог»: каталог книг постійно на екрані, інші дії — компактні кнопки над ним -->
+                <DockPanel x:Name="CatalogSection"
+                           Grid.Column="1"
+                           Margin="32,10,32,24">
+                    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <Button x:Name="PopularBooksButton"
+                            Content="Популярні книги"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="PopularBooksButton_Click"/>
+                        <Button x:Name="BookSearchButton"
+                            Content="Пошук за назвою"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="BookSearchButton_Click"/>
+                        <Button x:Name="BookSearchByAuthorButton"
+                            Content="Пошук за автором"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="BookSearchByAuthorButton_Click"/>
+                        <Button x:Name="BookDetailsButton"
+                            Content="Інформація про книгу"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="BookDetailsButton_Click"/>
+                        <Button x:Name="SimilarBooksButton"
+                            Content="Схожі книги"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="SimilarBooksButton_Click"/>
+                    </WrapPanel>
+                    <ContentControl x:Name="CatalogHost"/>
+                </DockPanel>
+
+                <ScrollViewer x:Name="OtherSectionsScrollViewer"
+                              Grid.Column="1"
                               Margin="32,10,32,24"
+                              Visibility="Collapsed"
                               VerticalScrollBarVisibility="Auto">
                     <Grid>
-                        <StackPanel x:Name="CatalogSection">
-                            <Button x:Name="BookCatalogButton"
-                                Content="Каталог книг"
-                                Style="{StaticResource MenuCardButton}"
-                                Click="BookCatalogButton_Click"/>
-                            <Button x:Name="PopularBooksButton"
-                                Content="Популярні книги"
-                                Style="{StaticResource MenuCardButton}"
-                                Click="PopularBooksButton_Click"/>
-                            <Button x:Name="BookSearchButton"
-                                Content="Пошук книги за назвою"
-                                Style="{StaticResource MenuCardButton}"
-                                Click="BookSearchButton_Click"/>
-                            <Button x:Name="BookSearchByAuthorButton"
-                                Content="Пошук книги за автором"
-                                Style="{StaticResource MenuCardButton}"
-                                Click="BookSearchByAuthorButton_Click"/>
-                            <Button x:Name="BookDetailsButton"
-                                Content="Інформація про книгу"
-                                Style="{StaticResource MenuCardButton}"
-                                Click="BookDetailsButton_Click"/>
-                            <Button x:Name="SimilarBooksButton"
-                                Content="Схожі книги"
-                                Style="{StaticResource MenuCardButton}"
-                                Click="SimilarBooksButton_Click"/>
-                        </StackPanel>
                         <StackPanel x:Name="FundSection" Visibility="Collapsed">
                             <Button x:Name="AddBookButton"
                                 Content="Додати нову книгу"
@@ -297,6 +309,10 @@
                                 Content="Переглянути залишки книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="BookStockButton_Click"/>
+                            <Button x:Name="BookCopiesButton"
+                                Content="Переглянути примірники книги"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="BookCopiesButton_Click"/>
                             <Button x:Name="WriteOffBookCopyButton"
                                 Content="Списати примірник"
                                 Style="{StaticResource MenuCardButton}"
@@ -319,6 +335,10 @@
                                 Content="Оформити повернення книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="ReturnBookButton_Click"/>
+                            <Button x:Name="ChangeBookCopyStatusButton"
+                                Content="Змінити статус примірника"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="ChangeBookCopyStatusButton_Click"/>
                             <Button x:Name="LoanJournalButton"
                                 Content="Переглянути журнал позик"
                                 Style="{StaticResource MenuCardButton}"

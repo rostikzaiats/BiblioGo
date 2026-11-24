@@ -79,7 +79,7 @@ namespace BiblioGo.Wpf
             services.AddApplication();
             services.AddInfrastructure(configuration);
             services.AddTransient<MainWindow>();
-            services.AddTransient<BookCatalogWindow>();
+            services.AddTransient<BookCatalogView>();
             services.AddTransient<PopularBooksWindow>();
             services.AddTransient<BookSearchWindow>();
             services.AddTransient<BookSearchByAuthorWindow>();
@@ -93,11 +93,13 @@ namespace BiblioGo.Wpf
             services.AddTransient<UpdateBookWindow>();
             services.AddTransient<DeleteBookWindow>();
             services.AddTransient<BookStockWindow>();
+            services.AddTransient<BookCopiesWindow>();
             services.AddTransient<LoanRequestWindow>();
             services.AddTransient<UserLoansWindow>();
             services.AddTransient<CheckCopyAvailabilityWindow>();
             services.AddTransient<ConfirmLoanIssueWindow>();
             services.AddTransient<ReturnBookWindow>();
+            services.AddTransient<ChangeBookCopyStatusWindow>();
             services.AddTransient<LoanJournalWindow>();
             services.AddTransient<UpdateUserProfileWindow>();
             services.AddTransient<ChangePasswordWindow>();

@@ -230,6 +230,48 @@ namespace BiblioGo.Application.Books.Services
             return Result.Success();
         }
 
+        // Use case 7: переглянути примірники книги (інвентарні номери, філії, статуси) з фільтрами за філією та статусом
+        public async Task<Result<IReadOnlyList<BookCopyDto>>> GetCopiesAsync(GetBookCopiesQuery query, CancellationToken cancellationToken = default)
+        {
+            var validationError = GetBookCopiesValidator.Validate(query);
+            if (validationError is not null)
+            {
+                _logger.LogWarning(
+                    "Book copies view rejected: {ValidationError} (book {BookId}, library {LibraryId}, status {Status})",
+                    validationError, query.BookId, query.LibraryId, query.Status);
+                return Result.Failure<IReadOnlyList<BookCopyDto>>(validationError);
+            }
+
+            if (await _bookRepository.GetByIdAsync(query.BookId, cancellationToken) is null)
+            {
+                _logger.LogWarning("Book copies view rejected: book {BookId} not found", query.BookId);
+                return Result.Failure<IReadOnlyList<BookCopyDto>>("Книгу не знайдено.");
+            }
+
+            if (query.LibraryId is { } libraryId && !await _libraryRepository.ExistsAsync(libraryId, cancellationToken))
+            {
+                _logger.LogWarning("Book copies view rejected: library {LibraryId} not found", libraryId);
+                return Result.Failure<IReadOnlyList<BookCopyDto>>("Філію не знайдено.");
+            }
+
+            var copies = await _bookCopyRepository.GetByBookAsync(query.BookId, query.LibraryId, query.Status, cancellationToken);
+
+            IReadOnlyList<BookCopyDto> items = copies.Select(CreateCopyDto).ToList();
+
+            return Result.Success(items);
+        }
+
+        private static BookCopyDto CreateCopyDto(BookCopy copy)
+        {
+            return new BookCopyDto
+            {
+                BookCopyId = copy.Id,
+                InventoryNumber = copy.InventoryNumber,
+                LibraryName = copy.Library.Name,
+                Status = copy.Status
+            };
+        }
+
         // Усього = примірники в обігу (на полицях і на руках); списані до загальної кількості не входять
         private static BookStockDto CreateStock(Book book, IReadOnlyDictionary<BookCopyStatus, int> counts)
         {
