@@ -326,6 +326,10 @@
                                 Content="Оформити повернення книги"
                                 Style="{StaticResource MenuCardButton}"
                                 Click="ReturnBookButton_Click"/>
+                            <Button x:Name="ChangeBookCopyStatusButton"
+                                Content="Змінити статус примірника"
+                                Style="{StaticResource MenuCardButton}"
+                                Click="ChangeBookCopyStatusButton_Click"/>
                             <Button x:Name="LoanJournalButton"
                                 Content="Переглянути журнал позик"
                                 Style="{StaticResource MenuCardButton}"

@@ -33,6 +33,13 @@ namespace BiblioGo.Application.Interfaces
         // UC 6: змінити статус примірника; false, якщо такого примірника немає
         Task<bool> SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default);
 
+        // UC 6 (Видача): примірник за інвентарним номером разом із книгою та філією (null, якщо такого немає)
+        Task<BookCopy?> FindByInventoryNumberAsync(int inventoryNumber, CancellationToken cancellationToken = default);
+
+        // UC 6 (Видача): змінити статус примірника, лише якщо він досі має currentStatus.
+        // false — якщо примірника немає або його статус за цей час змінився (нічого не збережено)
+        Task<bool> ChangeStatusAsync(int bookCopyId, BookCopyStatus currentStatus, BookCopyStatus newStatus, CancellationToken cancellationToken = default);
+
         // UC 5: кількість примірників книги за статусами (опційно лише в одній філії); відсутній статус означає 0
         Task<IReadOnlyDictionary<BookCopyStatus, int>> CountByStatusAsync(int bookId, int? libraryId, CancellationToken cancellationToken = default);
     }

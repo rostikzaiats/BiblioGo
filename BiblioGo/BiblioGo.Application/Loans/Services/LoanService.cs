@@ -286,6 +286,74 @@ namespace BiblioGo.Application.Loans.Services
             return Result.Success();
         }
 
+        // Use case 6: змінити статус примірника вручну відповідно до його фізичного стану
+        // (списати пошкоджений або повернути у фонд помилково списаний). Статус «Видано» виставляє лише
+        // підтвердження видачі (UC 4), а знімає — лише оформлення повернення (UC 5), щоб не розійтися з позиками
+        public async Task<Result<BookCopyStatusChangeDto>> ChangeBookCopyStatusAsync(ChangeBookCopyStatusCommand command, CancellationToken cancellationToken = default)
+        {
+            var error = ChangeBookCopyStatusValidator.Validate(command);
+            if (error is not null)
+            {
+                _logger.LogWarning(
+                    "Book copy status change rejected: {Reason} (inventory number {InventoryNumber}, new status {NewStatus}, librarian {LibrarianId})",
+                    error, command.InventoryNumber, command.NewStatus, command.LibrarianId);
+                return Result.Failure<BookCopyStatusChangeDto>(error);
+            }
+
+            _logger.LogInformation(
+                "Changing status of book copy with inventory number {InventoryNumber} to {NewStatus} by librarian {LibrarianId}",
+                command.InventoryNumber, command.NewStatus, command.LibrarianId);
+
+            var librarianError = await CheckLibrarianAsync(command.LibrarianId);
+            if (librarianError is not null)
+            {
+                _logger.LogWarning(
+                    "Book copy status change rejected: {Reason} (librarian {LibrarianId})",
+                    librarianError, command.LibrarianId);
+                return Result.Failure<BookCopyStatusChangeDto>(librarianError);
+            }
+
+            var copy = await _bookCopies.FindByInventoryNumberAsync(command.InventoryNumber, cancellationToken);
+            if (copy is null)
+            {
+                _logger.LogWarning(
+                    "Book copy status change rejected: book copy with inventory number {InventoryNumber} not found",
+                    command.InventoryNumber);
+                return Result.Failure<BookCopyStatusChangeDto>("Примірник з таким інвентарним номером не знайдено");
+            }
+
+            var statusError = GetStatusChangeRestriction(copy.Status, command.NewStatus);
+            if (statusError is not null)
+            {
+                _logger.LogWarning(
+                    "Book copy status change rejected: book copy {BookCopyId} cannot change status {CurrentStatus} -> {NewStatus}",
+                    copy.Id, copy.Status, command.NewStatus);
+                return Result.Failure<BookCopyStatusChangeDto>(statusError);
+            }
+
+            if (!await _bookCopies.ChangeStatusAsync(copy.Id, copy.Status, command.NewStatus, cancellationToken))
+            {
+                _logger.LogWarning(
+                    "Book copy status change rejected: book copy {BookCopyId} was changed concurrently",
+                    copy.Id);
+                return Result.Failure<BookCopyStatusChangeDto>(ConcurrentChangeError);
+            }
+
+            _logger.LogInformation(
+                "Book copy {BookCopyId} status changed {PreviousStatus} -> {NewStatus} by librarian {LibrarianId}",
+                copy.Id, copy.Status, command.NewStatus, command.LibrarianId);
+
+            return Result.Success(new BookCopyStatusChangeDto
+            {
+                BookCopyId = copy.Id,
+                InventoryNumber = copy.InventoryNumber,
+                BookTitle = copy.Book.Title,
+                LibraryName = copy.Library.Name,
+                PreviousStatus = copy.Status,
+                NewStatus = command.NewStatus
+            });
+        }
+
         // Use case 7: переглянути журнал позик філії (фільтр за статусом і датою оформлення, нові першими, сторінки)
         public async Task<Result<LoanJournalPageDto>> GetLoanJournalAsync(GetLoanJournalQuery query, CancellationToken cancellationToken = default)
         {
@@ -375,6 +443,24 @@ namespace BiblioGo.Application.Loans.Services
                 LoanStatus.Returned => "Книгу за цією заявкою вже повернено",
                 _ => null
             };
+        }
+
+        // UC 6: вручну дозволено лише «Доступний» <-> «Списаний»; повертає текст помилки або null
+        private static string? GetStatusChangeRestriction(BookCopyStatus currentStatus, BookCopyStatus newStatus)
+        {
+            if (currentStatus == newStatus)
+            {
+                return "Примірник уже має цей статус";
+            }
+
+            if (newStatus == BookCopyStatus.Issued)
+            {
+                return "Статус «Видано» встановлюється лише під час підтвердження видачі книги";
+            }
+
+            return currentStatus == BookCopyStatus.Issued
+                ? "Примірник на руках у читача: спершу оформіть повернення книги"
+                : null;
         }
 
         // Книгу можна повернути протягом усього граничного дня, тому термін — кінець цієї дати
