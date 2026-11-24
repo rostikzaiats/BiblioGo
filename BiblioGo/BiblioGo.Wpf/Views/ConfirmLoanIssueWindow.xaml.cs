@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Media;
 using BiblioGo.Application.Loans.Commands;
 using BiblioGo.Application.Loans.Services;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Wpf.Views
 {
@@ -13,9 +13,9 @@ namespace BiblioGo.Wpf.Views
         private const int DefaultLoanDays = 14;
 
         private readonly LoanService _loanService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public ConfirmLoanIssueWindow(LoanService loanService, CurrentUserSession session)
+        public ConfirmLoanIssueWindow(LoanService loanService, ICurrentUserSession session)
         {
             _loanService = loanService;
             _session = session;

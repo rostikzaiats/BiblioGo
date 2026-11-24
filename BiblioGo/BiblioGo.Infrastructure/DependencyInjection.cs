@@ -2,6 +2,7 @@ using BiblioGo.Application.Interfaces;
 using BiblioGo.Infrastructure.Persistence;
 using BiblioGo.Infrastructure.Repositories;
 using BiblioGo.Infrastructure.Security;
+using BiblioGo.Infrastructure.Sessions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ namespace BiblioGo.Infrastructure
             services.AddTransient<ILoanRepository, LoanRepository>();
             services.AddTransient<ILibraryRepository, LibraryRepository>();
             services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+            services.AddSingleton<ICurrentUserSession, CurrentUserSession>();
             return services;
         }
     }

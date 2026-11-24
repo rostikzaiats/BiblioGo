@@ -3,7 +3,6 @@ using System.Windows;
 using BiblioGo.Application;
 using BiblioGo.Infrastructure;
 using BiblioGo.Wpf.Views;
-using BiblioGo.Wpf.Session;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -102,10 +101,10 @@ namespace BiblioGo.Wpf
             services.AddTransient<ReturnBookWindow>();
             services.AddTransient<ChangeBookCopyStatusWindow>();
             services.AddTransient<LoanJournalWindow>();
-            services.AddSingleton<CurrentUserSession>();
             services.AddTransient<UpdateUserProfileWindow>();
             services.AddTransient<ChangePasswordWindow>();
             services.AddTransient<ChangeUserRoleWindow>();
+            services.AddTransient<AddLibraryWindow>();
 
             return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
         }

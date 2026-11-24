@@ -1,6 +1,6 @@
 ﻿using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 using System.Windows;
 
 namespace BiblioGo.Wpf.Views
@@ -11,9 +11,9 @@ namespace BiblioGo.Wpf.Views
     public partial class UpdateUserProfileWindow : Window
     {
         private readonly UserService _userService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public UpdateUserProfileWindow(UserService userService, CurrentUserSession session)
+        public UpdateUserProfileWindow(UserService userService, ICurrentUserSession session)
         {
             _userService = userService;
             _session = session;

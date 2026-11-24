@@ -198,9 +198,14 @@
                                     Content="Змінити роль користувача"
                                     Style="{StaticResource SidebarButton}"
                                     Click="ChangeUserRoleButton_Click"/>
+                            <Button x:Name="AddLibraryButton"
+                                    Content="Додати нову філію"
+                                    Style="{StaticResource SidebarButton}"
+                                    Click="AddLibraryButton_Click"/>
                             <Border Height="1"
                                     Margin="8,6"
                                     Background="{StaticResource BorderBrush}"/>
+                            
                             <Button x:Name="LogoutButton"
                                     Content="Вийти з акаунта"
                                     Foreground="{StaticResource ErrorBrush}"

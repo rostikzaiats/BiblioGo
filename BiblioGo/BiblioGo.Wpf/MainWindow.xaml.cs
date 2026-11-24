@@ -1,7 +1,6 @@
-﻿using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
 using BiblioGo.Domain.Enums;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 using BiblioGo.Wpf.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -19,7 +18,7 @@ namespace BiblioGo.Wpf
         private readonly CurrentUserSession _session;
         private readonly BookCatalogView _catalogView;
 
-        public MainWindow(IServiceProvider serviceProvider, UserService userService, CurrentUserSession session)
+        public MainWindow(IServiceProvider serviceProvider, UserService userService, ICurrentUserSession session)
         {
             _serviceProvider = serviceProvider;
             _userService = userService;
@@ -60,6 +59,7 @@ namespace BiblioGo.Wpf
 
             // тільки адмін
             ChangeUserRoleButton.Visibility = ToVisibility(isAdmin);
+            AddLibraryButton.Visibility = ToVisibility(isAdmin);
         }
 
         private static Visibility ToVisibility(bool visible)
@@ -92,21 +92,15 @@ namespace BiblioGo.Wpf
             ProfilePopup.IsOpen = false;
         }
 
-        private async void LogoutButton_Click(object sender, RoutedEventArgs e)
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_session.User is null)
-            {
-                return;
-            }
-
-            var result = await _userService.LogoutAsync(new LogoutUserCommand { UserId = _session.User.UserId });
+            var result = _userService.Logout();
             if (result.IsFailure)
             {
                 MessageBox.Show(result.Error, "Вихід з акаунта", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            _session.User = null;
             ((App)App.Current).Logout(this);
         }
         // Повертаємось у каталог: оновлюємо його, бо у фонді могли додати чи видалити книги
@@ -192,7 +186,12 @@ namespace BiblioGo.Wpf
             changeUserRoleWindow.Owner = this;
             changeUserRoleWindow.Show();
         }
-
+        private void AddLibraryButton_Click(object sender, RoutedEventArgs e)
+        {
+            var addLibraryWindow = _serviceProvider.GetRequiredService<AddLibraryWindow>();
+            addLibraryWindow.Owner = this;
+            addLibraryWindow.Show();
+        }
         private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)
         {
             var writeOffWindow = _serviceProvider.GetRequiredService<BookCopyWriteOffWindow>();

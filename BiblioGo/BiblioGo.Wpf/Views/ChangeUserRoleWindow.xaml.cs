@@ -2,16 +2,16 @@
 using BiblioGo.Application.Users.Commands;
 using BiblioGo.Application.Users.Services;
 using BiblioGo.Domain.Enums;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Wpf.Views
 {
     public partial class ChangeUserRoleWindow : Window
     {
         private readonly UserService _userService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public ChangeUserRoleWindow(UserService userService, CurrentUserSession session)
+        public ChangeUserRoleWindow(UserService userService, ICurrentUserSession session)
         {
             _userService = userService;
             _session = session;

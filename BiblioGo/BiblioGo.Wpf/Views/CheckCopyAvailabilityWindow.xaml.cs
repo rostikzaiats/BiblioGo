@@ -4,8 +4,7 @@ using BiblioGo.Application.Loans.Dtos;
 using BiblioGo.Application.Loans.Queries;
 using BiblioGo.Application.Loans.Services;
 using BiblioGo.Domain.Enums;
-using BiblioGo.Wpf.Session;
-
+using BiblioGo.Application.Interfaces;
 namespace BiblioGo.Wpf.Views
 {
     // Вікно юз кейсу «Перевірити наявність примірника перед видачею»: бібліотекар береться з поточного входу,
@@ -14,9 +13,9 @@ namespace BiblioGo.Wpf.Views
     public partial class CheckCopyAvailabilityWindow : Window
     {
         private readonly LoanService _loanService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public CheckCopyAvailabilityWindow(LoanService loanService, CurrentUserSession session)
+        public CheckCopyAvailabilityWindow(LoanService loanService, ICurrentUserSession session)
         {
             _loanService = loanService;
             _session = session;
