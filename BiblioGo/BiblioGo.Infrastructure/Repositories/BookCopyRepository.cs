@@ -131,6 +131,31 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToDictionaryAsync(item => item.Status, item => item.Count, cancellationToken);
         }
 
+        // UC 6 (Видача): примірник за інвентарним номером (номери унікальні в усій мережі) разом із книгою та філією
+        public async Task<BookCopy?> FindByInventoryNumberAsync(int inventoryNumber, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            return await context.BookCopies
+                .AsNoTracking()
+                .Include(copy => copy.Book)
+                .Include(copy => copy.Library)
+                .FirstOrDefaultAsync(copy => copy.InventoryNumber == inventoryNumber, cancellationToken);
+        }
+
+        // UC 6 (Видача): один умовний UPDATE — статус змінюється, лише якщо примірник досі має currentStatus.
+        // Так ручна зміна не перезапише статус, який щойно виставили видача чи повернення книги
+        public async Task<bool> ChangeStatusAsync(int bookCopyId, BookCopyStatus currentStatus, BookCopyStatus newStatus, CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var updatedRows = await context.BookCopies
+                .Where(copy => copy.Id == bookCopyId && copy.Status == currentStatus)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(copy => copy.Status, newStatus), cancellationToken);
+
+            return updatedRows > 0;
+        }
+
         // UC 6: змінити статус примірника (один UPDATE без попереднього читання запису); false, якщо примірника немає
         public async Task<bool> SetStatusAsync(int bookCopyId, BookCopyStatus status, CancellationToken cancellationToken = default)
         {
@@ -143,4 +168,4 @@ namespace BiblioGo.Infrastructure.Repositories
             return updatedRows > 0;
         }
     }
-}
+}

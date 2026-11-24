@@ -52,6 +52,7 @@ namespace BiblioGo.Wpf
             CheckCopyAvailabilityButton.Visibility = ToVisibility(isStaff);
             ConfirmLoanIssueButton.Visibility = ToVisibility(isStaff);
             ReturnBookButton.Visibility = ToVisibility(isStaff);
+            ChangeBookCopyStatusButton.Visibility = ToVisibility(isStaff);
             LoanJournalButton.Visibility = ToVisibility(isStaff);
 
             // тільки адмін
@@ -267,6 +268,13 @@ namespace BiblioGo.Wpf
             var returnBookWindow = _serviceProvider.GetRequiredService<ReturnBookWindow>();
             returnBookWindow.Owner = this;
             returnBookWindow.Show();
+        }
+
+        private void ChangeBookCopyStatusButton_Click(object sender, RoutedEventArgs e)
+        {
+            var changeBookCopyStatusWindow = _serviceProvider.GetRequiredService<ChangeBookCopyStatusWindow>();
+            changeBookCopyStatusWindow.Owner = this;
+            changeBookCopyStatusWindow.Show();
         }
 
         private void LoanJournalButton_Click(object sender, RoutedEventArgs e)
