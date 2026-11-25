@@ -4,7 +4,7 @@ using BiblioGo.Application.Loans.Commands;
 using BiblioGo.Application.Loans.Dtos;
 using BiblioGo.Application.Loans.Services;
 using BiblioGo.Domain.Enums;
-using BiblioGo.Wpf.Session;
+using BiblioGo.Application.Interfaces;
 
 namespace BiblioGo.Wpf.Views
 {
@@ -20,9 +20,9 @@ namespace BiblioGo.Wpf.Views
         ];
 
         private readonly LoanService _loanService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
 
-        public ChangeBookCopyStatusWindow(LoanService loanService, CurrentUserSession session)
+        public ChangeBookCopyStatusWindow(LoanService loanService, ICurrentUserSession session)
         {
             _loanService = loanService;
             _session = session;

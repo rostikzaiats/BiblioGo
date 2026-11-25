@@ -15,7 +15,7 @@ namespace BiblioGo.Wpf
     {
                 private readonly IServiceProvider _serviceProvider;
         private readonly UserService _userService;
-        private readonly CurrentUserSession _session;
+        private readonly ICurrentUserSession _session;
         private readonly BookCatalogView _catalogView;
 
         public MainWindow(IServiceProvider serviceProvider, UserService userService, ICurrentUserSession session)

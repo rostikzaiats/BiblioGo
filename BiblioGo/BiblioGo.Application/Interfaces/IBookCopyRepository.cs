@@ -45,6 +45,6 @@ namespace BiblioGo.Application.Interfaces
 
         // UC 7: примірники книги разом із філією, за інвентарним номером
         // (опційно лише в одній філії та/або лише в одному статусі). Існування книги і філії перевіряє сервіс
-        Task<IReadOnlyList<BookCopy>> GetByBookAsync(int bookId, int? libraryId, BookCopyStatus? status, CancellationToken cancellationToken = default);
+         Task<IReadOnlyList<BookCopy>> GetByBookAsync(int bookId, int? libraryId, BookCopyStatus? status, CancellationToken cancellationToken = default);
     }
 }

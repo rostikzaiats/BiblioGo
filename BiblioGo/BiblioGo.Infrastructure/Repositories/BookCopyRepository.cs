@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
@@ -166,6 +166,30 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ExecuteUpdateAsync(setters => setters.SetProperty(copy => copy.Status, status), cancellationToken);
 
             return updatedRows > 0;
+        }
+
+        public async Task<IReadOnlyList<BookCopy>> GetByBookAsync(int bookId, int? libraryId, BookCopyStatus? status,
+            CancellationToken cancellationToken = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+            var query = context.BookCopies
+                .AsNoTracking()
+                .Include(copy => copy.Library)
+                .Where(copy => copy.BookId == bookId);
+            if (libraryId is not null)
+            {
+             query = query
+                    .Where(copy => copy.LibraryId == libraryId.Value);
+            }
+
+            if (status is not null)
+            {
+               query = query
+                    .Where(copy => copy.Status == status.Value);
+            }
+
+            return await query
+                .OrderBy(copy => copy.InventoryNumber).ToListAsync(cancellationToken);
         }
     }
 }
