@@ -85,6 +85,7 @@ namespace BiblioGo.Wpf
             services.AddTransient<BookSearchByAuthorWindow>();
             services.AddTransient<BookDetailsWindow>();
             services.AddTransient<SimilarBooksWindow>();
+            services.AddTransient<LibraryBooksWindow>();
             services.AddTransient<RegistrationWindow>();
             services.AddTransient<LoginWindow>();
             services.AddTransient<BookCopyWriteOffWindow>();

@@ -1,4 +1,4 @@
-﻿
+﻿using BiblioGo.Application.Books.Dtos;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
 
@@ -26,6 +26,10 @@ namespace BiblioGo.Application.Interfaces
 
         // UC 8 (Каталог): кількість примірників книги на руках у читачів (статус Issued)
         Task<int> CountIssuedByBookAsync(int bookId, CancellationToken cancellationToken = default);
+
+        // Каталог, «Книги, доступні в бібліотеці»: книги, які можна взяти у філії зараз (те саме правило вільного
+        // примірника, що й у GetLoanableByBookAsync), з кількістю вільних примірників. Існування філії перевіряє сервіс
+        Task<IReadOnlyList<LibraryBookDto>> GetAvailableBooksInLibraryAsync(int libraryId, CancellationToken cancellationToken = default);
 
         // UC 6: зберегти зміни примірника (статус)
         Task UpdateAsync(BookCopy bookCopy);

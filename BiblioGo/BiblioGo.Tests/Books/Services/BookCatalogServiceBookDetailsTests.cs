@@ -24,6 +24,7 @@ namespace BiblioGo.Tests.Books.Services
             _service = new BookCatalogService(
                 _bookRepository.Object,
                 _bookCopyRepository.Object,
+                Mock.Of<ILibraryRepository>(),
                 NullLogger<BookCatalogService>.Instance);
         }
 

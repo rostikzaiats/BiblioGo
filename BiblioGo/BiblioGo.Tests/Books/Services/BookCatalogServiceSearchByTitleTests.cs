@@ -185,7 +185,7 @@ namespace BiblioGo.Tests.Books.Services
 
         private static BookCatalogService CreateService(IBookRepository repository)
         {
-            return new BookCatalogService(repository, Mock.Of<IBookCopyRepository>(), NullLogger<BookCatalogService>.Instance);
+            return new BookCatalogService(repository, Mock.Of<IBookCopyRepository>(), Mock.Of<ILibraryRepository>(), NullLogger<BookCatalogService>.Instance);
         }
 
         private static Mock<IBookRepository> CreateRepositoryReturning(IReadOnlyList<Book> books)

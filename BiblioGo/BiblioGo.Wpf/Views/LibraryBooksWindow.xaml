@@ -1,0 +1,33 @@
+<Window x:Class="BiblioGo.Wpf.Views.LibraryBooksWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Книги, доступні в бібліотеці" Height="520" Width="760"
+        WindowStartupLocation="CenterOwner"
+        FocusManager.FocusedElement="{Binding ElementName=LibraryComboBox}"
+        Loaded="Window_Loaded">
+    <DockPanel Margin="15">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Бібліотека:" FontWeight="Bold" Margin="0,0,0,5"/>
+            <DockPanel>
+                <Button x:Name="ShowButton" DockPanel.Dock="Right" Content="Показати книги" Margin="10,0,0,0" Padding="15,3"
+                        IsDefault="True" Click="ShowButton_Click"/>
+                <ComboBox x:Name="LibraryComboBox" Height="25" VerticalContentAlignment="Center"
+                          DisplayMemberPath="Name" SelectedValuePath="Id"
+                          SelectionChanged="LibraryComboBox_SelectionChanged"/>
+            </DockPanel>
+        </StackPanel>
+
+        <TextBlock x:Name="StatusTextBlock" DockPanel.Dock="Bottom" Margin="0,10,0,0" TextWrapping="Wrap" FontWeight="SemiBold"/>
+
+        <DataGrid x:Name="BooksDataGrid" Margin="0,10,0,0" AutoGenerateColumns="False" IsReadOnly="True"
+                  HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Назва" Binding="{Binding Title}" Width="2*"/>
+                <DataGridTextColumn Header="Автор" Binding="{Binding Author}" Width="*"/>
+                <DataGridTextColumn Header="Жанр" Binding="{Binding Genre}" Width="*"/>
+                <DataGridTextColumn Header="Рік" Binding="{Binding Year}" Width="Auto"/>
+                <DataGridTextColumn Header="Вільних примірників" Binding="{Binding AvailableCopies}" Width="Auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>
