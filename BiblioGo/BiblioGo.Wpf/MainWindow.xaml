@@ -278,6 +278,10 @@
                             Content="Схожі книги"
                             Style="{StaticResource QuickActionButton}"
                             Click="SimilarBooksButton_Click"/>
+                        <Button x:Name="LibraryBooksButton"
+                            Content="Книги в бібліотеці"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="LibraryBooksButton_Click"/>
                     </WrapPanel>
                     <ContentControl x:Name="CatalogHost"/>
                 </DockPanel>

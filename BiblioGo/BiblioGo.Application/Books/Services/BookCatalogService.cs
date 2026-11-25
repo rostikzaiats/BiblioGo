@@ -25,15 +25,18 @@ namespace BiblioGo.Application.Books.Services
 
         private readonly IBookRepository _bookRepository;
         private readonly IBookCopyRepository _bookCopyRepository;
+        private readonly ILibraryRepository _libraryRepository;
         private readonly ILogger<BookCatalogService> _logger;
 
         public BookCatalogService(
             IBookRepository bookRepository,
             IBookCopyRepository bookCopyRepository,
+            ILibraryRepository libraryRepository,
             ILogger<BookCatalogService> logger)
         {
             _bookRepository = bookRepository;
             _bookCopyRepository = bookCopyRepository;
+            _libraryRepository = libraryRepository;
             _logger = logger;
         }
 
@@ -219,6 +222,36 @@ namespace BiblioGo.Application.Books.Services
             }
 
             _logger.LogInformation("Loaded {BookCount} popular book(s) for period {Period}", books.Count, query.Period);
+
+            return Result.Success(books);
+        }
+
+        // Use case «Переглянути книги, доступні в бібліотеці»: книги, які можна взяти в обраній філії зараз,
+        // з кількістю вільних примірників
+        public async Task<Result<IReadOnlyList<LibraryBookDto>>> GetAvailableBooksInLibraryAsync(GetLibraryBooksQuery query, CancellationToken cancellationToken = default)
+        {
+            if (query.LibraryId <= 0)
+            {
+                const string validationError = "Оберіть бібліотеку.";
+                _logger.LogWarning("Library books for {LibraryId} rejected: {ValidationError}", query.LibraryId, validationError);
+                return Result.Failure<IReadOnlyList<LibraryBookDto>>(validationError);
+            }
+
+            if (!await _libraryRepository.ExistsAsync(query.LibraryId, cancellationToken))
+            {
+                _logger.LogWarning("Library books rejected: library {LibraryId} not found", query.LibraryId);
+                return Result.Failure<IReadOnlyList<LibraryBookDto>>("Бібліотеку не знайдено.");
+            }
+
+            _logger.LogInformation("Loading books available in library {LibraryId}", query.LibraryId);
+
+            var books = await _bookCopyRepository.GetAvailableBooksInLibraryAsync(query.LibraryId, cancellationToken);
+
+            _logger.LogInformation(
+                "Found {BookCount} book(s) with {CopyCount} available cop(ies) in library {LibraryId}",
+                books.Count,
+                books.Sum(book => book.AvailableCopies),
+                query.LibraryId);
 
             return Result.Success(books);
         }
