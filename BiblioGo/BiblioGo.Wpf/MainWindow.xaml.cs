@@ -60,7 +60,6 @@ namespace BiblioGo.Wpf
             // тільки адмін
             ChangeUserRoleButton.Visibility = ToVisibility(isAdmin);
             AddLibraryButton.Visibility = ToVisibility(isAdmin);
-            EditLibraryButton.Visibility = ToVisibility(isAdmin);
         }
 
         private static Visibility ToVisibility(bool visible)
@@ -199,12 +198,6 @@ namespace BiblioGo.Wpf
             var addLibraryWindow = _serviceProvider.GetRequiredService<AddLibraryWindow>();
             addLibraryWindow.Owner = this;
             addLibraryWindow.Show();
-        }
-        private void EditLibraryButton_Click(object sender, RoutedEventArgs e)
-        {
-            var editLibraryWindow = _serviceProvider.GetRequiredService<EditLibraryWindow>();
-            editLibraryWindow.Owner = this;
-            editLibraryWindow.Show();
         }
         private void WriteOffBookCopyButton_Click(object sender, RoutedEventArgs e)
         {

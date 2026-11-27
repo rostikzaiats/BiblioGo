@@ -2,7 +2,6 @@
 using System.Windows;
 using BiblioGo.Application;
 using BiblioGo.Infrastructure;
-using BiblioGo.Wpf.ViewModels;
 using BiblioGo.Wpf.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +33,7 @@ namespace BiblioGo.Wpf
         }
         public void Logout(Window currentMainWindow)
         {
+            // інакше закриття головного вікна завершить усю програму
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             currentMainWindow.Close();
             ShowLoginThenMain();
@@ -106,8 +106,6 @@ namespace BiblioGo.Wpf
             services.AddTransient<ChangePasswordWindow>();
             services.AddTransient<ChangeUserRoleWindow>();
             services.AddTransient<AddLibraryWindow>();
-            services.AddTransient<EditLibraryViewModel>();
-            services.AddTransient<EditLibraryWindow>();
 
             return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
         }

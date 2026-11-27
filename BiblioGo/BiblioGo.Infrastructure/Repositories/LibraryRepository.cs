@@ -26,12 +26,6 @@ namespace BiblioGo.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<Library?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-        {
-            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
-            return await context.Libraries.AsNoTracking().FirstOrDefaultAsync(library => library.Id == id, cancellationToken);
-        }
-
         // Фонд, use case 4 і 5: чи існує філія
         public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
         {
@@ -68,14 +62,6 @@ namespace BiblioGo.Infrastructure.Repositories
                 .Replace(@"\", @"\\", StringComparison.Ordinal)
                 .Replace("%", @"\%", StringComparison.Ordinal)
                 .Replace("_", @"\_", StringComparison.Ordinal);
-        }
-
-        public async Task UpdateAsync(Library library, CancellationToken cancellationToken = default)
-        {
-            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
-
-            context.Libraries.Update(library);
-            await context.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -14,8 +14,5 @@ namespace BiblioGo.Application.Interfaces
 
         // Адміністрування, use case 1: додати філію до мережі, повертає ідентифікатор створеної філії
         Task<int> AddAsync(Library library, CancellationToken cancellationToken = default);
-        // Адміністрування use case 2: Редагувати інформацію про філію
-        Task UpdateAsync(Library library, CancellationToken cancellationToken = default);
-        Task<Library?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     }
 }
