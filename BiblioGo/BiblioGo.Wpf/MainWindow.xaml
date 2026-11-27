@@ -205,7 +205,10 @@
                             <Border Height="1"
                                     Margin="8,6"
                                     Background="{StaticResource BorderBrush}"/>
-                            
+                            <Button x:Name="EditLibraryButton"
+                                    Content="Редагувати філію"
+                                    Style="{StaticResource SidebarButton}"
+                                    Click="EditLibraryButton_Click"/>
                             <Button x:Name="LogoutButton"
                                     Content="Вийти з акаунта"
                                     Foreground="{StaticResource ErrorBrush}"
