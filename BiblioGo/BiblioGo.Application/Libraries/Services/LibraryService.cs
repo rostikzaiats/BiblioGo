@@ -1,6 +1,7 @@
 ﻿using BiblioGo.Application.Common;
 using BiblioGo.Application.Interfaces;
 using BiblioGo.Application.Libraries.Commands;
+using BiblioGo.Application.Libraries.Dtos;
 using BiblioGo.Application.Libraries.Validators;
 using BiblioGo.Domain.Entities;
 using BiblioGo.Domain.Enums;
@@ -8,8 +9,6 @@ using Microsoft.Extensions.Logging;
 
 namespace BiblioGo.Application.Libraries.Services
 {
-    // Сервіс підсистеми «Адміністрування системи» (філії мережі): валідація, бізнес-правила, логування, звернення до репозиторіїв.
-    // Відмову (валідація чи бізнес-правило) повертає як неуспішний Result і логує як Warning; винятків не кидає
     public class LibraryService
     {
         private readonly ILibraryRepository _libraries;
@@ -62,6 +61,47 @@ namespace BiblioGo.Application.Libraries.Services
 
             _logger.LogInformation("Library {LibraryId} added by administrator {ActorId}", libraryId, command.ActorId);
             return Result.Success(libraryId);
+        }
+        // Адміністрування use case 2: Редагувати інформацію про філію
+        public async Task<Result>UpdateLibraryAsync(UpdateLibraryCommand command, CancellationToken cancellationToken = default)
+        {
+            var error = UpdateLibraryValidator.Validate(command);
+            if (error is not null)
+            {
+                _logger.LogWarning("Updating library rejected: {Reason}", error);
+                return Result.Failure(error);
+            }
+            var actor = await _users.FindByIdAsync(command.ActorId);
+            if (actor is null || actor.Role != UserRole.Administrator)
+            {
+                _logger.LogWarning("Updating Library rejected: actor {ActorId} not found or not admin", command.ActorId);
+                return Result.Failure("Ви не маєте прав для редагування філію");
+            }
+
+            var library = await _libraries.GetByIdAsync(command.LibraryId, cancellationToken);
+            if (library is null)
+            {
+                _logger.LogWarning("Updating library rejected: {LibraryId} library not found", command.LibraryId);
+                return Result.Failure("Філію не знайдено");
+            }
+
+            library.ContactInfo = command.ContactInfo.Trim();
+            library.Address = command.Address.Trim();
+            await _libraries.UpdateAsync(library, cancellationToken);
+            _logger.LogInformation("Library updated: {LibraryId}", command.LibraryId);
+            return Result.Success();
+        }
+
+        public async Task<Result<IReadOnlyList<LibraryDto>>> GetLibrariesAsync(CancellationToken cancellationToken = default)
+        {
+            var libraries = await _libraries.GetAllAsync(cancellationToken);
+            IReadOnlyList<LibraryDto> items = libraries
+                .Select(library => new LibraryDto { Id = library.Id, Name = library.Name, Address = library.Address,
+                    ContactInfo = library.ContactInfo})
+                .ToList();
+
+            _logger.LogInformation("Loaded {Count} libraries for dropdown", items.Count);
+            return Result.Success(items);
         }
     }
 }
